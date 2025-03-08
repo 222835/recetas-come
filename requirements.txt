@@ -5,3 +5,4 @@ narwhals==1.29.0
 packaging==24.2
 pillow==11.1.0
 plotly==6.0.0
+ttkthemes==3.2.2
