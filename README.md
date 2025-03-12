@@ -1,5 +1,4 @@
-#Recetas-COME# 
-Sistema de Gestión de Recetas y Proyecciones - Comestibles Excelentes
+## Sistema de Gestión de Recetas y Proyecciones - Comestibles Excelentes
 
 Este proyecto es un sistema de gestión de recetas y proyecciones de ingredientes para la empresa Comestibles Excelentes. El objetivo principal del sistema es facilitar la creación, proyección y análisis de ingredientes necesarios para la preparación de productos alimenticios, optimizando la selección de proveedores y controlando los costos. El sistema estará basado en una arquitectura cliente-servidor y utilizará MariaDB para la base de datos.
 
