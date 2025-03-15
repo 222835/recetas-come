@@ -28,7 +28,7 @@ El sistema contará con los siguientes roles de usuario:
 
 1.  **Clonar el repositorio:**
     ```bash
-    git clone [https://github.com/222835/recetas-come.git](https://github.com/222835/recetas-come.git)
+    git clone https://github.com/222835/recetas-come.git
     ```
 2.  **Navegar al directorio del proyecto:**
     ```bash
@@ -39,16 +39,22 @@ El sistema contará con los siguientes roles de usuario:
     python -m venv venv
     ```
     * **Activar el entorno virtual:**
-        * **Windows:** `venv\Scripts\activate`
-        * **macOS y Linux:** `source venv/bin/activate`
+        * **Windows:**
+          ```
+          venv\Scripts\activate
+          ```
+        * **macOS y Linux:**
+          ```bash
+          source venv/bin/activate
+          ```
 4.  **Instalar las dependencias:**
-        ```bash
-        pip install -r requirements.txt
-        ```
-5.  **Instalar MariaDB:**
+    ```bash
+    pip install -r requirements.txt
+    ```
+6.  **Instalar MariaDB:**
     * Descarga e instala MariaDB desde [mariadb.com/downloads/](https://mariadb.com/downloads/). Sigue las instrucciones oficiales para tu sistema operativo.
     * Vídeo tutorial de instalación: [https://www.youtube.com/watch?v=syYStO\_BFgw](https://www.youtube.com/watch?v=syYStO_BFgw)
-6.  **Configurar la base de datos:**
+7.  **Configurar la base de datos:**
     * Copia el archivo `.env.example` a `.env`:
         ```bash
         cp .env.example .env
@@ -69,7 +75,7 @@ El sistema contará con los siguientes roles de usuario:
             mysql -u tu_usuario -p
             ```
         3. Copia y pega el contenido del archivo .sql que se encuentra en la carpeta `src/database/db_init.sql`
-7.  **Ejecutar el proyecto:**
+8.  **Ejecutar el proyecto:**
     ```bash
     python main.py
     ```
