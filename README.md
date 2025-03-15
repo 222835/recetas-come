@@ -26,19 +26,78 @@ El sistema contará con los siguientes roles de usuario:
 
 ## Instalación
 
-1. Clona el repositorio:
+1.  **Clonar el repositorio:**
     ```bash
     git clone https://github.com/222835/recetas-come.git
     ```
-2. Navega al directorio del proyecto:
+2.  **Navegar al directorio del proyecto:**
     ```bash
     cd recetas-come
     ```
-3. Genera cambios y agregalos al proyecto
-    ```bash 
-    git add .
-    git commit -m "Descripción de los cambios realizados"
-    git push origin nombre_rama
+3.  **Crear un entorno virtual (recomendado):**
+    ```bash
+    python -m venv venv
+    ```
+    * **Activar el entorno virtual:**
+        * **Windows:**
+          ```
+          venv\Scripts\activate
+          ```
+        * **macOS y Linux:**
+          ```bash
+          source venv/bin/activate
+          ```
+4.  **Instalar las dependencias:**
+    ```bash
+    pip install -r requirements.txt
+    ```
+6.  **Instalar MariaDB:**
+    * Descarga e instala MariaDB desde [mariadb.com/downloads/](https://mariadb.com/downloads/). Sigue las instrucciones oficiales para tu sistema operativo.
+    * Vídeo tutorial de instalación: [https://www.youtube.com/watch?v=syYStO\_BFgw](https://www.youtube.com/watch?v=syYStO_BFgw)
+7.  **Configurar la base de datos:**
+    * Copia el archivo `.env.example` a `.env`:
+        ```bash
+        cp .env.example .env
+        ```
+    * Edita el archivo `.env` con las credenciales y la dirección de tu base de datos MariaDB local. Ejemplo:
+        ```
+        DB_HOST="localhost"
+        DB_USER="root"
+        DB_PASSWORD="root"
+        DB_DATABASE="test_db"
+        ```
+    * Crea la base de datos en MariaDB usando el nombre que especificaste en `.env`.
+    * Cree la base de datos COME, usando el script sql que le fue proporcionado, de la siguiente manera, ya sea con algun GUI de mariadb, o con la linea de comandos:
+    * **Usando la línea de comandos de MariaDB:**
+        1.  Abre la línea de comandos de MariaDB.
+        2.  Inicia sesión con tu usuario y contraseña:
+            ```bash
+            mysql -u tu_usuario -p
+            ```
+        3. Copia y pega el contenido del archivo .sql que se encuentra en la carpeta `src/database/db_init.sql`
+8.  **Ejecutar el proyecto:**
+    ```bash
+    python main.py
+    ```
 
-4. Haz un pull request para hacer merge de los cambios 
+### Tests
 
+Los tests estan escritos para funcionar con el modulo ya integrado en python de `unittest`. Estos estan organizados en sus propios archivos de la siguiente manera: `test_[nombre del modulo a testear]_[archivo de ese modulo a testear].py`, Los tests se organizan en clases para mayor comodidad.
+
+
+**Ejecutar un solo test:**
+
+```bash
+
+python -m unittest "[archivo a testear].py"
+
+```
+
+
+**Ejecutar todos los tests a la vez:**
+
+```bash
+
+python -m unittest discover -s tests -p "test_*.py"
+
+``` 
