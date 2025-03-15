@@ -12,6 +12,7 @@ from src.Users.Login.view import LoginApp
 ## @details Initializes the database and shows the login view
 if __name__ == '__main__':
     print("database initialized")
+    connector = Connector(f"{constants.DB_USER}:{constants.DB_PASSWORD}@{constants.DB_HOST}/{constants.DB_DATABASE}")
 
     login_view = LoginApp()
     login_view.mainloop()
