@@ -1,80 +1,72 @@
 from typing import Self
-from sqlalchemy import Column, Integer, String, DateTime
-from src.database.connector import Connector
+from sqlalchemy import Column, Integer, String
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy import create_engine
+from src.security.password_utils import Security
 
+Base = declarative_base()
 
-class User:
-    def __init__(self, username:str, password:str, name:str):
-        self.username = username
-        self.password = password
-        self.name = name
+class Usuario(Base):  # Renamed to Usuario to match the database table name
+    """@brief User model class
+    @details This class is used to represent a user in the database
+    """
+    __tablename__ = "Usuarios"  # Correct table name
 
-    def __str__(self):
-        return f'{self.name}'
-    
-    ## @brief Creates the user in the database
-    def create(self):
-        query = f"INSERT INTO users (username, password, name) VALUES ('{self.username}', '{self.password}', '{self.name}')"
-        connector = Connector.get_connection()
-        connector.execute_query(query)
-        connector.close_connection()
+    numero_usuario = Column(Integer, primary_key=True, autoincrement=True)
+    nombre_usuario = Column(String(50), nullable=False)
+    nombre_completo = Column(String(100), nullable=False)
+    contrasenia = Column(String(50))
+    rol = Column(String(20))
 
-    ## @brief Reads the user from the database
-    ## @return The user
-    def read(self):
-        query = f"SELECT * FROM users WHERE username='{self.username}'"
-        connector = Connector.get_connection()
-        result = connector.execute_query(query)
-        connector.close_connection()
-        return result
-    
-    ## @brief Updates the user in the database
-    def edit(self):
-        query = f"UPDATE users SET password='{self.password}', name='{self.name}' WHERE username='{self.username}'"
-        connector = Connector.get_connection()
-        connector.execute_query(query)
-        connector.close_connection()
+    def __init__(self, nombre_completo: str, contrasenia: str, rol: str, nombre_usuario: str) -> None:
+        """@brief Constructor
+        @details Creates a new user object
+        @param nombre_completo The full name of the user
+        @param contrasenia The password of the user
+        @param rol The role of the user
+        @param nombre_usuario The username of the user
+        """
+        self.nombre_usuario = nombre_usuario
+        self.nombre_completo = nombre_completo
+        self.contrasenia = Security.generate_password(contrasenia)
+        self.rol = rol
 
-    ## @brief Deletes the user from the database
-    def delete(self):
-        query = f"DELETE FROM users WHERE username='{self.username}'"
-        connector = Connector.get_connection()
-        connector.execute_query(query)
+    def __repr__(self) -> str:
+        return f"<Usuario(numero_usuario='{self.numero_usuario}', nombre_completo='{self.nombre_completo}', rol='{self.rol}')>"
+
+    def create(self, session) -> None:
+        """@brief Create a new user in the database
+        """
+        session.add(self)
+        session.commit()
+
+    def read(self, session) -> Self:
+        """@brief Read a user from the database
+        """
+        return session.query(Usuario).filter(Usuario.numero_usuario == self.numero_usuario).first()
     
-    ## @brief Returns all users from the database
-    ## @return All users
-    @staticmethod
-    def get_all(self):
-        query = f"SELECT * FROM users"
-        connector = Connector.get_connection()
-        result = connector.execute_query(query)
-        connector.close_connection()
-        return result
-    
-    ## @brief Returns the user from the database
-    ## @return The user
-    def get_user(self):
-        query = f"SELECT * FROM users WHERE username='{self.username}'"
-        connector = Connector.get_connection()
-        result = connector.execute_query(query)
-        connector.close_connection()
-        return result
-    
-    ## @brief Returns the user from the database by id
-    ## @param id The id of the user
-    ## @return The user
-    @staticmethod
-    def get_user_by_id(_, id)->Self:
-        query = f"SELECT * FROM users WHERE id='{id}'"
-        connector = Connector.get_connection()
-        result = connector.execute_query(query)
-        connector.close_connection()
-        return result
-    
-    ## @brief Returns the hashed password
-    def __generate_password_hash(self) -> str:
-        return self.password
-    
-    ## @brief Checks if the password is correct
-    def __check_password(self, password) -> bool:
-        return self.password == password
+    def read_by_username(self, session, nombre_usuario:str) -> Self:
+         """@brief Read a user from the database by username
+         """
+         return session.query(Usuario).filter(Usuario.nombre_usuario == nombre_usuario).first()
+
+    def update(self, session, nombre_completo:str|None=None, contrasenia:str|None=None, 
+               nombre_usuario:str|None = None, rol:str|None=None) -> None:
+        """@brief Update the user in the database
+        """
+        if nombre_completo:
+            self.nombre_completo = nombre_completo
+        if nombre_usuario:
+            self.nombre_usuario = nombre_usuario
+        if contrasenia:
+            self.contrasenia = contrasenia
+        if rol:
+            self.rol = rol
+        session.commit()
+
+    def delete(self, session) -> None:
+        """@brief Delete the user from the database
+        """
+        session.delete(self)
+        session.commit()
