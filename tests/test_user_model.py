@@ -9,6 +9,8 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from src.Users.model import Usuario, Base
 from src.security.password_utils import Security
+from src.Users.auth_service import AuthService
+
 class TestUsuarioModel(unittest.TestCase):
     def setUp(self):
         """Setup: Create an in-memory SQLite database and session for testing."""
@@ -21,7 +23,7 @@ class TestUsuarioModel(unittest.TestCase):
         """Teardown: Close the session and drop all tables after each test."""
         self.session.close()
         Base.metadata.drop_all(self.engine)
-
+        self.engine.dispose()
     def test_create_usuario(self):
         """Test creating a new Usuario."""
         hashed_password = "password123"
@@ -33,7 +35,8 @@ class TestUsuarioModel(unittest.TestCase):
         self.assertIsNotNone(new_user.numero_usuario)
         self.assertEqual(new_user.nombre_completo, "Test User")
         self.assertEqual(new_user.nombre_usuario, "testuser")
-        self.assertEqual(new_user.contrasenia, Security.generate_password(hashed_password))
+        #self.assertEqual(new_user.contrasenia, Security.generate_password(hashed_password))
+        self.assertTrue(Security.verify_password(hashed_password, new_user.contrasenia))
         self.assertEqual(new_user.rol, "user")
 
     def test_read_usuario(self):
@@ -50,8 +53,8 @@ class TestUsuarioModel(unittest.TestCase):
         self.assertEqual(retrieved_user.numero_usuario, new_user.numero_usuario)
         self.assertEqual(retrieved_user.nombre_completo, "Test User")
         self.assertEqual(retrieved_user.nombre_usuario, "testuser")
-        self.assertEqual(retrieved_user.contrasenia, Security.generate_password(hashed_password))
         self.assertEqual(retrieved_user.rol, "user")
+        self.assertTrue(Security.verify_password(hashed_password, retrieved_user.contrasenia))
 
     def test_read_usuario_by_username(self):
         """Test reading a Usuario from the database by username."""
@@ -66,7 +69,7 @@ class TestUsuarioModel(unittest.TestCase):
         # Assert that the retrieved user is the same as the created user
         self.assertEqual(retrieved_user.numero_usuario, new_user.numero_usuario)
         self.assertEqual(retrieved_user.nombre_completo, "Test User")
-        self.assertEqual(retrieved_user.nombre_usuario, "testuser")
+        self.assertTrue(Security.verify_password(hashed_password, retrieved_user.contrasenia))
         self.assertEqual(retrieved_user.contrasenia, Security.generate_password(hashed_password))
         self.assertEqual(retrieved_user.rol, "user")
 
@@ -108,6 +111,32 @@ class TestUsuarioModel(unittest.TestCase):
         # Assert that the user was deleted
         deleted_user = self.session.query(Usuario).filter_by(numero_usuario=new_user.numero_usuario).first()
         self.assertIsNone(deleted_user)
+    
+    def test_authenticate(self):
+            """Test the authentication of a user."""
+            hashed_password = "password123"
+            new_user = Usuario(nombre_completo="Test User", contrasenia=hashed_password, rol="user", nombre_usuario="testuser")
+            self.session.add(new_user)
+            self.session.commit()
 
+            # Try to authenticate with the correct credentials
+            authenticated_user = AuthService.authenticate(self.session, "testuser", hashed_password)
+
+            # Assert that the authentication was successful and the correct user was returned
+            self.assertIsNotNone(authenticated_user)
+            self.assertEqual(authenticated_user.nombre_usuario, "testuser")
+            self.assertTrue(Security.verify_password(hashed_password, authenticated_user.contrasenia))
+
+            # Try to authenticate with the incorrect username
+            authenticated_user_invalid_username = AuthService.authenticate(self.session, "invalidtestuser", hashed_password)
+
+            # Assert that authentication failed with incorrect username
+            self.assertIsNone(authenticated_user_invalid_username)
+
+            # Try to authenticate with incorrect credentials
+            authenticated_user_invalid_password = AuthService.authenticate(self.session, "testuser", "wrongpassword")
+
+            # Assert that authentication failed with incorrect password
+            self.assertIsNone(authenticated_user_invalid_password)
 if __name__ == '__main__':
     unittest.main()

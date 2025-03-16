@@ -1,8 +1,5 @@
 import unittest
 from unittest.mock import patch, MagicMock
-from src.Users.Login.controller import LoginController
-from src.Users.model import Usuario
-from src.security.password_utils import Security  # Import Security class
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 import sys
@@ -10,6 +7,10 @@ import os
 
 # Add the project root to the sys.path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from src.Users.Login.controller import LoginController
+from src.Users.model import Usuario
+from src.security.password_utils import Security  # Import Security class
 
 class TestLoginController(unittest.TestCase):
 
