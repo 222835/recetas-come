@@ -133,7 +133,7 @@ class TestUsuarioModel(unittest.TestCase):
             # Assert that authentication failed with incorrect username
             self.assertIsNone(authenticated_user_invalid_username)
 
-            # Try to authenicate with incorrect credentials
+            # Try to authenticate with incorrect credentials
             authenticated_user_invalid_password = AuthService.authenticate(self.session, "testuser", "wrongpassword")
 
             # Assert that authentication failed with incorrect password

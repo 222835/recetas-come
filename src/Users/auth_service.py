@@ -22,3 +22,5 @@ class AuthService:
         if not Security.verify_password(password, user.contrasenia):
             return None
         
+        return user
+        
