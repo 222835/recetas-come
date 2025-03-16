@@ -24,23 +24,3 @@ class Security:
         @return True if the passwords match, False otherwise
         """
         return hash.scrypt(password.encode(), salt=b'salt', n=2**14, r=8, p=1, dklen=64).hex() == hashed_password 
-
-class AuthService:
-    @staticmethod
-    def authenticate(session, username: str, password: str):
-        from src.Users.model import Usuario
-        """ 
-        @brief Authenticates a user based on username and password.
-        @details Checks if the user exists and if the password matches the stored hash.
-        @param session Database session for querying.
-        @param username User's username.
-        @param password User's provided password.
-        @return User object if authenticated, None otherwise.
-        """
-        user = session.query(Usuario).filter_by(nombre_usuario=username).first()
-        if user is None:
-            return None
-        if Security.verify_password(password, user.contrasenia):
-            return user
-        else:
-            return None
