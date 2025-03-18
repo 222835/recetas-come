@@ -70,3 +70,27 @@ class Usuario(Base):  # Renamed to Usuario to match the database table name
         """
         session.delete(self)
         session.commit()
+
+    def edit_account_info(editor, target, session, nombre_completo: str | None = None, 
+              contrasenia: str | None = None, nombre_usuario: str | None = None) -> None:
+        """@brief Allows users to edit account information, depending on their roles and other constraints
+        """
+        if editor.rol != "admin" and editor.numero_usuario != target.numero_usuario:
+            raise PermissionError("Error: No se tienen permisos para modificar esta cuenta.")
+        
+        if editor.rol == "admin":
+            target.update(session, nombre_completo = nombre_completo, 
+                            contrasenia = contrasenia, nombre_usuario = nombre_usuario)
+        else:
+            target.update(session, contrasenia = contrasenia, nombre_usuario = nombre_usuario)
+
+    def delete_account(editor, target, session) -> None:
+        """@brief Allows only admins to delete other accounts
+        """
+        if editor.rol != "admin":
+            raise PermissionError("Error: No se tienen los permisos necesarios para eliminar usuarios.")
+        
+        if target.rol == "admin":
+            raise PermissionError("Error: No se pueden eliminar cuentas de administrador.")
+        
+        target.delete(session)
