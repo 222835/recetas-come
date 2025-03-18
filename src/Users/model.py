@@ -60,7 +60,7 @@ class Usuario(Base):  # Renamed to Usuario to match the database table name
         if nombre_usuario:
             self.nombre_usuario = nombre_usuario
         if contrasenia:
-            self.contrasenia = contrasenia
+            self.contrasenia = Security.generate_password(contrasenia) #Changed to hash updated passwords
         if rol:
             self.rol = rol
         session.commit()
