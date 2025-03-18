@@ -138,5 +138,23 @@ class TestUsuarioModel(unittest.TestCase):
 
             # Assert that authentication failed with incorrect password
             self.assertIsNone(authenticated_user_invalid_password)
+
+    def test_edit_account_info_admin(self):
+        """Tests that an admin can edit other users information."""
+        new_user_admin = Usuario(nombre_completo="Nombre Admin", contrasenia="admin123", rol="admin", nombre_usuario="adminuser")
+        new_user_invitado = Usuario(nombre_completo="Test User", contrasenia="password123", rol="invitado", nombre_usuario="testuser")
+        self.session.add_all([new_user_admin, new_user_invitado])
+        self.session.commit()
+
+        # Admin modifies another users information
+        Usuario.edit_account_info(new_user_admin, new_user_invitado, self.session, nombre_completo="Updated User", nombre_usuario="updateduser", contrasenia="updatedpass123")
+
+        updated_user = self.session.query(Usuario).filter_by(numero_usuario=new_user_invitado.numero_usuario).first()
+
+        # Asserts that changes have been made
+        self.assertEqual(updated_user.nombre_completo, "Updated User")
+        self.assertEqual(updated_user.nombre_usuario, "updateduser")
+        self.assertEqual(updated_user.contrasenia, "updatedpass123")
+            
 if __name__ == '__main__':
     unittest.main()
