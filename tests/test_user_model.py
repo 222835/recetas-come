@@ -217,5 +217,16 @@ class TestUsuarioModel(unittest.TestCase):
         with self.assertRaises(PermissionError):
             Usuario.delete_account(new_user1, new_user2, self.session)
 
+    def test_edit_account_info_existing_username(self):
+        """Tests that a guest user cannot update to an existing username."""
+        new_user1 = Usuario(nombre_completo="User1", contrasenia="password123", rol="user", nombre_usuario="user1")
+        new_user2 = Usuario(nombre_completo="User2", contrasenia="password123", rol="user", nombre_usuario="user2")
+        self.session.add_all([new_user1, new_user2])
+        self.session.commit()
+
+        # User1 intenta cambiar su nombre de usuario a "User2", que ya existe
+        with self.assertRaises(ValueError):
+            Usuario.edit_account_info(new_user1, new_user1, self.session, nombre_usuario="user2")
+
 if __name__ == '__main__':
     unittest.main()
