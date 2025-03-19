@@ -49,7 +49,7 @@ class TestLoginController(unittest.TestCase):
 
         # Call the login method
         with patch('src.security.password_utils.Security.generate_password', return_value="hashed_password"):
-            result = LoginController.login(self, user_data)
+            result = LoginController.login(user_data)
 
         # Assert that the login was successful
         self.assertTrue(result)
@@ -75,7 +75,7 @@ class TestLoginController(unittest.TestCase):
         user_data = {"nombre_usuario": "testuser", "contrasenia": "password"}
 
         # Call the login method
-        result = LoginController.login(self, user_data)
+        result = LoginController.login(user_data)
 
         # Assert that the login failed because the user was not found
         self.assertFalse(result)
@@ -103,7 +103,7 @@ class TestLoginController(unittest.TestCase):
 
         # Call the login method
         with patch('src.security.password_utils.Security.generate_password', return_value="incorrect_password"):
-            result = LoginController.login(self, user_data)
+            result = LoginController.login(user_data)
 
         # Assert that the login failed because the password was incorrect
         self.assertFalse(result)
