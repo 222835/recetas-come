@@ -84,7 +84,8 @@ class TestUsuarioModel(unittest.TestCase):
         new_hashed_password = "new_password"
         new_user.nombre_completo = "New Test User"
         new_user.nombre_usuario = "newtestuser"
-        new_user.contrasenia = new_hashed_password
+        new_user.update(self.session, contrasenia=new_hashed_password) # Proposed change for lower commented line
+        #new_user.contrasenia = new_hashed_password
         new_user.rol = "admin"
         self.session.commit()
 
@@ -94,7 +95,7 @@ class TestUsuarioModel(unittest.TestCase):
         # Assert that the user's information was updated correctly
         self.assertEqual(updated_user.nombre_completo, "New Test User")
         self.assertEqual(updated_user.nombre_usuario, "newtestuser")
-        self.assertEqual(updated_user.contrasenia, new_hashed_password)
+        self.assertTrue(Security.verify_password(new_hashed_password, updated_user.contrasenia)) # Updated assertion
         self.assertEqual(updated_user.rol, "admin")
 
     def test_delete_usuario(self):
@@ -138,5 +139,82 @@ class TestUsuarioModel(unittest.TestCase):
 
             # Assert that authentication failed with incorrect password
             self.assertIsNone(authenticated_user_invalid_password)
+    
+    def test_edit_account_info_admin(self):
+            """Tests that an admin can edit other users information."""
+            new_user_admin = Usuario(nombre_completo="Nombre Admin", contrasenia="admin123", rol="admin", nombre_usuario="adminuser")
+            new_user_invitado = Usuario(nombre_completo="Test User", contrasenia="password123", rol="invitado", nombre_usuario="testuser")
+            self.session.add_all([new_user_admin, new_user_invitado])
+            self.session.commit()
+
+            # Admin modifies another users information
+            new_hashed_password = "newpassword"
+            Usuario.edit_account_info(new_user_admin, new_user_invitado, self.session, nombre_completo="Updated User", nombre_usuario="updateduser",
+                                    contrasenia=new_hashed_password)
+
+            updated_user = self.session.query(Usuario).filter_by(numero_usuario=new_user_invitado.numero_usuario).first()
+
+            # Asserts that changes have been made
+            self.assertEqual(updated_user.nombre_completo, "Updated User")
+            self.assertEqual(updated_user.nombre_usuario, "updateduser")
+            self.assertTrue(Security.verify_password(new_hashed_password, updated_user.contrasenia))
+    def test_edit_account_info_self(self):
+            """Tests that users can edit their own username and password."""
+            hashed_password = "password123"
+            new_user = Usuario(nombre_completo="Test User", contrasenia= hashed_password, rol="invitado", nombre_usuario="testuser")
+            self.session.add(new_user)
+            self.session.commit()
+
+            # User edits their own information
+            new_hashed_password = "newpassword"
+            Usuario.edit_account_info(new_user, new_user, self.session, nombre_usuario="newusername", contrasenia=new_hashed_password)
+
+            updated_user = self.session.query(Usuario).filter_by(numero_usuario=new_user.numero_usuario).first()
+
+            # Asserts that changes have been made
+            self.assertEqual(updated_user.nombre_usuario, "newusername")
+            self.assertTrue(Security.verify_password(new_hashed_password, updated_user.contrasenia))
+
+    def test_edit_account_info_no_permission(self):
+        """Tests that a guest user cannot edit another users info."""
+        new_user1 = Usuario(nombre_completo="User1", contrasenia="password123", rol="user", nombre_usuario="user1")
+        new_user2 = Usuario(nombre_completo="User2", contrasenia="password123", rol="user", nombre_usuario="user2")
+        self.session.add_all([new_user1, new_user2])
+        self.session.commit()
+
+        # User1 tries to modify User2 information, asserts it raises an error
+        with self.assertRaises(PermissionError):
+            Usuario.edit_account_info(new_user1, new_user2, self.session, nombre_usuario="newusername")
+
+    def test_delete_account_admin(self):
+        """Tests that an admin can delete a user account."""
+        new_user_admin = Usuario(nombre_completo="Nombre Admin", contrasenia="admin123", rol="admin", nombre_usuario="adminuser")
+        new_user_invitado = Usuario(nombre_completo="Test User", contrasenia="password123", rol="invitado", nombre_usuario="testuser")
+        self.session.add_all([new_user_admin, new_user_invitado])
+        self.session.commit()
+
+        # Admin deletes guest user
+        Usuario.delete_account(new_user_admin, new_user_invitado, self.session)
+        deleted_user = self.session.query(Usuario).filter_by(numero_usuario=new_user_invitado.numero_usuario).first()
+
+        # Asserts if user was deleted
+        self.assertIsNone(deleted_user)
+
+    def test_delete_account_no_permission(self):
+        """Tests that a guest user cant delete another user and admin cant delete its own account."""
+        new_user_admin = Usuario(nombre_completo="Nombre Admin", contrasenia="admin123", rol="admin", nombre_usuario="adminuser")
+        new_user1 = Usuario(nombre_completo="User1", contrasenia="password123", rol="invitado", nombre_usuario="user1")
+        new_user2 = Usuario(nombre_completo="User2", contrasenia="password123", rol="invitado", nombre_usuario="user2")
+        self.session.add_all([new_user_admin, new_user1, new_user2])
+        self.session.commit()
+
+        # Admin tries to delete own account, asserts it raises an error
+        with self.assertRaises(PermissionError):
+            Usuario.delete_account(new_user_admin, new_user_admin, self.session)
+
+        # User1 tries to delete User2, asserts it raises an error
+        with self.assertRaises(PermissionError):
+            Usuario.delete_account(new_user1, new_user2, self.session)
+
 if __name__ == '__main__':
     unittest.main()
