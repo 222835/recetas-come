@@ -36,17 +36,17 @@ class Receta(Base):
         self.ingredientes = ingredientes
 
     def __repr__(self) -> str:
-         return f"<Receta(id_receta='{self.id_receta}', nombre='{self.nombre}', clasificacion='{self.clasificacion}', periodo= '{self.periodo}', comensales_base='{self.comensales_base}')>"
+        return f"Receta: {self.nombre_receta}, {self.clasificacion}, {self.periodo}, {self.comensales_base} comensales"    
     
     def create(self, session) -> None:
         """@brief Create a new recipe in the database"""
         session.add(self)
         session.commit()
 
-    def read(self, session) -> Self:
-        """@brief Read a user from the database
+    def read(self, session) -> "Receta":
+        """@brief Read a recipe from the database
         """
-        return session.query(Receta).filter(Receta.id_receta == self.id_receta).first()
+        return session.query(Receta).filter(Receta.numero_receta == self.numero_receta).first()
     
     def update(self, session, nombre_receta: str | None = None, clasificacion: str | None = None, periodo: str | None = None, comensales_base: int | None = None, ingredientes: str | None = None) -> None:
         """@brief Update the recipe details"""
