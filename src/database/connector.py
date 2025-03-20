@@ -9,7 +9,8 @@ Base = declarative_base()
 ## @brief This class is responsible for connecting to the database and executing queries
 class Connector:
     ## @brief Connects to the database
-    def __init__(self, db_url="mysql+mariadb://root:password@localhost/test"):  # Updated connection string
+    def __init__(self, db_url="mysql+mariadb://root:password@localhost/test"):
+        print(db_url)  # Updated connection string
         self.engine = create_engine(db_url)
         Base.metadata.create_all(self.engine)  # Create tables
         self.Session = sessionmaker(bind=self.engine)
