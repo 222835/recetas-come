@@ -1,6 +1,5 @@
 from sqlalchemy.orm import Session
 from src.Recipes.model import Receta
-
 class RecetasController:
     
     @staticmethod
