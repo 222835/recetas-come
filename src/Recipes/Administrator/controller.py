@@ -1,10 +1,4 @@
 from sqlalchemy.orm import Session
-import sys
-import os
-
-# Add the project root to the sys.path
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
 from src.Recipes.model import Receta
 
 class RecetasController:
