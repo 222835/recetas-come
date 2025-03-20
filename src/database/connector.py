@@ -1,10 +1,8 @@
 import mariadb as db
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy.ext.declarative import declarative_base
+from src.database.base_model import Base 
 from sqlalchemy.engine.base import Connection
-
-Base = declarative_base()
 
 ## @brief This class is responsible for connecting to the database and executing queries
 class Connector:
@@ -27,11 +25,12 @@ class Connector:
 
     ## @brief Executes the query and returns the result
     ## @param query The query to be executed
-    ## @return The result of the query
-    def execute_query(self, query): # Removed type annotation
+    def execute_query(self, query):
         with self.connection.cursor() as cursor:
             cursor.execute(query)
             return cursor.fetchall()
 
+    ## @brief Returns a session object
+    ## @return Self The session object
     def get_session(self):
         return self.Session()
