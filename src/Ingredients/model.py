@@ -1,67 +1,55 @@
-from sqlalchemy import Column, Integer, String, DECIMAL, ForeignKey, Table
-from sqlalchemy.orm import relationship, declarative_base
 from typing import Self
+from sqlalchemy import Column, Integer, String
+from sqlalchemy.orm import declarative_base
 
 Base = declarative_base()
 
-##Table for many-to-many relationship between Recetas and Ingredientes
-Receta_Ingredientes = Table(
-    "Receta_Ingredientes", Base.metadata,
-    Column("id_receta", Integer, ForeignKey("Recetas.id_receta"), primary_key=True),
-    Column("id_ingrediente", Integer, ForeignKey("Ingredientes.id_ingrediente"), primary_key=True),
-    Column("cantidad", DECIMAL(10, 2), nullable=False),
-    Column("unidad_medida", String(20), nullable=False)
-)
-
 class Ingrediente(Base):
     ##@brief Ingredient model class
-    ##@details This class represents an ingredient in the database
-
+    ##@details This class is used to represent an ingredient in the database
+    
     __tablename__ = "Ingredientes"
 
     id_ingrediente = Column(Integer, primary_key=True, autoincrement=True)
     nombre = Column(String(100), nullable=False)
     clasificacion = Column(String(50))
-    unidad_medida = Column(String(20), nullable=False)
+    unidad_medida = Column(String(20))
 
-    ## Relationship with Recetas through Receta_Ingredientes
-    recetas = relationship("Receta", secondary=Receta_Ingredientes, back_populates="ingredientes")
-
-    def __init__(self, nombre: str, clasificacion: str, unidad_medida: str) -> None:
-        ##@brief Constructor
-        ##@details Creates a new ingredient object
+    def __init__(self, nombre: str, clasificacion: str | None = None, unidad_medida: str | None = None) -> None:
+        ##@brief Constructor for the ingredient class
         ##@param nombre The name of the ingredient
-        ##@param clasificacion The classification of the ingredient
-        ##@param unidad_medida The unit of measurement
-
+        ##@param clasificacion The classification of the ingredient (optional)
+        ##@param unidad_medida The unit of measurement for the ingredient (optional)
+    
         self.nombre = nombre
         self.clasificacion = clasificacion
         self.unidad_medida = unidad_medida
 
     def __repr__(self) -> str:
-        return f"<Ingrediente(id={self.id_ingrediente}, nombre='{self.nombre}', unidad='{self.unidad_medida}')>"
+        return f"Ingrediente({self.nombre}, {self.clasificacion}, {self.unidad_medida})"
 
     def create(self, session) -> None:
-        ##@brief Create a new ingredient in the database
+        ##@brief Insert a new ingredient into the database
         ##@param session The SQLAlchemy session
-        
+
         session.add(self)
         session.commit()
 
     def read(self, session) -> Self:
-        ##@brief Read an ingredient from the database
+        ##@brief Fetch an ingredient from the database by its id
         ##@param session The SQLAlchemy session
-        ##@return The ingredient object if found
+        ##@return The ingredient object
 
         return session.query(Ingrediente).filter(Ingrediente.id_ingrediente == self.id_ingrediente).first()
 
-    def update(self, session, nombre: str | None = None, clasificacion: str | None = None, unidad_medida: str | None = None) -> None:
-        ##@brief Update the ingredient's details in the database
+    def update(self, session, nombre: str | None = None, clasificacion: str | None = None, 
+               unidad_medida: str | None = None) -> None:
+        ##@brief Update an ingredient's information in the database
         ##@param session The SQLAlchemy session
-        ##@param nombre The new name of the ingredient (optional)
-        ##@param clasificacion The new classification (optional)
-        ##@param unidad_medida The new measurement unit (optional)
-        
+        ##@param nombre The name of the ingredient (optional)
+        ##@param clasificacion The classification of the ingredient (optional)
+        ##@param unidad_medida The unit of measurement (optional)
+
         if nombre:
             self.nombre = nombre
         if clasificacion:
@@ -73,6 +61,5 @@ class Ingrediente(Base):
     def delete(self, session) -> None:
         ##@brief Delete the ingredient from the database
         ##@param session The SQLAlchemy session
-        
         session.delete(self)
         session.commit()
