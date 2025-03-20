@@ -13,13 +13,6 @@ class Usuario(BaseModel):
     rol = Column(String(20))
 
     def __init__(self, nombre_completo: str, contrasenia: str, rol: str, nombre_usuario: str) -> None:
-        """@brief Constructor
-        @details Creates a new user object
-        @param nombre_completo The full name of the user
-        @param contrasenia The password of the user
-        @param rol The role of the user
-        @param nombre_usuario The username of the user
-        """
         self.nombre_usuario = nombre_usuario
         self.nombre_completo = nombre_completo
         self.contrasenia = Security.generate_password(contrasenia)
