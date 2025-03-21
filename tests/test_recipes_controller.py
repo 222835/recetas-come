@@ -1,7 +1,7 @@
 import sys
 import os
 
-# Add the project root to the sys.path
+##Add the project root to the sys.path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from src.Recipes.model import Receta
@@ -11,16 +11,15 @@ from sqlalchemy.orm import Session
 class RecetaController:
     @staticmethod
     def create_receta(session: Session, nombre_receta: str, clasificacion: str, periodo: str,comensales_base: int, ingredientes: list) -> Receta:
-        """Create a new recipe in the database."""
+        ##Create a new recipe in the database.
         print(f"Creating recipe: {nombre_receta}, {clasificacion}, {periodo}, {comensales_base}, {ingredientes}")
         
-        # Crear la receta
         nueva_receta = Receta(
             nombre_receta=nombre_receta,
             clasificacion=clasificacion,
             periodo=periodo,
             comensales_base=comensales_base,
-            ingredientes=",".join(ingredientes)  # Suponiendo que ingredientes es una lista de nombres
+            ingredientes=",".join(ingredientes)
         )
         
         session.add(nueva_receta)
@@ -31,7 +30,7 @@ class RecetaController:
 
     @staticmethod
     def get_receta_by_id(session: Session, id_receta: int) -> Receta:
-        """Get a recipe by its ID."""
+        ##Get a recipe by its ID.
         print(f"Getting recipe by ID: {id_receta}")
         receta = session.query(Receta).filter(Receta.id_receta == id_receta).first()
         
@@ -45,14 +44,13 @@ class RecetaController:
     @staticmethod
     def update_receta(session: Session, id_receta: int, nombre_receta: str = None, clasificacion: str = None,
                       periodo: str = None, comensales_base: int = None, ingredientes: list = None) -> Receta:
-        """Update an existing recipe."""
+        ##Update an existing recipe.
         print(f"Updating recipe with ID: {id_receta}")
         
         receta = RecetaController.get_receta_by_id(session, id_receta)
         if receta is None:
             return None
 
-        # Actualizar los campos
         if nombre_receta:
             receta.nombre_receta = nombre_receta
         if clasificacion:
@@ -70,7 +68,7 @@ class RecetaController:
 
     @staticmethod
     def delete_receta(session: Session, id_receta: int) -> bool:
-        """Delete a recipe from the database."""
+        ##Delete a recipe from the database.
         print(f"Deleting recipe with ID: {id_receta}")
         
         receta = RecetaController.get_receta_by_id(session, id_receta)

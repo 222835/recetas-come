@@ -11,20 +11,20 @@ from src.Recipes.model import Receta, Base
 
 class TestRecetaModel(unittest.TestCase):
     def setUp(self):
-        """Setup: Create an in-memory SQLite database and session for testing."""
+        ##Setup: Create an in-memory SQLite database and session for testing.
         self.engine = create_engine('sqlite:///:memory:')
         Base.metadata.create_all(self.engine)
         self.Session = sessionmaker(bind=self.engine)
         self.session = self.Session()
 
     def tearDown(self):
-        """Teardown: Close the session and drop all tables after each test."""
+        ##Teardown: Close the session and drop all tables after each test.
         self.session.close()
         Base.metadata.drop_all(self.engine)
         self.engine.dispose()
 
     def test_create_receta(self):
-        """Test creating a new Receta."""
+        ##Test creating a new Receta.
         receta = Receta(nombre_receta="Sopa de Tomate", clasificacion="Sopa", periodo="Almuerzo", comensales_base=4, ingredientes="Tomate, Cebolla")
         self.session.add(receta)
         self.session.commit()
