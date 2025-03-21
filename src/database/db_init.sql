@@ -43,9 +43,7 @@ CREATE TABLE Recetas (
     nombre_receta VARCHAR(100) NOT NULL,
     clasificacion VARCHAR(50),
     periodo VARCHAR(50) NOT NULL,                       
-    comensales_base INT NOT NULL,              
-    ingredientes TEXT NOT NULL,  
-     
+    comensales_base INT NOT NULL,                   
 );
 
 CREATE TABLE Receta_Ingredientes (
