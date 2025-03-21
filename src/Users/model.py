@@ -70,7 +70,8 @@ class Usuario(Base):  # Renamed to Usuario to match the database table name
         """
         session.delete(self)
         session.commit()
-       def edit_account_info(editor, target, session, nombre_completo: str | None = None, 
+        
+    def edit_account_info(editor, target, session, nombre_completo: str | None = None, 
               contrasenia: str | None = None, nombre_usuario: str | None = None) -> None:
         """@brief Allows users to edit account information, depending on their roles and other constraints
         """
