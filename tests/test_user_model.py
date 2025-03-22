@@ -56,6 +56,23 @@ class TestUsuarioModel(unittest.TestCase):
         self.assertEqual(retrieved_user.rol, "user")
         self.assertTrue(Security.verify_password(hashed_password, retrieved_user.contrasenia))
 
+    def test_read_usuario_by_username(self):
+        """Test reading a Usuario from the database by username."""
+        hashed_password = "password123"
+        new_user = Usuario(nombre_completo="Test User", contrasenia=hashed_password, rol="user", nombre_usuario="testuser")
+        self.session.add(new_user)
+        self.session.commit()
+
+        # Read the user from the database by username
+        retrieved_user = self.session.query(Usuario).filter_by(nombre_usuario="testuser").first()
+
+        # Assert that the retrieved user is the same as the created user
+        self.assertEqual(retrieved_user.numero_usuario, new_user.numero_usuario)
+        self.assertEqual(retrieved_user.nombre_completo, "Test User")
+        self.assertTrue(Security.verify_password(hashed_password, retrieved_user.contrasenia))
+        self.assertEqual(retrieved_user.contrasenia, Security.generate_password(hashed_password))
+        self.assertEqual(retrieved_user.rol, "user")
+
     def test_update_usuario(self):
         """Test updating a Usuario in the database."""
         hashed_password = "password123"
@@ -159,8 +176,8 @@ class TestUsuarioModel(unittest.TestCase):
 
     def test_edit_account_info_no_permission(self):
         """Tests that a guest user cannot edit another users info."""
-        new_user1 = Usuario(nombre_completo="User1", contrasenia="password123", rol="user", nombre_usuario="user1")
-        new_user2 = Usuario(nombre_completo="User2", contrasenia="password123", rol="user", nombre_usuario="user2")
+        new_user1 = Usuario(nombre_completo="User1", contrasenia="password123", rol="invitado", nombre_usuario="user1")
+        new_user2 = Usuario(nombre_completo="User2", contrasenia="password123", rol="invitado", nombre_usuario="user2")
         self.session.add_all([new_user1, new_user2])
         self.session.commit()
 
@@ -197,6 +214,17 @@ class TestUsuarioModel(unittest.TestCase):
         # User1 tries to delete User2, asserts it raises an error
         with self.assertRaises(PermissionError):
             Usuario.delete_account(new_user1, new_user2, self.session)
+
+    def test_edit_account_info_existing_username(self):
+        """Tests that a guest user cannot update to an existing username."""
+        new_user1 = Usuario(nombre_completo="User1", contrasenia="password123", rol="invitado", nombre_usuario="user1")
+        new_user2 = Usuario(nombre_completo="User2", contrasenia="password123", rol="invitado", nombre_usuario="user2")
+        self.session.add_all([new_user1, new_user2])
+        self.session.commit()
+
+        # User1 intenta cambiar su nombre de usuario a "User2", que ya existe
+        with self.assertRaises(ValueError):
+            Usuario.edit_account_info(new_user1, new_user1, self.session, nombre_usuario="user2")
 
 if __name__ == '__main__':
     unittest.main()

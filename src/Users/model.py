@@ -77,6 +77,11 @@ class Usuario(Base):  # Renamed to Usuario to match the database table name
         """
         if editor.rol != "admin" and editor.numero_usuario != target.numero_usuario:
             raise PermissionError("Error: No se tienen permisos para modificar esta cuenta.")
+        
+        if nombre_usuario and nombre_usuario != target.nombre_usuario:
+            existing_user = session.query(Usuario).filter_by(nombre_usuario=nombre_usuario).first()
+            if existing_user:
+                raise ValueError("Error: El nombre de usuario ya existe.")
 
         if editor.rol == "admin":
             target.update(session, nombre_completo = nombre_completo, 
