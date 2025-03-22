@@ -60,7 +60,7 @@ class Usuario(Base):  # Renamed to Usuario to match the database table name
         if nombre_usuario:
             self.nombre_usuario = nombre_usuario
         if contrasenia:
-            self.contrasenia = Security.generate_password(contrasenia) #Changed to hash updated passwords
+            self.contrasenia = Security.generate_password(contrasenia)
         if rol:
             self.rol = rol
         session.commit()
@@ -70,7 +70,7 @@ class Usuario(Base):  # Renamed to Usuario to match the database table name
         """
         session.delete(self)
         session.commit()
-
+        
     def edit_account_info(editor, target, session, nombre_completo: str | None = None, 
               contrasenia: str | None = None, nombre_usuario: str | None = None) -> None:
         """@brief Allows users to edit account information, depending on their roles and other constraints
@@ -94,8 +94,8 @@ class Usuario(Base):  # Renamed to Usuario to match the database table name
         """
         if editor.rol != "admin":
             raise PermissionError("Error: No se tienen los permisos necesarios para eliminar usuarios.")
-        
+
         if target.rol == "admin":
             raise PermissionError("Error: No se pueden eliminar cuentas de administrador.")
-        
+
         target.delete(session)
