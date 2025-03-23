@@ -3,7 +3,7 @@ from src.security.password_utils import Security
 
 class LoginController:
     @staticmethod
-    def login(user_data: dict) -> bool:
+    def login(user_data: dict[str,str]) -> bool:
         """@brief Check if the user exists in the database and the password is correct
         @details This method checks if the user exists in the database and the password is correct
         @param user_data A dictionary containing the user data
