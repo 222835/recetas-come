@@ -7,6 +7,7 @@ ROOT_PATH = os.path.dirname(os.path.abspath(__file__))  # Define ROOT_PATH here
 constants.init(ROOT_PATH) # Initialize constants
 
 from src.Users.Login.view import LoginApp
+from src.Recipes.recetas_admin_view import RecetasAdminView
 
 
 ## @brief Main function
@@ -18,6 +19,9 @@ if __name__ == '__main__':
 
     login_view = LoginApp()
     login_view.mainloop()
+
+    recetas_admin_view = RecetasAdminView(login_view)
+    recetas_admin_view.pack(fill="both", expand=True)
 
     #connector.close_connection()
     print("database closed")
