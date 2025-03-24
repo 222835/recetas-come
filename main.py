@@ -7,8 +7,6 @@ ROOT_PATH = os.path.dirname(os.path.abspath(__file__))  # Define ROOT_PATH here
 constants.init(ROOT_PATH) # Initialize constants
 
 from src.Users.Login.view import LoginApp
-from src.Recipes.recetas_admin_view import RecetasAdminView
-
 
 ## @brief Main function
 ## @details Initializes the database and shows the login view
@@ -19,6 +17,19 @@ if __name__ == '__main__':
 
     login_view = LoginApp()
     login_view.mainloop()
+
+    if hasattr(login_view, 'user_role'):
+        if login_view.user_role == 'admin':
+            admin_app = AdminDashboard()
+            admin_app.mainloop()
+        elif login_view.user_role == 'invitado':
+            invitado_app = InvitadoDashboard()
+            invitado_app.mainloop()
+        else:
+            print("Rol desconocido o no se inició sesión correctamente.")
+    else:
+        print("No se obtuvo user_role; quizás el usuario cerró el login.")
+
 
     recetas_admin_view = RecetasAdminView(login_view)
     recetas_admin_view.pack(fill="both", expand=True)
