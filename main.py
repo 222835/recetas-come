@@ -17,10 +17,10 @@ from src.Users.Dashboard.invitado_dashboard import InvitadoDashboard
 if __name__ == '__main__':
     print("database initialized")
     print(f"mysql+pymysql://{env["DB_USER"]}:{env["DB_PASSWORD"]}@{env["DB_HOST"]}:3307/{env["DB_DATABASE"]}")
-    connector = Connector(f"mariadb://{env["DB_USER"]}:{env["DB_PASSWORD"]}@{env["DB_HOST"]}:3307/{env["DB_DATABASE"]}")
+    connector = Connector(f"mysql+pymysql://{env["DB_USER"]}:{env["DB_PASSWORD"]}@{env["DB_HOST"]}:3306/{env["DB_DATABASE"]}")
 
-    login_view = LoginApp()
-    login_view.mainloop()
+    #login_view = LoginApp()
+    #login_view.mainloop()
 
     if hasattr(login_view, 'user_role'):
         if login_view.user_role == 'admin':
