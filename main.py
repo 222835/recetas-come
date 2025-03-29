@@ -1,5 +1,6 @@
 from ast import main
 import os
+import customtkinter as ctk
 from src.database.connector import Connector
 import src.utils.constants as constants
 from src.utils.constants import env as env  # Import constants
@@ -7,6 +8,9 @@ ROOT_PATH = os.path.dirname(os.path.abspath(__file__))  # Define ROOT_PATH here
 constants.init(ROOT_PATH) # Initialize constants
 
 from src.Users.Login.view import LoginApp
+from src.Users.Dashboard.admin_dashboard import AdminDashboard
+from src.Users.Dashboard.invitado_dashboard import InvitadoDashboard
+
 
 ## @brief Main function
 ## @details Initializes the database and shows the login view
@@ -31,8 +35,8 @@ if __name__ == '__main__':
         print("No se obtuvo user_role; quizás el usuario cerró el login.")
 
 
-    recetas_admin_view = RecetasAdminView(login_view)
-    recetas_admin_view.pack(fill="both", expand=True)
+    #recetas_admin_view = RecetasAdminView(login_view)
+    #recetas_admin_view.pack(fill="both", expand=True)
 
     #connector.close_connection()
     print("database closed")

@@ -13,6 +13,7 @@ import pywinstyles
 import tkinter as tk
 from tkinter import messagebox
 
+
 ## @class LoginApp
 ## @brief Clase que representa la ventana de inicio de sesión.
 ## @details La clase LoginApp se encarga de crear la interfaz de login, generar un fondo con gradiente,
