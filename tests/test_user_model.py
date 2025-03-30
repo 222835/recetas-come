@@ -4,27 +4,28 @@ from sqlalchemy.orm import sessionmaker
 import sys
 import os
 
-# Add the project root to the sys.path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from src.Users.model import Usuario, Base
 from src.security.password_utils import Security
 from src.Users.auth_service import AuthService
 
+## @brief Test class for the Usuario model, which includes unit tests for CRUD operations and authentication.
 class TestUsuarioModel(unittest.TestCase):
+    ## @brief Set up the test environment by creating an in-memory SQLite database and session.
     def setUp(self):
         """Setup: Create an in-memory SQLite database and session for testing."""
         self.engine = create_engine('sqlite:///:memory:')
         Base.metadata.create_all(self.engine)
         self.Session = sessionmaker(bind=self.engine)
         self.session = self.Session()
-
+    ##Create the Usuario table in the in-memory database
     def tearDown(self):
         """Teardown: Close the session and drop all tables after each test."""
         self.session.close()
         Base.metadata.drop_all(self.engine)
         self.engine.dispose()
-
+    ## @brief Test creating a new Usuario.
     def test_create_usuario(self):
         """Test creating a new Usuario."""
         hashed_password = "password123"
@@ -38,7 +39,7 @@ class TestUsuarioModel(unittest.TestCase):
         self.assertEqual(new_user.nombre_usuario, "testuser")
         self.assertTrue(Security.verify_password(hashed_password, new_user.contrasenia))
         self.assertEqual(new_user.rol, "user")
-
+    ## @brief Test reading a Usuario from the database.
     def test_read_usuario(self):
         """Test reading a Usuario from the database."""
         hashed_password = "password123"
@@ -56,6 +57,7 @@ class TestUsuarioModel(unittest.TestCase):
         self.assertEqual(retrieved_user.rol, "user")
         self.assertTrue(Security.verify_password(hashed_password, retrieved_user.contrasenia))
 
+    ## @brief Test reading a Usuario from the database by username.
     def test_read_usuario_by_username(self):
         """Test reading a Usuario from the database by username."""
         hashed_password = "password123"
@@ -72,7 +74,7 @@ class TestUsuarioModel(unittest.TestCase):
         self.assertTrue(Security.verify_password(hashed_password, retrieved_user.contrasenia))
         self.assertEqual(retrieved_user.contrasenia, Security.generate_password(hashed_password))
         self.assertEqual(retrieved_user.rol, "user")
-
+    ## @brief Test reading a Usuario from the database by ID.
     def test_update_usuario(self):
         """Test updating a Usuario in the database."""
         hashed_password = "password123"
@@ -96,7 +98,7 @@ class TestUsuarioModel(unittest.TestCase):
         self.assertEqual(updated_user.nombre_usuario, "newtestuser")
         self.assertTrue(Security.verify_password(new_hashed_password, updated_user.contrasenia))
         self.assertEqual(updated_user.rol, "admin")
-
+    ## @brief Test deleting a Usuario from the database.
     def test_delete_usuario(self):
         """Test deleting a Usuario from the database."""
         hashed_password = "password123"
@@ -111,7 +113,7 @@ class TestUsuarioModel(unittest.TestCase):
         # Assert that the user was deleted
         deleted_user = self.session.query(Usuario).filter_by(numero_usuario=new_user.numero_usuario).first()
         self.assertIsNone(deleted_user)
-    
+    ## @brief Test the authentication of a user.
     def test_authenticate(self):
         """Test the authentication of a user."""
         hashed_password = "password123"
@@ -138,7 +140,7 @@ class TestUsuarioModel(unittest.TestCase):
 
         # Assert that authentication failed with incorrect password
         self.assertIsNone(authenticated_user_invalid_password)
-    
+    ## @brief Test the authentication of a user with an empty password.
     def test_edit_account_info_admin(self):
         """Tests that an admin can edit other users information."""
         new_user_admin = Usuario(nombre_completo="Nombre Admin", contrasenia="admin123", rol="admin", nombre_usuario="adminuser")
@@ -156,7 +158,7 @@ class TestUsuarioModel(unittest.TestCase):
         self.assertEqual(updated_user.nombre_completo, "Updated User")
         self.assertEqual(updated_user.nombre_usuario, "updateduser")
         self.assertTrue(Security.verify_password(new_hashed_password, updated_user.contrasenia))
-
+    ## @brief Test the authentication of a user with an empty password.
     def test_edit_account_info_self(self):
         """Tests that users can edit their own username and password."""
         hashed_password = "password123"
@@ -173,7 +175,7 @@ class TestUsuarioModel(unittest.TestCase):
         # Asserts that changes have been made
         self.assertEqual(updated_user.nombre_usuario, "newusername")
         self.assertTrue(Security.verify_password(new_hashed_password, updated_user.contrasenia))
-
+    ## @brief Test the authentication of a user with an empty password.
     def test_edit_account_info_no_permission(self):
         """Tests that a guest user cannot edit another users info."""
         new_user1 = Usuario(nombre_completo="User1", contrasenia="password123", rol="invitado", nombre_usuario="user1")
@@ -182,9 +184,9 @@ class TestUsuarioModel(unittest.TestCase):
         self.session.commit()
 
         # User1 tries to modify User2 information, asserts it raises an error
-        with self.assertRaises(PermissionError):
-            Usuario.edit_account_info(new_user1, new_user2, self.session, nombre_usuario="newusername")
+        with self.assertRaises(PermissionError): Usuario.edit_account_info(new_user1, new_user2, self.session, nombre_usuario="newusername")
 
+    ## @brief Test the authentication of a user with an empty password.
     def test_delete_account_admin(self):
         """Tests that an admin can delete a user account."""
         new_user_admin = Usuario(nombre_completo="Nombre Admin", contrasenia="admin123", rol="admin", nombre_usuario="adminuser")
@@ -199,6 +201,7 @@ class TestUsuarioModel(unittest.TestCase):
         # Asserts if user was deleted
         self.assertIsNone(deleted_user)
 
+    ## @brief Test the authentication of a user with an empty password.
     def test_delete_account_no_permission(self):
         """Tests that a guest user cant delete another user and admin cant delete its own account."""
         new_user_admin = Usuario(nombre_completo="Nombre Admin", contrasenia="admin123", rol="admin", nombre_usuario="adminuser")
@@ -215,6 +218,7 @@ class TestUsuarioModel(unittest.TestCase):
         with self.assertRaises(PermissionError):
             Usuario.delete_account(new_user1, new_user2, self.session)
 
+    ## @brief Test the authentication of a user with an empty password.
     def test_edit_account_info_existing_username(self):
         """Tests that a guest user cannot update to an existing username."""
         new_user1 = Usuario(nombre_completo="User1", contrasenia="password123", rol="invitado", nombre_usuario="user1")

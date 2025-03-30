@@ -6,11 +6,8 @@ from sqlalchemy import create_engine
 
 Base = declarative_base()
 
-
+## @brief Recipes model class, this class is used to represent a recipe in the database
 class Receta(Base): 
-    ##@brief recipes model class
-    ##@details This class is used to represent a recipe in the database
-    
     __tablename__ = "Recetas" 
 
     numero_receta = Column(Integer, primary_key=True, autoincrement=True)
@@ -20,6 +17,7 @@ class Receta(Base):
     comensales_base = Column(Integer, nullable=False)
     ingredientes = Column(Text, nullable=False)
     
+    ##@brief Constructor for the Receta class
     def __init__(self, nombre_receta: str, clasificacion: str, periodo: str, comensales_base: int, ingredientes: str) -> None:
        
         ##@brief Constructor
@@ -35,18 +33,22 @@ class Receta(Base):
         self.comensales_base = comensales_base
         self.ingredientes = ingredientes
 
+    ##@brief String representation of the Receta class
     def __repr__(self) -> str:
         return f"Receta: {self.nombre_receta}, {self.clasificacion}, {self.periodo}, {self.comensales_base} comensales"    
     
+    ##@brief Method to create a new recipe in the database
     def create(self, session) -> None:
         ##@brief Create a new recipe in the database
         session.add(self)
         session.commit()
 
+    ##@brief Method to read a recipe from the database
     def read(self, session) -> "Receta":
         ##@brief Read a recipe from the database
         return session.query(Receta).filter(Receta.numero_receta == self.numero_receta).first()
     
+    ##@brief Method to read all recipes from the database
     def update(self, session, nombre_receta: str | None = None, clasificacion: str | None = None, periodo: str | None = None, comensales_base: int | None = None, ingredientes: str | None = None) -> None:
         ##@brief Update the recipe details
         if nombre_receta:
@@ -61,6 +63,7 @@ class Receta(Base):
             self.ingredientes = ingredientes
         session.commit()
 
+    ## @brief Method to delete a recipe from the database
     def delete(self, session) -> None:
         ##@brief Delete the recipe from the database
         session.delete(self)

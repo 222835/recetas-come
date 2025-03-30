@@ -12,8 +12,10 @@ from src.Users.Login.controller import LoginController
 from src.Users.model import Usuario
 from src.security.password_utils import Security  # Import Security class
 
+## @brief Test class for the LoginController, which includes unit tests for the login functionality.
 class TestLoginController(unittest.TestCase):
 
+    ## @brief Set up the test environment by creating an in-memory SQLite database and session.
     def setUp(self):
         """Setup: Create an in-memory SQLite database and session for testing."""
         self.engine = create_engine('sqlite:///:memory:')
@@ -22,12 +24,14 @@ class TestLoginController(unittest.TestCase):
         self.Session = sessionmaker(bind=self.engine)
         self.session = self.Session()
 
+    ##Create the Usuario table in the in-memory database
     def tearDown(self):
         """Teardown: Close the session and drop all tables after each test."""
         self.session.close()
         from src.Users.model import Base
         Base.metadata.drop_all(self.engine)
 
+    ## @brief Test successful login.
     @patch('src.Users.Login.controller.Usuario')
     def test_login_success(self, MockUsuario):
         """Test successful login."""
@@ -57,6 +61,7 @@ class TestLoginController(unittest.TestCase):
         # mock_user.generate_password.assert_called_once_with("password")  # No longer needed
         mock_session.close.assert_called_once()
 
+    ## @brief Test login when the user is not found.
     @patch('src.Users.Login.controller.Usuario')
     def test_login_user_not_found(self, MockUsuario):
         """Test login when the user is not found."""
@@ -82,6 +87,7 @@ class TestLoginController(unittest.TestCase):
         mock_user.read_by_username.assert_called_once_with(mock_session, "testuser")
         mock_session.close.assert_called_once()
 
+    ## @brief Test login with an incorrect password.
     @patch('src.Users.Login.controller.Usuario')
     def test_login_incorrect_password(self, MockUsuario):
         """Test login with an incorrect password."""
