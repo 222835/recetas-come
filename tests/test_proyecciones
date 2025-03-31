@@ -1,0 +1,113 @@
+import unittest
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+import sys
+import os
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from src.Projections.model import Base, ProyeccionRecetas
+from src.Users.model import Usuario
+from src.Recipes.model import Receta
+
+class Test(unittest.TestCase):
+
+    ## @brief Set up the test environment by creating an in-memory SQLite database and session.
+    def setUp(self):
+        ## Setup: Create an in-memory SQLite database and session for testing.
+        self.engine = create_engine('sqlite:///:memory:')
+        Base.metadata.create_all(self.engine)
+        self.Session = sessionmaker(bind=self.engine)
+        self.session = self.Session()
+
+        # Setup test data: create a user and some recipes
+        self.usuario = Usuario(numero_usuario=1, nombre="Test User")
+        self.session.add(self.usuario)
+        self.session.commit()
+
+        self.receta1 = Receta(nombre_receta="Sopa de Tomate", clasificacion="Sopa", periodo="Almuerzo", comensales_base=4, ingredientes="Tomate, Cebolla")
+        self.receta2 = Receta(nombre_receta="Sopa de Calabaza", clasificacion="Sopa", periodo="Almuerzo", comensales_base=4, ingredientes="Calabaza, Cebolla")
+        self.session.add(self.receta1)
+        self.session.add(self.receta2)
+        self.session.commit()
+
+    ## Create the Proyeccion table in the in-memory database
+    def tearDown(self):
+        ## Teardown: Close the session and drop all tables after each test.
+        self.session.close()
+        Base.metadata.drop_all(self.engine)
+        self.engine.dispose()
+
+    ## @brief Test creating a projection.
+    def test_create_projection(self):
+        recetas = [
+            {'id_receta': self.receta1.id_receta, 'porcentaje': 50},
+            {'id_receta': self.receta2.id_receta, 'porcentaje': 50}
+        ]
+
+        proyeccion = ProyeccionRecetas.create_projection(self.session, numero_usuario=1, nombre="Proyeccion Test", periodo="Semana", comensales=4, recetas=recetas)
+
+        # Assert that the projection is created
+        self.assertIsNotNone(proyeccion.id_proyeccion)
+        self.assertEqual(proyeccion.nombre, "Proyeccion Test")
+        self.assertEqual(proyeccion.periodo, "Semana")
+        self.assertEqual(proyeccion.comensales, 4)
+        self.assertEqual(len(proyeccion.recetas), 2)
+
+    ## @brief Test reading a projection.
+    def test_read_projection(self):
+        recetas = [
+            {'id_receta': self.receta1.id_receta, 'porcentaje': 50},
+            {'id_receta': self.receta2.id_receta, 'porcentaje': 50}
+        ]
+
+        proyeccion = ProyeccionRecetas.create_projection(self.session, numero_usuario=1, nombre="Proyeccion Test", periodo="Semana", comensales=4, recetas=recetas)
+
+        # Retrieve the projection from the database
+        retrieved_proyeccion = ProyeccionRecetas.get_projection(self.session, id_proyeccion=proyeccion.id_proyeccion)
+
+        # Assert that the retrieved projection matches the created one
+        self.assertEqual(retrieved_proyeccion.id_proyeccion, proyeccion.id_proyeccion)
+        self.assertEqual(retrieved_proyeccion.nombre, "Proyeccion Test")
+        self.assertEqual(retrieved_proyeccion.periodo, "Semana")
+        self.assertEqual(retrieved_proyeccion.comensales, 4)
+
+    ## @brief Test updating a projection.
+    def test_update_projection(self):
+        recetas = [
+            {'id_receta': self.receta1.id_receta, 'porcentaje': 50},
+            {'id_receta': self.receta2.id_receta, 'porcentaje': 50}
+        ]
+
+        proyeccion = ProyeccionRecetas.create_projection(self.session, numero_usuario=1, nombre="Proyeccion Test", periodo="Semana", comensales=4, recetas=recetas)
+
+        # Update the projection
+        ProyeccionRecetas.update_projection(self.session, id_proyeccion=proyeccion.id_proyeccion, nombre="Proyeccion Actualizada", periodo="Fin de Semana", comensales=6)
+
+        # Retrieve the updated projection
+        updated_proyeccion = ProyeccionRecetas.get_projection(self.session, id_proyeccion=proyeccion.id_proyeccion)
+
+        # Assert that the projection was updated
+        self.assertEqual(updated_proyeccion.nombre, "Proyeccion Actualizada")
+        self.assertEqual(updated_proyeccion.periodo, "Fin de Semana")
+        self.assertEqual(updated_proyeccion.comensales, 6)
+
+    ## @brief Test deleting a projection.
+    def test_delete_projection(self):
+        recetas = [
+            {'id_receta': self.receta1.id_receta, 'porcentaje': 50},
+            {'id_receta': self.receta2.id_receta, 'porcentaje': 50}
+        ]
+
+        proyeccion = ProyeccionRecetas.create_projection(self.session, numero_usuario=1, nombre="Proyeccion Test", periodo="Semana", comensales=4, recetas=recetas)
+
+        # Delete the projection
+        ProyeccionRecetas.delete_projection(self.session, id_proyeccion=proyeccion.id_proyeccion)
+
+        # Assert that the projection is deleted
+        deleted_proyeccion = ProyeccionRecetas.get_projection(self.session, id_proyeccion=proyeccion.id_proyeccion)
+        self.assertIsNone(deleted_proyeccion)
+
+
+if __name__ == '__main__':
+    unittest.main()

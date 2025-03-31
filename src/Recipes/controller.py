@@ -5,12 +5,9 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '.
 
 from sqlalchemy.orm import Session
 from src.Recipes.model import Receta
-<<<<<<< HEAD
-=======
 from typing import List
 
 ## @brief This module contains the RecetasController class, which provides methods to manage recipes in the database.
->>>>>>> f9369a7 (Comentarios)
 class RecetasController:
     
     ## @brief This method creates a new recipe in the database.

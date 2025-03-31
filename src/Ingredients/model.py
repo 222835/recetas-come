@@ -1,8 +1,11 @@
+import os
+import sys
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+
 from typing import Self
 from sqlalchemy import Column, Integer, String
-from sqlalchemy.orm import declarative_base
-
-Base = declarative_base()
+from src.Users.model import Base
 
 ##@brief Base class for all models
 class Ingrediente(Base):
@@ -65,7 +68,6 @@ class Ingrediente(Base):
 
     ##@brief Delete an ingredient from the database
     def delete(self, session) -> None:
-        ##@brief Delete the ingredient from the database
         ##@param session The SQLAlchemy session
         session.delete(self)
         session.commit()

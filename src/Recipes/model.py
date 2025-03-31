@@ -1,10 +1,14 @@
+import os
+import sys
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+
 from typing import Self
 from sqlalchemy import Column, Integer, String, Text
-from sqlalchemy.orm import declarative_base
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
+from src.Users.model import Base
 
-Base = declarative_base()
 
 ## @brief Recipes model class, this class is used to represent a recipe in the database
 class Receta(Base): 
