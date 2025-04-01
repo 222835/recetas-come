@@ -1,14 +1,25 @@
+## @file admin_dashboard.py
+## @brief Dashboard interface for administrator users using CustomTkinter.
+## @details This module defines the AdminDashboard class, which displays the main admin interface,
+## including a navigation bar, a collapsible sidebar with icons, a profile dropdown menu,
+## and a dynamic layout for interactive image buttons representing different sections.
+
 import customtkinter as ctk
 from PIL import Image, ImageTk, ImageOps, ImageDraw
 import tkinter as tk
 from pathlib import Path
 
+## @brief Set global appearance and theme for CustomTkinter.
 ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("dark-blue")
 
 BASE_DIR = Path(__file__).resolve().parent
 IMAGE_PATH = BASE_DIR.parents[2] / "res" / "images"
 
+## @brief Add rounded corners to an image.
+## @param im The input image.
+## @param radius Radius for the rounded corners.
+## @return Image with alpha mask for rounded corners.
 def add_rounded_corners(im, radius):
     mask = Image.new("L", im.size, 0)
     draw = ImageDraw.Draw(mask)
@@ -16,10 +27,14 @@ def add_rounded_corners(im, radius):
     im.putalpha(mask)
     return im
 
+## @class AdminDashboard
+## @brief CustomTkinter admin interface.
+## @details Creates a window with a navbar, sidebar, profile menu, and custom image buttons.
 class AdminDashboard(ctk.CTk):
     def __init__(self):
+        ## @brief Initialize the admin dashboard window.
         super().__init__()
-        self.title("Main Admin")
+        self.title("Dashboard Administrador")
         self.geometry("1920x1080")
         self.configure(fg_color="#1a1a22")
 
@@ -129,18 +144,21 @@ class AdminDashboard(ctk.CTk):
 
         self.create_custom_buttons()
 
+    ## @brief Repositions the dropdown menu if visible.
     def reposition_dropdown_if_visible(self, event=None):
         if self.dropdown_visible:
             x = self.profile_container.winfo_rootx() - 110
             y = self.profile_container.winfo_rooty() + self.profile_container.winfo_height()
             self.dropdown_menu.geometry(f"+{x}+{y}")
 
+    ## @brief Handles actions from dropdown menu.
     def handle_option(self, option):
         if option == "Cerrar sesión":
             self.show_logout_popup()
         else:
             print(f"{option} clicked")
 
+    ## @brief Shows/hides the dropdown menu.
     def toggle_dropdown(self, event=None):
         if self.dropdown_visible:
             self.dropdown_menu.withdraw()
@@ -152,6 +170,7 @@ class AdminDashboard(ctk.CTk):
             self.dropdown_menu.deiconify()
             self.dropdown_visible = True
 
+    ## @brief Expands the sidebar to show text.
     def expand_sidebar(self, event=None):
         if not self.sidebar_expanded:
             self.sidebar_frame.configure(width=250)
@@ -159,6 +178,7 @@ class AdminDashboard(ctk.CTk):
                 text_label.pack(side="left", padx=5)
             self.sidebar_expanded = True
 
+    ## @brief Collapses the sidebar to hide text.
     def collapse_sidebar(self, event=None):
         if self.sidebar_expanded:
             self.sidebar_frame.configure(width=150)
@@ -166,6 +186,7 @@ class AdminDashboard(ctk.CTk):
                 text_label.pack_forget()
             self.sidebar_expanded = False
 
+    ## @brief Creates image-based buttons in the main content area.
     def create_custom_buttons(self):
         self.main_content.grid_columnconfigure((0, 1, 2, 3, 4, 5), weight=1)
         self.main_content.grid_rowconfigure((0, 1, 2, 3, 4), weight=1)
@@ -209,6 +230,7 @@ class AdminDashboard(ctk.CTk):
         create_image_button("cuentas.jpg", "👥 Gestión de cuentas", 1, 4, 4, 2, 600, 360)
         create_image_button("costos.jpg", "💰 Costos", 3, 2, 2, 4, 1200, 360)
 
+    ## @brief Shows a popup to confirm logout.
     def show_logout_popup(self):
         popup = tk.Toplevel(self)
         popup.title("Cerrar sesión")
@@ -248,14 +270,23 @@ class AdminDashboard(ctk.CTk):
         )
         yes_btn.pack(side="left", padx=10)
 
+    ## @brief Closes the current window and opens the login view.
+    ## @param popup The confirmation popup to destroy before logout.
     def logout(self, popup):
         popup.destroy()
         self.destroy()
-
         from src.Users.Login.view import LoginApp
-        login = LoginApp()  
+        login = LoginApp()
         login.mainloop()
 
+## @brief Draws a rounded rectangle on a canvas.
+## @param canvas The canvas where the shape will be drawn.
+## @param x1 Top-left X coordinate.
+## @param y1 Top-left Y coordinate.
+## @param x2 Bottom-right X coordinate.
+## @param y2 Bottom-right Y coordinate.
+## @param radius Radius of the corners.
+## @param kwargs Additional arguments passed to create_polygon.
 def round_rectangle(canvas, x1, y1, x2, y2, radius=25, **kwargs):
     points = [
         x1+radius, y1, x2-radius, y1, x2, y1,
