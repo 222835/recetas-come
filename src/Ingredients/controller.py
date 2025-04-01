@@ -59,4 +59,3 @@ class IngredienteController:
         session.delete(ingrediente)
         session.commit()
         return True
-

@@ -1,8 +1,6 @@
 CREATE DATABASE COME;
-GO
 
 USE COME;
-GO
 
 CREATE TABLE Usuarios (
     numero_usuario INT PRIMARY KEY,
