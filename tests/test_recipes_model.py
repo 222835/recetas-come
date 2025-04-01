@@ -84,7 +84,7 @@ class TestRecetaModel(unittest.TestCase):
         updated_receta = self.session.query(Receta).filter_by(numero_receta=receta.numero_receta).first()
 
         # Print the updated receta
-        print(f"Receta actualizadas con numero: {receta.numero_receta}, nombre: {receta.nombre_receta}, clasificacion: {receta.clasificacion}")
+        print(f"Receta actualizada con numero: {receta.numero_receta}, nombre: {receta.nombre_receta}, clasificacion: {receta.clasificacion}")
 
         ##Assert that the receta's information was updated correctly
         self.assertEqual(updated_receta.nombre_receta, "Sopa de Calabaza")

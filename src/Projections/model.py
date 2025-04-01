@@ -4,8 +4,12 @@ import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
 from sqlalchemy import Column, Integer, String, ForeignKey
-from sqlalchemy.orm import relationship
-from src.Recipes.model import Receta, Base
+from sqlalchemy.orm import relationship, declarative_base
+from src.Recipes.model import Receta
+from src.Users.model import Usuario
+from src.Recipes.model import Receta
+
+Base = declarative_base()
 
 
 class Proyeccion(Base):
@@ -13,7 +17,7 @@ class Proyeccion(Base):
     __table_args__ = {'extend_existing': True}
 
     id_proyeccion = Column(Integer, primary_key=True)
-    numero_usuario = Column(Integer, ForeignKey('Usuarios.numero_usuario'), nullable=False)
+    numero_usuario = Column(Integer, ForeignKey(Usuario.numero_usuario), nullable=False)
     nombre = Column(String(100), nullable=False)
     periodo = Column(String(50), nullable=False)
     comensales = Column(Integer, nullable=False)
@@ -49,3 +53,19 @@ class Proyeccion(Base):
                         }
 
         return ingredientes_totales
+
+class ProyeccionRecetas (Base):
+    __tablename__ = "ProyeccionesRecetas"
+    __table_args__ = {'extend_existing': True}
+
+    id_proyeccion_receta = Column(Integer, primary_key=True)
+    id_proyeccion = Column(Integer, ForeignKey('Proyecciones.id_proyeccion'), nullable=False)
+    id_receta = Column(Integer, ForeignKey(Receta.numero_receta), nullable=False)
+    porcentaje = Column(Integer, nullable=False)
+
+    proyeccion = relationship("Proyeccion", back_populates="recetas")
+    receta = relationship("Receta", back_populates="proyecciones")
+
+    def __init__(self, id_receta: int, porcentaje: int) -> None:
+        self.id_receta = id_receta
+        self.porcentaje = porcentaje
