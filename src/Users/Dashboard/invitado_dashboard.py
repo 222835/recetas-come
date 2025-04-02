@@ -1,3 +1,8 @@
+## @file invitado_dashboard.py
+## @brief Module defining the guest dashboard interface using CustomTkinter.
+## @details This module contains the InvitadoDashboard class, which builds a custom GUI for guests, including
+## a sidebar, a top navigation bar, and interactive buttons with images.
+
 import customtkinter as ctk
 from PIL import Image, ImageTk, ImageOps, ImageDraw
 import tkinter as tk
@@ -10,14 +15,22 @@ BASE_DIR = Path(__file__).resolve().parent
 IMAGE_PATH = BASE_DIR.parents[2] / "res" / "images"
 
 def add_rounded_corners(im, radius):
+    ## @brief Adds rounded corners to a PIL image.
+    ## @param im PIL image to modify.
+    ## @param radius Corner radius.
+    ## @return PIL image with rounded corners.
     mask = Image.new("L", im.size, 0)
     draw = ImageDraw.Draw(mask)
     draw.rounded_rectangle((0, 0, im.size[0], im.size[1]), radius=radius, fill=255)
     im.putalpha(mask)
     return im
 
+## @class InvitadoDashboard
+## @brief Class representing the guest dashboard interface.
+## @details This class builds a responsive dashboard layout for guest users using CustomTkinter.
 class InvitadoDashboard(ctk.CTk):
     def __init__(self):
+        ## @brief Initializes the guest dashboard interface.
         super().__init__()
         self.title("Dashboard Invitado")
         self.geometry("1920x1080")
@@ -30,7 +43,7 @@ class InvitadoDashboard(ctk.CTk):
         try:
             self.logo_image = ctk.CTkImage(Image.open(IMAGE_PATH / "come.webp"), size=(150, 60))
         except FileNotFoundError:
-            print("Imagen 'come.webp' no encontrada en:", IMAGE_PATH)
+            print("Image 'come.webp' not found at:", IMAGE_PATH)
             self.logo_image = None
 
         ctk.CTkLabel(self.navbar, image=self.logo_image, text="", fg_color="transparent").place(x=25, y=7)
@@ -43,7 +56,7 @@ class InvitadoDashboard(ctk.CTk):
             profile_img = Image.open(IMAGE_PATH / "perfil.jpg").resize((40, 40))
             self.profile_photo = ImageTk.PhotoImage(profile_img)
         except FileNotFoundError:
-            print("Imagen 'perfil.jpg' no encontrada.")
+            print("Image 'perfil.jpg' not found.")
             self.profile_photo = None
 
         self.dropdown_visible = False
@@ -96,7 +109,7 @@ class InvitadoDashboard(ctk.CTk):
         self.profile_btn.bind("<Button-1>", self.toggle_dropdown)
         self.arrow_label.bind("<Button-1>", self.toggle_dropdown)
 
-        # --- CONTENEDOR PRINCIPAL ---
+        # --- MAIN CONTAINER ---
         self.main_container = ctk.CTkFrame(self, fg_color="#1a1a22")
         self.main_container.pack(side="top", fill="both", expand=True)
 
@@ -126,25 +139,28 @@ class InvitadoDashboard(ctk.CTk):
             text_label.pack_forget()
             self.sidebar_buttons.append((icon_label, text_label))
 
-        # --- CONTENIDO PRINCIPAL ---
+        # --- MAIN CONTENT ---
         self.main_content = ctk.CTkFrame(self.main_container, fg_color="#1a1a22")
         self.main_content.pack(side="left", fill="both", expand=True)
 
         self.create_custom_buttons()
 
     def reposition_dropdown_if_visible(self, event=None):
+        ## @brief Repositions dropdown menu if it is visible.
         if self.dropdown_visible:
             x = self.profile_container.winfo_rootx() - 110
             y = self.profile_container.winfo_rooty() + self.profile_container.winfo_height()
             self.dropdown_menu.geometry(f"+{x}+{y}")
 
     def handle_option(self, option):
+        ## @brief Handles selected dropdown option.
         if option == "Cerrar sesión":
             self.show_logout_popup()
         else:
             print(f"{option} clicked")
 
     def show_logout_popup(self):
+        ## @brief Displays a logout confirmation popup.
         popup = tk.Toplevel(self)
         popup.title("Cerrar sesión")
         popup.configure(bg="white")
@@ -159,39 +175,31 @@ class InvitadoDashboard(ctk.CTk):
         popup.geometry(f"370x170+{x}+{y}")
         popup.grab_set()
 
-        tk.Label(popup, text="Cerrar sesión", font=("Segoe UI Semibold", 16),
-                 fg="#D32F2F", bg="white").pack(pady=(15, 0))
-
-        tk.Label(popup, text="¿Estás seguro que quieres cerrar sesión de tu cuenta?",
-                 font=("Segoe UI", 10), bg="white", fg="#666").pack(pady=10)
+        tk.Label(popup, text="Cerrar sesión", font=("Segoe UI Semibold", 16), fg="#D32F2F", bg="white").pack(pady=(15, 0))
+        tk.Label(popup, text="¿Estás seguro que quieres cerrar sesión de tu cuenta?", font=("Segoe UI", 10), bg="white", fg="#666").pack(pady=10)
 
         btn_frame = tk.Frame(popup, bg="white")
         btn_frame.pack(pady=10)
 
         style = {"font": ("Segoe UI Semibold", 10), "width": 10, "height": 1}
 
-        no_btn = tk.Button(
-            btn_frame, text="No", bg="white", fg="#D32F2F", bd=2, relief="solid",
-            highlightthickness=0, command=popup.destroy, **style
-        )
+        no_btn = tk.Button(btn_frame, text="No", bg="white", fg="#D32F2F", bd=2, relief="solid", highlightthickness=0, command=popup.destroy, **style)
         no_btn.pack(side="left", padx=10)
         no_btn.configure(highlightbackground="#D32F2F")
 
-        yes_btn = tk.Button(
-            btn_frame, text="Sí", bg="#D32F2F", fg="white", bd=0,
-            highlightthickness=0, command=lambda: self.logout(popup), **style
-        )
+        yes_btn = tk.Button(btn_frame, text="Sí", bg="#D32F2F", fg="white", bd=0, highlightthickness=0, command=lambda: self.logout(popup), **style)
         yes_btn.pack(side="left", padx=10)
 
     def logout(self, popup):
+        ## @brief Handles logout process.
         popup.destroy()
         self.destroy()
-
         from src.Users.Login.view import LoginApp
         login = LoginApp()
         login.mainloop()
 
     def toggle_dropdown(self, event=None):
+        ## @brief Shows or hides the dropdown menu.
         if self.dropdown_visible:
             self.dropdown_menu.withdraw()
             self.dropdown_visible = False
@@ -203,6 +211,7 @@ class InvitadoDashboard(ctk.CTk):
             self.dropdown_visible = True
 
     def expand_sidebar(self, event=None):
+        ## @brief Expands the sidebar when mouse enters.
         if not self.sidebar_expanded:
             self.sidebar_frame.configure(width=250)
             for icon_label, text_label in self.sidebar_buttons:
@@ -210,6 +219,7 @@ class InvitadoDashboard(ctk.CTk):
             self.sidebar_expanded = True
 
     def collapse_sidebar(self, event=None):
+        ## @brief Collapses the sidebar when mouse leaves.
         if self.sidebar_expanded:
             self.sidebar_frame.configure(width=150)
             for icon_label, text_label in self.sidebar_buttons:
@@ -217,6 +227,7 @@ class InvitadoDashboard(ctk.CTk):
             self.sidebar_expanded = False
 
     def create_custom_buttons(self):
+        ## @brief Creates the main dashboard image buttons.
         self.main_content.grid_columnconfigure((0, 1, 2, 3, 4, 5), weight=1)
         self.main_content.grid_rowconfigure((0, 1, 2, 3, 4), weight=1)
 
@@ -230,7 +241,7 @@ class InvitadoDashboard(ctk.CTk):
                 zoom_img = ImageOps.fit(image, (int(w * 1.03), int(h * 1.03)), Image.Resampling.LANCZOS)
                 zoom = ctk.CTkImage(light_image=zoom_img, size=(int(w * 1.03), int(h * 1.03)))
             except FileNotFoundError:
-                print(f"Imagen '{img_file}' no encontrada.")
+                print(f"Image '{img_file}' not found.")
                 return
 
             btn = ctk.CTkButton(
@@ -259,6 +270,7 @@ class InvitadoDashboard(ctk.CTk):
         create_image_button("costos.jpg", "💰 Costos", 3, 2, 2, 4, 1200, 360)
 
 def round_rectangle(canvas, x1, y1, x2, y2, radius=25, **kwargs):
+    ## @brief Draws a rounded rectangle on a canvas.
     points = [
         x1+radius, y1, x2-radius, y1, x2, y1,
         x2, y1+radius, x2, y2-radius, x2, y2,
