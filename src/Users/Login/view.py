@@ -166,14 +166,14 @@ class LoginApp(ctk.CTk):
         result = connector.execute_query(query)
 
         if not result:
-            messagebox.showerror("Error", "Usuario no encontrado")
+            messagebox.showerror("Error", "Usuario no encontrado", parent=self)
             self.login_button.configure(state="normal")  
             return
 
         stored_role, stored_password = result[0]
 
         if stored_password != contrasena:
-            messagebox.showerror("Error", "Contraseña incorrecta")
+            messagebox.showerror("Error", "Contraseña incorrecta", parent=self)
             self.login_button.configure(state="normal")
             return
 
@@ -182,11 +182,11 @@ class LoginApp(ctk.CTk):
         elif stored_role.lower() == 'invitado':
             self.user_role = 'invitado'
         else:
-            messagebox.showerror("Error", f"El rol '{stored_role}' no está reconocido.")
+            messagebox.showerror("Error", f"El rol '{stored_role}' no está reconocido.",  parent=self)
             self.login_button.configure(state="normal")
             return
 
-        messagebox.showinfo("Éxito", f"Bienvenido {usuario}. Rol asignado: {self.user_role}")
+        messagebox.showinfo("Éxito", f"Bienvenido {usuario}. Rol asignado: {self.user_role}",  parent=self)
 
         self.destroy()
 
