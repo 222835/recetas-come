@@ -2,6 +2,11 @@ import customtkinter as ctk
 from PIL import Image, ImageTk, ImageOps, ImageDraw
 import tkinter as tk
 from pathlib import Path
+from src.Recipes.recetas_admin_view import RecetasAdminView
+from src.Projections.proyecciones_admin import ProyeccionesAdminView
+from src.Users.cuentas import CuentasAdminView
+from src.Costs.costos import CostosAdminView
+from src.Projections.historial import HistorialAdminView
 
 ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("dark-blue")
@@ -99,35 +104,55 @@ class AdminDashboard(ctk.CTk):
         self.main_container.pack(side="top", fill="both", expand=True)
 
         self.sidebar_expanded = False
-        self.sidebar_frame = ctk.CTkFrame(self.main_container, width=150, fg_color="#19171d", corner_radius=0)
+        self.sidebar_frame = ctk.CTkFrame(self.main_container, width=430, fg_color="#1a1a22", corner_radius=0)
+        ctk.CTkLabel(self.sidebar_frame, text="", height=85).pack()
         self.sidebar_frame.pack(side="left", fill="y")
         self.sidebar_frame.bind("<Enter>", self.expand_sidebar)
         self.sidebar_frame.bind("<Leave>", self.collapse_sidebar)
 
         self.sections = {
-            "🏠": "Inicio",
-            "📦": "Historial",
-            "🖼️": "Proyecciones",
-            "📄": "Costos",
-            "👤": "Cuentas"
+            "Home icon.png": ("Inicio", lambda: self.create_custom_buttons()),
+            "historial.png": ("Historial", lambda: self.load_view(HistorialAdminView)),
+            "proyecciones.png": ("Proyecciones", lambda: self.load_view(ProyeccionesAdminView)),
+            "costos.png": ("Costos", lambda: self.load_view(CostosAdminView)),
+            "cuentas.png": ("Cuentas", lambda: self.load_view(CuentasAdminView))
         }
 
         self.sidebar_buttons = []
-        for icon, name in self.sections.items():
+        for icon_file, (name, command) in self.sections.items():
             frame = ctk.CTkFrame(self.sidebar_frame, fg_color="transparent")
-            frame.pack(pady=15, anchor="w")
-            icon_label = ctk.CTkLabel(frame, text=icon, font=("Arial", 26), width=60)
-            icon_label.pack(side="left")
+            frame.pack(pady=20, anchor="w")
+
+            try:
+                img_path = IMAGE_PATH / icon_file
+                image = Image.open(img_path).resize((38, 38), Image.Resampling.LANCZOS)
+                icon_img = ctk.CTkImage(light_image=image, size=(38, 38))
+            except:
+                print(f"Error al cargar {icon_file}")
+                icon_img = None
+
+            icon_label = ctk.CTkLabel(frame, image=icon_img, text="", width=40)
+            icon_label.pack(side="left", padx=20, pady=5)
             icon_label.bind("<Enter>", self.expand_sidebar)
-            text_label = ctk.CTkLabel(frame, text=name, text_color="white", font=("Arial", 16))
+            icon_label.bind("<Button-1>", lambda e, cmd=command: cmd())
+
+            text_label = ctk.CTkLabel(frame, text=name, text_color="white", font=("Arial", 22))
             text_label.pack(side="left", padx=5)
             text_label.pack_forget()
+            text_label.bind("<Button-1>", lambda e, cmd=command: cmd())
+
             self.sidebar_buttons.append((icon_label, text_label))
 
         self.main_content = ctk.CTkFrame(self.main_container, fg_color="#1a1a22")
         self.main_content.pack(side="left", fill="both", expand=True, padx=0, pady=0)
 
         self.create_custom_buttons()
+
+    def load_view(self, ViewClass):
+        for widget in self.main_content.winfo_children():
+            widget.destroy()
+        view = ViewClass(self.main_content)
+        view.pack(fill="both", expand=True)
 
     def reposition_dropdown_if_visible(self, event=None):
         if self.dropdown_visible:
@@ -137,7 +162,7 @@ class AdminDashboard(ctk.CTk):
 
     def handle_option(self, option):
         if option == "Cerrar sesión":
-            self.show_logout_popup()
+            self.destroy()
         else:
             print(f"{option} clicked")
 
@@ -167,10 +192,13 @@ class AdminDashboard(ctk.CTk):
             self.sidebar_expanded = False
 
     def create_custom_buttons(self):
+        for widget in self.main_content.winfo_children():
+            widget.destroy()
+
         self.main_content.grid_columnconfigure((0, 1, 2, 3, 4, 5), weight=1)
         self.main_content.grid_rowconfigure((0, 1, 2, 3, 4), weight=1)
 
-        def create_image_button(img_file, text, row, col, colspan, rowspan, w, h, command=None):
+        def create_image_button(img_file, text, row, col, colspan, rowspan, w, h, command):
             try:
                 image = Image.open(IMAGE_PATH / img_file).convert("RGBA")
                 image = ImageOps.fit(image, (w, h), Image.Resampling.LANCZOS)
@@ -203,58 +231,11 @@ class AdminDashboard(ctk.CTk):
             btn.bind("<Enter>", lambda e: btn.configure(image=btn.image_zoom))
             btn.bind("<Leave>", lambda e: btn.configure(image=btn.image_normal))
 
-        create_image_button("recetas.jpg", "📄 Recetas", 0, 0, 3, 1, 900, 180)
-        create_image_button("historial.jpg", "📊 Historial", 0, 3, 3, 1, 900, 180)
-        create_image_button("proyecciones.jpg", "🖼️ Proyecciones", 1, 0, 4, 2, 1200, 360)
-        create_image_button("cuentas.jpg", "👥 Gestión de cuentas", 1, 4, 4, 2, 600, 360)
-        create_image_button("costos.jpg", "💰 Costos", 3, 2, 2, 4, 1200, 360)
-
-    def show_logout_popup(self):
-        popup = tk.Toplevel(self)
-        popup.title("Cerrar sesión")
-        popup.configure(bg="white")
-        popup.resizable(False, False)
-        popup.geometry("370x170")
-
-        popup.update_idletasks()
-        screen_width = popup.winfo_screenwidth()
-        screen_height = popup.winfo_screenheight()
-        x = int((screen_width / 2) - (370 / 2))
-        y = int((screen_height / 2) - (170 / 2))
-        popup.geometry(f"370x170+{x}+{y}")
-        popup.grab_set()
-
-        tk.Label(popup, text="Cerrar sesión", font=("Arial", 16, "bold"),
-                 fg="#D32F2F", bg="white").pack(pady=(15, 0))
-
-        tk.Label(popup, text="¿Estás seguro que quieres cerrar sesión de tu cuenta?",
-                 font=("Arial", 10), bg="white", fg="#666").pack(pady=10)
-
-        btn_frame = tk.Frame(popup, bg="white")
-        btn_frame.pack(pady=10)
-
-        style = {"font": ("Arial", 10, "bold"), "width": 10, "height": 1}
-
-        no_btn = tk.Button(
-            btn_frame, text="No", bg="white", fg="#D32F2F", bd=2, relief="solid",
-            highlightthickness=0, command=popup.destroy, **style
-        )
-        no_btn.pack(side="left", padx=10)
-        no_btn.configure(highlightbackground="#D32F2F")
-
-        yes_btn = tk.Button(
-            btn_frame, text="Sí", bg="#D32F2F", fg="white", bd=0,
-            highlightthickness=0, command=lambda: self.logout(popup), **style
-        )
-        yes_btn.pack(side="left", padx=10)
-
-    def logout(self, popup):
-        popup.destroy()
-        self.destroy()
-
-        from src.Users.Login.view import LoginApp
-        login = LoginApp()  
-        login.mainloop()
+        create_image_button("recetas.jpg", "📄 Recetas", 0, 0, 3, 1, 900, 180, lambda: self.load_view(RecetasAdminView))
+        create_image_button("historial.jpg", "📊 Historial", 0, 3, 3, 1, 900, 180, lambda: self.load_view(ProyeccionesAdminView))
+        create_image_button("proyecciones.jpg", "🖼️ Proyecciones", 1, 0, 4, 2, 1200, 360, lambda: self.load_view(ProyeccionesAdminView))
+        create_image_button("cuentas.jpg", "👥 Gestión de cuentas", 1, 4, 4, 2, 600, 360, lambda: self.load_view(CuentasAdminView))
+        create_image_button("costos.jpg", "💰 Costos", 3, 2, 2, 4, 1200, 360, lambda: self.load_view(CostosAdminView))
 
 def round_rectangle(canvas, x1, y1, x2, y2, radius=25, **kwargs):
     points = [

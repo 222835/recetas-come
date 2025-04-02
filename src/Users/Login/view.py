@@ -26,7 +26,7 @@ class LoginApp(ctk.CTk):
     un formulario de usuario y contraseña, y un botón de inicio. La función login() realiza la autenticación
     y redirige al dashboard según el rol.
     """
-    def __init__(self):
+    def __init__(self, master=None):
         """
         @brief Inicializa la ventana de inicio de sesión.
         @details Configura el título, tamaño de la ventana y genera el fondo con gradiente, además de crear
@@ -199,14 +199,14 @@ class LoginApp(ctk.CTk):
         result = connector.execute_query(query)
 
         if not result:
-            messagebox.showerror("Error", "Usuario no encontrado")
+            messagebox.showerror("Error", "Usuario no encontrado", parent=self)
             self.login_button.configure(state="normal")  
             return
 
         stored_role, stored_password = result[0]
 
         if stored_password != contrasena:
-            messagebox.showerror("Error", "Contraseña incorrecta")
+            messagebox.showerror("Error", "Contraseña incorrecta", parent=self)
             self.login_button.configure(state="normal")
             return
 
@@ -215,11 +215,11 @@ class LoginApp(ctk.CTk):
         elif stored_role.lower() == 'invitado':
             self.user_role = 'invitado'
         else:
-            messagebox.showerror("Error", f"El rol '{stored_role}' no está reconocido.")
+            messagebox.showerror("Error", f"El rol '{stored_role}' no está reconocido.",  parent=self)
             self.login_button.configure(state="normal")
             return
 
-        messagebox.showinfo("Éxito", f"Bienvenido {usuario}. Rol asignado: {self.user_role}")
+        messagebox.showinfo("Éxito", f"Bienvenido {usuario}. Rol asignado: {self.user_role}",  parent=self)
 
         self.destroy()
 
