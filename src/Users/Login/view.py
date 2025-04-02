@@ -18,9 +18,19 @@ from tkinter import messagebox
 ## and handling user authentication. If authentication is successful, the window closes and the corresponding
 ## dashboard (admin or guest) is opened.
 class LoginApp(ctk.CTk):
-    ## @brief Initializes the login window.
-    ## @details Sets title, window size, generates the gradient background, and creates UI widgets.
-    def __init__(self):
+
+    """
+    @brief Clase que representa la ventana de inicio de sesión.
+    @details Esta clase utiliza CustomTkinter para generar la interfaz de login con un fondo con gradiente,
+    un formulario de usuario y contraseña, y un botón de inicio. La función login() realiza la autenticación
+    y redirige al dashboard según el rol.
+    """
+    def __init__(self, master=None):
+        """
+        @brief Inicializa la ventana de inicio de sesión.
+        @details Configura el título, tamaño de la ventana y genera el fondo con gradiente, además de crear
+        los widgets de la interfaz.
+        """
         super().__init__()
         self.title("Login")
         self.geometry("1920x1080")

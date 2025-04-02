@@ -144,6 +144,13 @@ class AdminDashboard(ctk.CTk):
 
         self.create_custom_buttons()
 
+
+    def load_view(self, ViewClass):
+        for widget in self.main_content.winfo_children():
+            widget.destroy()
+        view = ViewClass(self.main_content)
+        view.pack(fill="both", expand=True)
+
     ## @brief Repositions the dropdown menu if visible.
     def reposition_dropdown_if_visible(self, event=None):
         if self.dropdown_visible:
@@ -222,7 +229,7 @@ class AdminDashboard(ctk.CTk):
             btn.image_zoom = zoom
             btn.grid(row=row, column=col, columnspan=colspan, rowspan=rowspan, padx=5, pady=5, sticky="nsew")
             btn.bind("<Enter>", lambda e: btn.configure(image=btn.image_zoom))
-            btn.bind("<Leave>", lambda e: btn.configure(image=btn.image_normal))
+            btn.bind("<Leave>", lambda e: btn.configure(image=btn.image_Anormal))
 
         create_image_button("recetas.jpg", "📄 Recetas", 0, 0, 3, 1, 900, 180)
         create_image_button("historial.jpg", "📊 Historial", 0, 3, 3, 1, 900, 180)
