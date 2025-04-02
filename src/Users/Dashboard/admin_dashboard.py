@@ -237,6 +237,7 @@ class AdminDashboard(ctk.CTk):
         create_image_button("cuentas.jpg", "👥 Gestión de cuentas", 1, 4, 4, 2, 600, 360)
         create_image_button("costos.jpg", "💰 Costos", 3, 2, 2, 4, 1200, 360)
 
+
     ## @brief Shows a popup to confirm logout.
     def show_logout_popup(self):
         popup = tk.Toplevel(self)
