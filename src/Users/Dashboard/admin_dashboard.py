@@ -180,7 +180,7 @@ class AdminDashboard(ctk.CTk):
     ## @brief Handles actions from dropdown menu.
     def handle_option(self, option):
         if option == "Cerrar sesión":
-            self.destroy()
+            self.show_logout_popup()
         else:
             print(f"{option} clicked")
 
@@ -250,8 +250,9 @@ class AdminDashboard(ctk.CTk):
             btn.image_normal = normal
             btn.image_zoom = zoom
             btn.grid(row=row, column=col, columnspan=colspan, rowspan=rowspan, padx=5, pady=5, sticky="nsew")
-            btn.bind("<Enter>", lambda e: btn.configure(image=btn.image_zoom))
-            btn.bind("<Leave>", lambda e: btn.configure(image=btn.image_Anormal))
+            btn.bind("<Enter>", lambda e, b=btn: b.configure(image=b.image_zoom))
+            btn.bind("<Leave>", lambda e, b=btn: b.configure(image=b.image_normal))
+
 
 
         create_image_button("recetas.jpg", "📄 Recetas", 0, 0, 3, 1, 900, 180, lambda: self.load_view(RecetasAdminView))
