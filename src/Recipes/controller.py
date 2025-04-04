@@ -17,20 +17,20 @@ class RecetasController:
         ## All fields are required, and the recipe must have at least one ingredient.
         
         if user_role != 'admin':
-            raise PermissionError("Only administrators can create recipes.")
+            raise PermissionError("Solo los administradores pueden crear recetas.")
         
         ## Validate required fields
         if not nombre_receta or not clasificacion or not periodo or comensales_base <= 0:
-            raise ValueError("Recipe name, classification, period, and base number of servings are required.")
+            raise ValueError("Los campos nombre_receta, clasificacion, periodo y comensales_base son obligatorios y deben ser válidos.")
         
         ## Validate ingredients
         if not ingredientes or len(ingredientes) == 0:
-            raise ValueError("Recipe must contain at least one ingredient.")
+            raise ValueError("La receta debe contener al menos un ingrediente.")
         
         ## Ensure all ingredients have required fields
         for ingrediente in ingredientes:
             if not ingrediente.get('nombre') or not ingrediente.get('cantidad') or not ingrediente.get('unidad_medida'):
-                raise ValueError("Each ingredient must have a name, quantity, and unit of measure.")
+                raise ValueError("Cada ingrediente debe tener un nombre, cantidad y unidad de medida.")
         
         receta = Receta(
             nombre_receta=nombre_receta,
@@ -56,7 +56,7 @@ class RecetasController:
         ## Only admin users are allowed to update recipes.
         
         if user_role != 'admin':
-            raise PermissionError("Only administrators can update recipes.")
+            raise PermissionError("Solo los administradores pueden actualizar recetas.")
         
         receta = session.query(Receta).filter(Receta.numero_receta == numero_receta).first()
         if receta:
@@ -71,10 +71,10 @@ class RecetasController:
             if ingredientes:
                 ## Validate ingredients
                 if not ingredientes or len(ingredientes) == 0:
-                    raise ValueError("Recipe must contain at least one ingredient.")
+                    raise ValueError("La receta debe contener al menos un ingrediente.")
                 for ingrediente in ingredientes:
                     if not ingrediente.get('nombre') or not ingrediente.get('cantidad') or not ingrediente.get('unidad_medida'):
-                        raise ValueError("Each ingredient must have a name, quantity, and unit of measure.")
+                        raise ValueError("Cada ingrediente debe tener un nombre, cantidad y unidad de medida.")
                 receta.ingredientes = ingredientes
             receta.update(session)
         return receta
@@ -86,7 +86,7 @@ class RecetasController:
         ## Only admin users are allowed to delete recipes.
         
         if user_role != 'admin':
-            raise PermissionError("Only administrators can delete recipes.")
+            raise PermissionError("Solo los administradores pueden eliminar recetas.")
         
         receta = session.query(Receta).filter(Receta.numero_receta == numero_receta).first()
         if receta:

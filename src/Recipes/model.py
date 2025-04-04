@@ -7,12 +7,11 @@ from typing import Self
 from sqlalchemy import Column, Integer, String, Text
 from sqlalchemy.orm import sessionmaker, declarative_base
 from sqlalchemy import create_engine
-from src.Users.model import Base
 
-Base = declarative_base()
+Recetas_Base = declarative_base()
 ## @brief Recipes model class, this class is used to represent a recipe in the database
-class Receta(Base): 
-    __tablename__ = "Recetas" 
+class Receta(Recetas_Base): 
+    __tablename__ = "recetas" 
 
     numero_receta = Column(Integer, primary_key=True, autoincrement=True)
     nombre_receta = Column(String(100), nullable=False)
@@ -72,3 +71,12 @@ class Receta(Base):
         ##@brief Delete the recipe from the database
         session.delete(self)
         session.commit()
+
+    ## Add this method to your Receta class in src/Recipes/model.py
+
+def get_ingredientes(self):
+    if not self.ingredientes:
+        return []
+    
+    ## Simple parsing of comma-separated ingredients
+    return [ing.strip() for ing in self.ingredientes.split(',')]

@@ -6,7 +6,7 @@ import os
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from src.Recipes.model import Receta, Base
+from src.Recipes.model import Receta, Recetas_Base
 
 ## @brief Test class for the Receta model, which includes unit tests for creating, reading, updating, and deleting recipes in the database.
 class TestRecetaModel(unittest.TestCase):
@@ -15,7 +15,7 @@ class TestRecetaModel(unittest.TestCase):
     def setUp(self):
         ##Setup: Create an in-memory SQLite database and session for testing.
         self.engine = create_engine('sqlite:///:memory:')
-        Base.metadata.create_all(self.engine)
+        Recetas_Base.metadata.create_all(self.engine)
         self.Session = sessionmaker(bind=self.engine)
         self.session = self.Session()
 
@@ -23,7 +23,7 @@ class TestRecetaModel(unittest.TestCase):
     def tearDown(self):
         ##Teardown: Close the session and drop all tables after each test.
         self.session.close()
-        Base.metadata.drop_all(self.engine)
+        Recetas_Base.metadata.drop_all(self.engine)
         self.engine.dispose()
 
     ## @brief Test creating a new Receta in the database.

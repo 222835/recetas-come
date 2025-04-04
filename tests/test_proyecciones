@@ -1,112 +1,175 @@
 import unittest
+import os
+import sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-import sys
-import os
+from src.Projections.model import Proyecciones_Base, Proyeccion
+from src.Recipes.model import Recetas_Base, Receta
+from src.Projections.controller import ProyeccionController
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
-from src.Projections.model import Base, Proyeccion, ProyeccionRecetas
-from src.Recipes.model import Receta
-from src.Users.model import Usuario
-from Projections.controller import ProyeccionController
-
-## @brief Test class for the ProyeccionController, which includes unit tests for CRUD operations on projections.
-class TestProyeccionController(unittest.TestCase):
-
-    ## @brief Set up the test environment by creating an in-memory SQLite database and session.
+## Test class for ProyeccionController. This class contains unit tests for the ProyeccionController methods.
+class TestProyeccionSimplificado(unittest.TestCase):
+    
+    ## Set up the test environment by creating an in-memory SQLite database and initializing the session.
     def setUp(self):
-        ## Setup: Create an in-memory SQLite database and session for testing.
-        self.engine = create_engine('sqlite:///:memory:')  # Usar base de datos en memoria para pruebas
-        Base.metadata.create_all(self.engine)
+        self.engine = create_engine('sqlite:///:memory:')
+        Recetas_Base.metadata.create_all(self.engine)
+        Proyecciones_Base.metadata.create_all(self.engine) 
         self.Session = sessionmaker(bind=self.engine)
         self.session = self.Session()
-
-        # Crear un usuario y una receta para usar en las pruebas
-        self.usuario = Usuario(numero_usuario=1, nombre="Usuario 1")
-        self.session.add(self.usuario)
+        
+        self.receta1 = Receta(nombre_receta="Pollo al horno", 
+                             clasificacion="Plato principal", 
+                             ingredientes="Pollo, Especias, Aceite",
+                             comensales_base=4,
+                             periodo="Comida")
+        self.receta2 = Receta(nombre_receta="Ensalada César", 
+                             clasificacion="Entrante", 
+                             ingredientes="Lechuga, Pollo, Queso, Aderezo", 
+                             comensales_base=4, 
+                             periodo="Comida")
+        
+        self.session.add(self.receta1)
+        self.session.add(self.receta2)
         self.session.commit()
-
-        self.receta = Receta(numero_receta=1, nombre="Receta 1")
-        self.session.add(self.receta)
-        self.session.commit()
-
-    ## Create the Proyeccion table in the in-memory database.
+        print(f"Recetas creadas con IDs: {self.receta1.numero_receta}, {self.receta2.numero_receta}")
+        
+    
+    ## Tear down the test environment by rolling back any transactions and closing the session.
     def tearDown(self):
-        ## Teardown: Close the session and drop all tables after each test.
+        self.session.rollback()  # Clean any pending transactions
         self.session.close()
-        Base.metadata.drop_all(self.engine)
+        Recetas_Base.metadata.drop_all(self.engine)
+        Proyecciones_Base.metadata.drop_all(self.engine)
+        
+        # Dispose of the engine to close all connections
         self.engine.dispose()
+            
+    ## Test for creating a valid projection. This test will create a projection with two recipes and check if it was created successfully.
+    def test_crear_proyeccion_valida(self):
+        proyeccion = ProyeccionController.create_projection(
+            session=self.session,
+            nombre="Test Proyeccion",
+            periodo="Comida",
+            comensales=100,
+            recetas=[
+                {"id_receta": self.receta1.numero_receta, "porcentaje": 60},
+                {"id_receta": self.receta2.numero_receta, "porcentaje": 40}
+            ]
+        )
+        
+        print(f"Proyección creada: ID={proyeccion.id}, Nombre={proyeccion.nombre}")
+        print(f"Recetas IDs: {proyeccion.recetas_ids}")
+        print(f"Porcentajes: {proyeccion.porcentajes}")
+        
+        self.assertIsNotNone(proyeccion.id)
+        self.assertEqual(proyeccion.recetas_ids, f"{self.receta1.numero_receta},{self.receta2.numero_receta}")
+        self.assertEqual(proyeccion.porcentajes, "60,40")
 
-    ## @brief Test creating a new Proyeccion in the database.
-    def test_create_proyeccion(self):
-        ## Test creating a new Proyeccion.
-        controller = ProyeccionController()
-        recetas = [{'id_receta': 1, 'porcentaje': 50}, {'id_receta': 1, 'porcentaje': 50}]
-        proyeccion = controller.create_projection(self.session, numero_usuario=1, nombre="Proyeccion 1", periodo="2025", comensales=4, recetas=recetas)
+    ## Test for validating the minimum number of recipes. This test will create a projection with only one recipe, which should raise a ValueError.
+    def test_validacion_minimo_recetas(self):
+        try:
+            ProyeccionController.create_projection(
+                session=self.session,
+                nombre="Test",
+                periodo="Comida",
+                comensales=100,
+                recetas=[{"id_receta": self.receta1.numero_receta, "porcentaje": 100}] 
+            )
+            print("ERROR: La proyeccion se creo cuando deberia haber fallado")
+            self.fail("No se lanzo ValueError")
+        except ValueError as e:
+            print(f"Error capturado correctamente: {str(e)}")
+            self.assertIn("al menos", str(e))
+        
+    
+    ## Test for validating the sum of percentages. This test will create a projection with percentages that sum to more than 100%.
+    def test_validacion_suma_porcentajes(self):
+        try:
+            ProyeccionController.create_projection(
+                session=self.session,
+                nombre="Test",
+                periodo="Comida",
+                comensales=100,
+                recetas=[
+                    {"id_receta": self.receta1.numero_receta, "porcentaje": 70},
+                    {"id_receta": self.receta2.numero_receta, "porcentaje": 40}
+                ] 
+            )
+            print("ERROR: La proyeccion se creo cuando deberia haber fallado")
+            self.fail("No se lanzo ValueError")
+        except ValueError as e:
+            print(f"Error capturado correctamente: {str(e)}")
+            self.assertIn("100%", str(e))
 
-        # Print the created proyeccion
-        print(f"Proyeccion creada con ID: {proyeccion.id_proyeccion}, nombre: {proyeccion.nombre}")
+    ## Test for calculating total ingredients based on the projection. This test will create a projection and then calculate the total ingredients needed for that projection.
+    def test_calculo_ingredientes(self):
 
-        ## Assert that the proyeccion was created correctly.
-        self.assertIsNotNone(proyeccion.id_proyeccion)
-        self.assertEqual(proyeccion.nombre, "Proyeccion 1")
-        self.assertEqual(len(proyeccion.recetas), 2)
-        self.assertEqual(proyeccion.recetas[0].id_receta, 1)
-        self.assertEqual(proyeccion.recetas[1].id_receta, 1)
+        proyeccion = ProyeccionController.create_projection(
+            session=self.session,
+            nombre="Test",
+            periodo="Comida",
+            comensales=100,
+            recetas=[
+                {"id_receta": self.receta1.numero_receta, "porcentaje": 60},
+                {"id_receta": self.receta2.numero_receta, "porcentaje": 40}
+            ]
+        )
+        
+        print(f"Proyeccion creada con ID: {proyeccion.id}")
+        
+        ingredientes = ProyeccionController.calculate_total_ingredients(
+            session=self.session,
+            id_proyeccion=proyeccion.id
+        )
+        
+        print(f"Ingredientes calculados: {ingredientes}")
+        
+        self.assertIsInstance(ingredientes, dict)
+        self.assertGreater(len(ingredientes), 0)
 
-    ## @brief Test reading a Proyeccion from the database.
-    def test_read_proyeccion(self):
-        ## Test reading a Proyeccion from the database.
-        controller = ProyeccionController()
-        recetas = [{'id_receta': 1, 'porcentaje': 50}, {'id_receta': 1, 'porcentaje': 50}]
-        proyeccion = controller.create_projection(self.session, numero_usuario=1, nombre="Proyeccion 1", periodo="2025", comensales=4, recetas=recetas)
+        ## Check if the expected ingredients are present in the calculated ingredients    
+        for ingrediente in ["Pollo", "Especias", "Aceite", "Lechuga", "Queso", "Aderezo"]:
+            self.assertIn(ingrediente, ingredientes)
+            print(f"Verificado ingrediente: {ingrediente} = {ingredientes.get(ingrediente)}")
 
-        ## Read the proyeccion from the database
-        fetched_proyeccion = controller.get_projection(self.session, proyeccion.id_proyeccion)
+    ## Update test for the projection. This test will create a projection and then update it with new data.
+    def test_actualizacion_proyeccion(self):
+        proyeccion = ProyeccionController.create_projection(
+            session=self.session,
+            nombre="Original",
+            periodo="Desayuno",
+            comensales=100,
+            recetas=[
+                {"id_receta": self.receta1.numero_receta, "porcentaje": 60},
+                {"id_receta": self.receta2.numero_receta, "porcentaje": 40}
+            ]  
+        )
+        
+        print(f"Proyeccion inicial: ID={proyeccion.id}, Nombre={proyeccion.nombre}, Comensales={proyeccion.comensales}")
+        print(f"Porcentajes iniciales: {proyeccion.porcentajes}")
 
-        # Print the fetched proyeccion
-        print(f"Proyeccion leída con ID: {fetched_proyeccion.id_proyeccion}, nombre: {fetched_proyeccion.nombre}")
-
-        ## Assert that the fetched proyeccion matches the created one.
-        self.assertEqual(fetched_proyeccion.id_proyeccion, proyeccion.id_proyeccion)
-        self.assertEqual(fetched_proyeccion.nombre, "Proyeccion 1")
-
-    ## @brief Test updating a Proyeccion in the database.
-    def test_update_proyeccion(self):
-        ## Test updating a Proyeccion in the database.
-        controller = ProyeccionController()
-        recetas = [{'id_receta': 1, 'porcentaje': 50}, {'id_receta': 1, 'porcentaje': 50}]
-        proyeccion = controller.create_projection(self.session, numero_usuario=1, nombre="Proyeccion 1", periodo="2025", comensales=4, recetas=recetas)
-
-        ## Update the proyeccion's information
-        controller.update_projection(self.session, proyeccion.id_proyeccion, nombre="Proyeccion Actualizada")
-
-        # Fetch the updated proyeccion from the database
-        updated_proyeccion = self.session.query(Proyeccion).filter_by(id_proyeccion=proyeccion.id_proyeccion).first()
-
-        # Print the updated proyeccion
-        print(f"Proyeccion actualizada con ID: {updated_proyeccion.id_proyeccion}, nombre: {updated_proyeccion.nombre}")
-
-        ## Assert that the proyeccion's information was updated correctly.
-        self.assertEqual(updated_proyeccion.nombre, "Proyeccion Actualizada")
-
-    ## @brief Test deleting a Proyeccion from the database.
-    def test_delete_proyeccion(self):
-        ## Test deleting a Proyeccion from the database.
-        controller = ProyeccionController()
-        recetas = [{'id_receta': 1, 'porcentaje': 50}, {'id_receta': 1, 'porcentaje': 50}]
-        proyeccion = controller.create_projection(self.session, numero_usuario=1, nombre="Proyeccion 1", periodo="2025", comensales=4, recetas=recetas)
-
-        ## Delete the proyeccion from the database
-        controller.delete_projection(self.session, proyeccion.id_proyeccion)
-
-        # Print the deleted proyeccion
-        print(f"Proyeccion borrada con ID: {proyeccion.id_proyeccion}")
-
-        ## Assert that the proyeccion was deleted
-        deleted_proyeccion = self.session.query(Proyeccion).filter_by(id_proyeccion=proyeccion.id_proyeccion).first()
-        self.assertIsNone(deleted_proyeccion)
+        ## Update the projection with new data
+        ProyeccionController.update_projection(
+            session=self.session,
+            id_proyeccion=proyeccion.id,
+            nombre="Actualizado",
+            comensales=4,
+            recetas=[
+                {"id_receta": self.receta1.numero_receta, "porcentaje": 70},
+                {"id_receta": self.receta2.numero_receta, "porcentaje": 30}
+            ]
+        )
+        
+        ##Use the new SQLAlchemy syntax to retrieve the updated object
+        actualizada = self.session.get(Proyeccion, proyeccion.id)
+        print(f"Proyeccion actualizada: ID={actualizada.id}, Nombre={actualizada.nombre}, Comensales={actualizada.comensales}")
+        print(f"Porcentajes actualizados: {actualizada.porcentajes}")
+        
+        self.assertEqual(actualizada.nombre, "Actualizado")
+        self.assertEqual(actualizada.comensales, 4)
+        self.assertEqual(actualizada.porcentajes, "70,30")
 
 if __name__ == '__main__':
     unittest.main()
