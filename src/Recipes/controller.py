@@ -9,25 +9,20 @@ from typing import List
 
 class RecetasController:
     
-    ## @brief This method creates a new recipe in the database.
+    ## @brief This method creates a new recipe in the database, this method is static and does not require an instance of the class to be called.
     @staticmethod
     def create_recipe(session: Session, nombre_receta: str, clasificacion: str, periodo: str, comensales_base: int, ingredientes: List[dict], user_role: str) -> Receta:
-        ## Create a new recipe in the database.
-        ## Only admin users are allowed to create recipes. 
-        ## All fields are required, and the recipe must have at least one ingredient.
         
+        ## Create a new recipe in the database.
         if user_role != 'admin':
             raise PermissionError("Solo los administradores pueden crear recetas.")
-        
-        ## Validate required fields
+        ## Validate input parameters
         if not nombre_receta or not clasificacion or not periodo or comensales_base <= 0:
             raise ValueError("Los campos nombre_receta, clasificacion, periodo y comensales_base son obligatorios y deben ser válidos.")
-        
         ## Validate ingredients
         if not ingredientes or len(ingredientes) == 0:
             raise ValueError("La receta debe contener al menos un ingrediente.")
-        
-        ## Ensure all ingredients have required fields
+        ## Validate each ingredient
         for ingrediente in ingredientes:
             if not ingrediente.get('nombre') or not ingrediente.get('cantidad') or not ingrediente.get('unidad_medida'):
                 raise ValueError("Cada ingrediente debe tener un nombre, cantidad y unidad de medida.")
@@ -39,25 +34,22 @@ class RecetasController:
             comensales_base=comensales_base,
             ingredientes=ingredientes
         )
-        receta.create(session)  ## Call the create method from the Receta model
+        receta.create(session)  
         return receta
 
-    ## @brief This method retrieves a recipe by its ID.
+    ## @brief This method retrieves a recipe by its ID. This method is static and does not require an instance of the class to be called.
     @staticmethod
     def get_recipe_by_id(session: Session, numero_receta: int) -> Receta:
-        ## Retrieve a recipe by its ID.
         receta = session.query(Receta).filter(Receta.numero_receta == numero_receta).first()
         return receta
 
-    ## @brief This method retrieves all recipes from the database.
+    ## @brief This method retrieves all recipes from the database. This method is static and does not require an instance of the class to be called.
     @staticmethod
     def update_recipe(session: Session, numero_receta: int, nombre_receta: str = None, clasificacion: str = None, periodo: str = None, comensales_base: int = None, ingredientes: List[dict] = None, user_role: str = None) -> Receta:
-        ## Update an existing recipe. 
-        ## Only admin users are allowed to update recipes.
-        
+        ## Update a recipe in the database.
         if user_role != 'admin':
             raise PermissionError("Solo los administradores pueden actualizar recetas.")
-        
+        ## Validate input parameters
         receta = session.query(Receta).filter(Receta.numero_receta == numero_receta).first()
         if receta:
             if nombre_receta:
@@ -79,15 +71,13 @@ class RecetasController:
             receta.update(session)
         return receta
 
-    ## @brief This method retrieves all recipes from the database.
+    ## @brief This method retrieves all recipes from the database. This method is static and does not require an instance of the class to be called.
     @staticmethod
     def delete_recipe(session: Session, numero_receta: int, user_role: str) -> bool:
-        ## Delete a recipe from the database. 
-        ## Only admin users are allowed to delete recipes.
-        
+        ## Delete a recipe from the database.        
         if user_role != 'admin':
             raise PermissionError("Solo los administradores pueden eliminar recetas.")
-        
+        ## Validate input parameters
         receta = session.query(Receta).filter(Receta.numero_receta == numero_receta).first()
         if receta:
             receta.delete(session)

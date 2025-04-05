@@ -10,7 +10,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from src.Users.Login.controller import LoginController
 from src.Users.model import Usuario
-from src.security.password_utils import Security  # Import Security class
+from src.security.password_utils import Security
 
 ## @brief Test class for the LoginController, which includes unit tests for the login functionality.
 class TestLoginController(unittest.TestCase):
@@ -76,13 +76,13 @@ class TestLoginController(unittest.TestCase):
         mock_session = MagicMock()
         mock_user.get_session.return_value = mock_session
 
-        # Prepare user data
+        ## Prepare user data
         user_data = {"nombre_usuario": "testuser", "contrasenia": "password"}
 
-        # Call the login method
+        ## Call the login method
         result = LoginController.login(user_data)
 
-        # Assert that the login failed because the user was not found
+        ## Assert that the login failed because the user was not found
         self.assertFalse(result)
         mock_user.read_by_username.assert_called_once_with(mock_session, "testuser")
         mock_session.close.assert_called_once()
@@ -91,28 +91,22 @@ class TestLoginController(unittest.TestCase):
     @patch('src.Users.Login.controller.Usuario')
     def test_login_incorrect_password(self, MockUsuario):
         """Test login with an incorrect password."""
-        # Mock the Usuario object and its methods
+        
         mock_user = MagicMock()
         mock_user.read_by_username.return_value = mock_user
-        # mock_user.generate_password.return_value = "incorrect_password"  # No longer needed
         mock_user.contrasenia = "hashed_password"
 
-        # Configure the MockUsuario to return the mock_user
+
         MockUsuario.return_value = mock_user
 
-        # Create a mock session
         mock_session = MagicMock()
         mock_user.get_session.return_value = mock_session
 
-        # Prepare user data
         user_data = {"nombre_usuario": "testuser", "contrasenia": "password"}
 
-        # Call the login method
         with patch('src.security.password_utils.Security.generate_password', return_value="incorrect_password"):
             result = LoginController.login(user_data)
 
-        # Assert that the login failed because the password was incorrect
         self.assertFalse(result)
         mock_user.read_by_username.assert_called_once_with(mock_session, "testuser")
-        # mock_user.generate_password.assert_called_once_with("password")  # No longer needed
         mock_session.close.assert_called_once()

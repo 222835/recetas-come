@@ -7,11 +7,8 @@ from typing import Self
 from sqlalchemy import Column, Integer, String
 from src.Users.model import Base
 
-##@brief Base class for all models
+##@brief Base class for all models, this class is used to represent an ingredient in the database
 class Ingrediente(Base):
-    ##@brief Ingredient model class
-    ##@details This class is used to represent an ingredient in the database
-    
     __tablename__ = "Ingredientes"
 
     id_ingrediente = Column(Integer, primary_key=True, autoincrement=True)
@@ -19,44 +16,28 @@ class Ingrediente(Base):
     clasificacion = Column(String(50))
     unidad_medida = Column(String(20))
 
-    ## @brief Constructor for the ingredient class
+    ##@brief Constructor for the ingredient class, initializes the ingredient with a name, classification, and unit of measurement
     def __init__(self, nombre: str, clasificacion: str | None = None, unidad_medida: str | None = None) -> None:
-        ##@param nombre The name of the ingredient
-        ##@param clasificacion The classification of the ingredient (optional)
-        ##@param unidad_medida The unit of measurement for the ingredient (optional)
-    
         self.nombre = nombre
         self.clasificacion = clasificacion
         self.unidad_medida = unidad_medida
 
-    ##@brief String representation of the ingredient class
+    ##@brief String representation of the ingredient class, this is used for debugging and logging purposes
     def __repr__(self) -> str:
         return f"Ingrediente({self.nombre}, {self.clasificacion}, {self.unidad_medida})"
 
-    ##@brief String representation of the ingredient class for display
+    ##@brief String representation of the ingredient class for display, this is used for debugging and logging purposes
     def create(self, session) -> None:
-        ##@brief Insert a new ingredient into the database
-        ##@param session The SQLAlchemy session
-
         session.add(self)
         session.commit()
 
-    ##@brief Fetch an ingredient from the database by its id
+    ##@brief Fetch an ingredient from the database by its id, this is used for debugging and logging purposes
     def read(self, session) -> Self:
-        ##@brief Fetch an ingredient from the database by its id
-        ##@param session The SQLAlchemy session
-        ##@return The ingredient object
-
         return session.query(Ingrediente).filter(Ingrediente.id_ingrediente == self.id_ingrediente).first()
 
-    ##@brief Fetch all ingredients from the database
+    ##@brief Fetch all ingredients from the database, this is used for debugging and logging purposes
     def update(self, session, nombre: str | None = None, clasificacion: str | None = None, 
                unidad_medida: str | None = None) -> None:
-        ##@brief Update an ingredient's information in the database
-        ##@param session The SQLAlchemy session
-        ##@param nombre The name of the ingredient (optional)
-        ##@param clasificacion The classification of the ingredient (optional)
-        ##@param unidad_medida The unit of measurement (optional)
 
         if nombre:
             self.nombre = nombre
@@ -66,8 +47,7 @@ class Ingrediente(Base):
             self.unidad_medida = unidad_medida
         session.commit()
 
-    ##@brief Delete an ingredient from the database
+    ##@brief Delete an ingredient from the database, this is used for debugging and logging purposes
     def delete(self, session) -> None:
-        ##@param session The SQLAlchemy session
         session.delete(self)
         session.commit()
