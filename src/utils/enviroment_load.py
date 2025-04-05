@@ -1,6 +1,6 @@
 import os
 
-# Load enviroment variables
+## Load enviroment variables
 def load_enviroment():
     with open(".env", "r") as file:
         for line in file:

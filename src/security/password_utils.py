@@ -5,7 +5,9 @@ import sys
 # Add the project root to the sys.path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
+## @brief Security class for password hashing and verification
 class Security:
+    ##@brief Constructor for the Security class
     @staticmethod
     def generate_password(password: str) -> str:
         """@brief Generate a hash for the password
@@ -15,6 +17,7 @@ class Security:
         """
         return hash.scrypt(password.encode(), salt=b'salt', n=2**14, r=8, p=1, dklen=64).hex()
     
+    ##@brief Verify if the provided password matches the stored hash
     @staticmethod
     def verify_password(password: str, hashed_password: str) -> bool:
         """@brief Verify if the provided password matches the stored hash
