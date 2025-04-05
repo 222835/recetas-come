@@ -11,7 +11,8 @@ FONT_PATH = None
 env = {"DB_HOST": os.getenv("DB_HOST"),
     "DB_USER": os.getenv("DB_USER"),
     "DB_PASSWORD": os.getenv("DB_PASSWORD"),
-    "DB_DATABASE": os.getenv("DB_DATABASE")}
+    "DB_DATABASE": os.getenv("DB_DATABASE"),
+    "DB_PORT": os.getenv("DB_PORT") }
 
 
 def init(root_path):
@@ -26,3 +27,4 @@ def init(root_path):
     env["DB_USER"] = os.getenv("DB_USER")
     env["DB_PASSWORD"] = os.getenv("DB_PASSWORD")
     env["DB_DATABASE"] = os.getenv("DB_DATABASE")
+    env["DB_PORT"] = os.getenv("DB_PORT") 
