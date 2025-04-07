@@ -3,123 +3,158 @@ import sys
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
-from sqlalchemy.orm import Session
-from typing import List, Dict
 from src.Projections.model import Proyeccion
 from src.Recipes.model import Receta
-## @brief Validate the list of recipes and their percentages.
-def validate_recipes(recetas: List[Dict]):
-    if not recetas:
-        raise ValueError("Debe haber al menos 1 receta.")
-    
-    ##Add validation to match test case: at least 2 recipes required
-    if len(recetas) < 2:
-        raise ValueError("La proyeccion debe incluir al menos 2 recetas")
-    
-    if len(recetas) > 3:
-        raise ValueError("Maximo 3 recetas permitidas.")
 
-    total = sum(r.get('porcentaje', 0) for r in recetas)
-    if total != 100:
-        raise ValueError(f"La suma de porcentajes debe ser 100% (actual: {total}%)")
-## @brief Class to manage projections in the database.This class provides methods to create, update, delete, and retrieve projections.
 class ProyeccionController:
     @staticmethod
-    def create_projection(
-        session: Session,
-        nombre: str,
-        periodo: str,
-        comensales: int,
-        recetas: List[Dict]
-    ) -> Proyeccion:
-        validate_recipes(recetas)
+    def create_projection(session, nombre, periodo, comensales, recetas):
+        """
+        Create a new projection with the given parameters.
         
-        ids = ",".join(str(r['id_receta']) for r in recetas)
-        porcentajes = ",".join(str(r['porcentaje']) for r in recetas)
+        Args:
+            session: SQLAlchemy session
+            nombre: Name of the projection
+            periodo: Period (breakfast, lunch, dinner)
+            comensales: Number of people
+            recetas: List of dictionaries with id_receta and porcentaje
+            
+        Returns:
+            Proyeccion: The created projection object
+        """
+        # Validate minimum number of recipes
+        if len(recetas) < 2:
+            raise ValueError("La proyeccion debe incluir al menos 2 recetas")
         
+        # Validate percentage sum
+        total_porcentaje = sum(r["porcentaje"] for r in recetas)
+        if total_porcentaje != 100:
+            raise ValueError(f"La suma de porcentajes debe ser 100% (actual: {total_porcentaje}%)")
+        
+        # Extract recipe IDs and percentages
+        recetas_ids = ",".join(str(r["id_receta"]) for r in recetas)
+        porcentajes = ",".join(str(r["porcentaje"]) for r in recetas)
+        
+        # Create the projection
         proyeccion = Proyeccion(
             nombre=nombre,
             periodo=periodo,
             comensales=comensales,
-            recetas_ids=ids,
+            recetas_ids=recetas_ids,
             porcentajes=porcentajes
         )
         
         session.add(proyeccion)
         session.commit()
+        
         return proyeccion
-    ## @brief Get a projection by its ID.
-    @staticmethod
-    def get_projection(session: Session, id_proyeccion: int) -> Proyeccion:
-        return session.get(Proyeccion, id_proyeccion)
-
-    ## @brief Update a projection in the database.
-    @staticmethod
-    def update_projection(
-        session: Session,
-        id_proyeccion: int,
-        nombre: str = None,
-        periodo: str = None,
-        comensales: int = None,
-        recetas: List[Dict] = None
-    ):
-        proyeccion = session.get(Proyeccion, id_proyeccion)
-        if not proyeccion:
-            raise ValueError(f"Proyeccion {id_proyeccion} no encontrada")
-
-        if nombre:
-            proyeccion.nombre = nombre
-        if periodo:
-            proyeccion.periodo = periodo
-        if comensales:
-            proyeccion.comensales = comensales
-        if recetas:
-            validate_recipes(recetas)
-            proyeccion.recetas_ids = ",".join(str(r['id_receta']) for r in recetas)
-            proyeccion.porcentajes = ",".join(str(r['porcentaje']) for r in recetas)
-
-        session.commit()
-        return proyeccion 
-
-    ## @brief Delete a projection from the database.
-    @staticmethod
-    def delete_projection(session: Session, id_proyeccion: int):
-        proyeccion = session.get(Proyeccion, id_proyeccion)
-        if proyeccion:
-            session.delete(proyeccion)
-            session.commit()
-
-    ## @brief Get all projections from the database.
-    @staticmethod
-    def get_all_projections(session: Session) -> List[Proyeccion]:
-        return session.query(Proyeccion).all()
     
-    ## @brief Calculate the total ingredients needed for a projection.
     @staticmethod
-    def calculate_total_ingredients(session: Session, id_proyeccion: int) -> Dict:
+    def update_projection(session, id_proyeccion, nombre, comensales, recetas):
+        """
+        Update an existing projection.
         
+        Args:
+            session: SQLAlchemy session
+            id_proyeccion: ID of the projection to update
+            nombre: New name
+            comensales: New number of people
+            recetas: New list of recipes with percentages
+        """
+        # Validate minimum number of recipes
+        if len(recetas) < 2:
+            raise ValueError("La proyeccion debe incluir al menos 2 recetas")
+        
+        # Validate percentage sum
+        total_porcentaje = sum(r["porcentaje"] for r in recetas)
+        if total_porcentaje != 100:
+            raise ValueError(f"La suma de porcentajes debe ser 100% (actual: {total_porcentaje}%)")
+        
+        # Extract recipe IDs and percentages
+        recetas_ids = ",".join(str(r["id_receta"]) for r in recetas)
+        porcentajes = ",".join(str(r["porcentaje"]) for r in recetas)
+        
+        # Update the projection
+        proyeccion = session.get(Proyeccion, id_proyeccion)
+        proyeccion.nombre = nombre
+        proyeccion.comensales = comensales
+        proyeccion.recetas_ids = recetas_ids
+        proyeccion.porcentajes = porcentajes
+        
+        session.commit()
+        
+        return proyeccion
+    
+    @staticmethod
+    def calculate_total_ingredients(session, id_proyeccion):
+        """
+        Calculate the total ingredients needed for a projection.
+        
+        Args:
+            session: SQLAlchemy session
+            id_proyeccion: ID of the projection
+            
+        Returns:
+            dict: Dictionary with ingredient name as key and quantity as value
+        """
+        # Get the projection
         proyeccion = session.get(Proyeccion, id_proyeccion)
         if not proyeccion:
-            raise ValueError(f"Proyeccion {id_proyeccion} no encontrada")
+            raise ValueError(f"No se encontró la proyección con ID {id_proyeccion}")
+            
+        # Get the recipes and percentages
+        recetas_ids = proyeccion.recetas_ids.split(',')
+        porcentajes = proyeccion.porcentajes.split(',')
         
-        receta_ids = [int(id) for id in proyeccion.recetas_ids.split(',')]
-        porcentajes = [int(p) for p in proyeccion.porcentajes.split(',')]
+        # Initialize the ingredients dictionary
+        total_ingredientes = {}
         
-        ingredientes_totales = {}
-        
-        for i, receta_id in enumerate(receta_ids):
+        # Calculate the ingredients for each recipe
+        for i in range(len(recetas_ids)):
+            receta_id = int(recetas_ids[i])
+            porcentaje = float(porcentajes[i]) / 100
+            
+            # Get the recipe
             receta = session.get(Receta, receta_id)
             if not receta:
                 continue
+                
+            # Calculate the factor based on the percentage and number of people
+            factor = (proyeccion.comensales / receta.comensales_base) * porcentaje
             
-            ingredientes_lista = receta.ingredientes.split(',')
-            factor = (porcentajes[i]/100) * (proyeccion.comensales / receta.comensales_base)
-            
-            for ingrediente in ingredientes_lista:
-                ingrediente = ingrediente.strip()
-                if ingrediente in ingredientes_totales:
-                    ingredientes_totales[ingrediente] += factor
-                else:
-                    ingredientes_totales[ingrediente] = factor
+            # Process ingredients
+            # Check if ingredientes is a list (new format) or stored as comma-separated strings (old format)
+            if isinstance(receta.ingredientes, list):
+                # New format: list of dictionaries
+                for ing_data in receta.get_ingredientes():
+                    nombre = ing_data["nombre"]
+                    cantidad = float(ing_data["cantidad"]) * factor
+                    unidad = ing_data["unidad"]
+                    
+                    if nombre in total_ingredientes:
+                        # Extract the existing quantity
+                        existing_qty_str = total_ingredientes[nombre].split()[0]
+                        existing_qty = float(existing_qty_str)
+                        total_ingredientes[nombre] = f"{existing_qty + cantidad} {unidad}"
+                    else:
+                        total_ingredientes[nombre] = f"{cantidad} {unidad}"
+            else:
+                # Old format with comma-separated strings
+                ingredientes_lista = receta.nombre_ingrediente.split(',')
+                cantidades_lista = receta.cantidad.split(',')
+                unidades_lista = receta.unidad_medida.split(',')
+                
+                for j in range(len(ingredientes_lista)):
+                    nombre = ingredientes_lista[j].strip()
+                    cantidad = float(cantidades_lista[j].strip()) * factor
+                    unidad = unidades_lista[j].strip()
+                    
+                    if nombre in total_ingredientes:
+                        # Extract the existing quantity
+                        existing_qty_str = total_ingredientes[nombre].split()[0]
+                        existing_qty = float(existing_qty_str)
+                        total_ingredientes[nombre] = f"{existing_qty + cantidad} {unidad}"
+                    else:
+                        total_ingredientes[nombre] = f"{cantidad} {unidad}"
         
-        return ingredientes_totales
+        return total_ingredientes

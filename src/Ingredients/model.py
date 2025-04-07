@@ -5,10 +5,12 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '.
 
 from typing import Self
 from sqlalchemy import Column, Integer, String
-from src.Users.model import Base
+from sqlalchemy.orm import declarative_base
+
+Base_ingrediente = declarative_base()
 
 ##@brief Base class for all models, this class is used to represent an ingredient in the database
-class Ingrediente(Base):
+class Ingrediente(Base_ingrediente):
     __tablename__ = "Ingredientes"
 
     id_ingrediente = Column(Integer, primary_key=True, autoincrement=True)

@@ -6,7 +6,7 @@ import os
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from src.Ingredients.model import Ingrediente, Base
+from src.Ingredients.model import Ingrediente, Base_ingrediente
 
 ## @brief Test class for the Ingrediente model, this class is used to test the Ingrediente model
 class TestIngredienteModel(unittest.TestCase):
@@ -15,7 +15,7 @@ class TestIngredienteModel(unittest.TestCase):
     def setUp(self):
         ##Setup: Create an in-memory SQLite database and session for testing.
         self.engine = create_engine('sqlite:///:memory:')
-        Base.metadata.create_all(self.engine)
+        Base_ingrediente.metadata.create_all(self.engine)
         self.Session = sessionmaker(bind=self.engine)
         self.session = self.Session()
 
@@ -23,7 +23,7 @@ class TestIngredienteModel(unittest.TestCase):
     def tearDown(self):
         ##Teardown: Close the session and drop all tables after each test.
         self.session.close()
-        Base.metadata.drop_all(self.engine)
+        Base_ingrediente.metadata.drop_all(self.engine)
         self.engine.dispose()
 
     ## @brief Test creating an Ingrediente, this method is used to test the creation of an Ingrediente
