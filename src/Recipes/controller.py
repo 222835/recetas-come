@@ -9,11 +9,10 @@ from typing import List
 
 class RecetasController:
     
-    ## @brief This method creates a new recipe in the database, this method is static and does not require an instance of the class to be called.
+    ## @brief Create a new recipe in the database.
     @staticmethod
     def create_recipe(session: Session, nombre_receta: str, clasificacion: str, periodo: str, comensales_base: int, ingredientes: List[dict], user_role: str) -> Receta:
-        
-        ## Create a new recipe in the database.
+
         if user_role != 'admin':
             raise PermissionError("Solo los administradores pueden crear recetas.")
         ## Validate input parameters
@@ -37,16 +36,13 @@ class RecetasController:
         receta.create(session)  
         return receta
 
-    ## @brief This method retrieves a recipe by its ID. This method is static and does not require an instance of the class to be called.
-    @staticmethod
+    ## @brief Retrieve a recipe by its ID.
     def get_recipe_by_id(session: Session, numero_receta: int) -> Receta:
         receta = session.query(Receta).filter(Receta.numero_receta == numero_receta).first()
         return receta
 
-    ## @brief This method retrieves all recipes from the database. This method is static and does not require an instance of the class to be called.
-    @staticmethod
+    ## @brief Update a recipe in the database.
     def update_recipe(session: Session, numero_receta: int, nombre_receta: str = None, clasificacion: str = None, periodo: str = None, comensales_base: int = None, ingredientes: List[dict] = None, user_role: str = None) -> Receta:
-        ## Update a recipe in the database.
         if user_role != 'admin':
             raise PermissionError("Solo los administradores pueden actualizar recetas.")
         ## Validate input parameters
@@ -71,13 +67,12 @@ class RecetasController:
             receta.update(session)
         return receta
 
-    ## @brief This method retrieves all recipes from the database. This method is static and does not require an instance of the class to be called.
+    ## @brief Delete a recipe from the database.
     @staticmethod
-    def delete_recipe(session: Session, numero_receta: int, user_role: str) -> bool:
-        ## Delete a recipe from the database.        
+    def delete_recipe(session: Session, numero_receta: int, user_role: str) -> bool:  
+        ## Validate input parameters
         if user_role != 'admin':
             raise PermissionError("Solo los administradores pueden eliminar recetas.")
-        ## Validate input parameters
         receta = session.query(Receta).filter(Receta.numero_receta == numero_receta).first()
         if receta:
             receta.delete(session)

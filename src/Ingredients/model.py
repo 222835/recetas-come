@@ -28,16 +28,16 @@ class Ingrediente(Base_ingrediente):
     def __repr__(self) -> str:
         return f"Ingrediente({self.nombre}, {self.clasificacion}, {self.unidad_medida})"
 
-    ##@brief String representation of the ingredient class for display, this is used for debugging and logging purposes
+    ##@brief Create an ingredient in database.
     def create(self, session) -> None:
         session.add(self)
         session.commit()
 
-    ##@brief Fetch an ingredient from the database by its id, this is used for debugging and logging purposes
+    ##@brief Fetch an ingredient from the database by its id.
     def read(self, session) -> Self:
         return session.query(Ingrediente).filter(Ingrediente.id_ingrediente == self.id_ingrediente).first()
 
-    ##@brief Fetch all ingredients from the database, this is used for debugging and logging purposes
+    ##@brief Update an ingredient in database.
     def update(self, session, nombre: str | None = None, clasificacion: str | None = None, 
                unidad_medida: str | None = None) -> None:
 
@@ -49,7 +49,7 @@ class Ingrediente(Base_ingrediente):
             self.unidad_medida = unidad_medida
         session.commit()
 
-    ##@brief Delete an ingredient from the database, this is used for debugging and logging purposes
+    ##@brief Delete an ingredient from the database.
     def delete(self, session) -> None:
         session.delete(self)
         session.commit()
