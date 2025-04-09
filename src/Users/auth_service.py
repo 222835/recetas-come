@@ -1,9 +1,16 @@
+import os
+import sys
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
 from sqlalchemy.orm import Session
 from src.Users.model import Usuario
 from src.security.password_utils import Security
 from typing import Optional
 
+## @brief AuthService class, this class is used to handle the authentication process of the user
 class AuthService:
+
+    ## @brief Constructor of the class
     @staticmethod
     def authenticate(session: Session, username: str, password: str) -> Optional[Usuario]:
         """

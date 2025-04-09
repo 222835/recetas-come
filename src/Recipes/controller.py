@@ -9,27 +9,22 @@ from typing import List
 
 class RecetasController:
     
+    ## @brief Create a new recipe in the database.
     @staticmethod
     def create_recipe(session: Session, nombre_receta: str, clasificacion: str, periodo: str, comensales_base: int, ingredientes: List[dict], user_role: str) -> Receta:
-        ## Create a new recipe in the database.
-        ## Only admin users are allowed to create recipes. 
-        ## All fields are required, and the recipe must have at least one ingredient.
-        
+
         if user_role != 'admin':
-            raise PermissionError("Only administrators can create recipes.")
-        
-        ## Validate required fields
+            raise PermissionError("Solo los administradores pueden crear recetas.")
+        ## Validate input parameters
         if not nombre_receta or not clasificacion or not periodo or comensales_base <= 0:
-            raise ValueError("Recipe name, classification, period, and base number of servings are required.")
-        
+            raise ValueError("Los campos nombre_receta, clasificacion, periodo y comensales_base son obligatorios y deben ser válidos.")
         ## Validate ingredients
         if not ingredientes or len(ingredientes) == 0:
-            raise ValueError("Recipe must contain at least one ingredient.")
-        
-        ## Ensure all ingredients have required fields
+            raise ValueError("La receta debe contener al menos un ingrediente.")
+        ## Validate each ingredient
         for ingrediente in ingredientes:
             if not ingrediente.get('nombre') or not ingrediente.get('cantidad') or not ingrediente.get('unidad_medida'):
-                raise ValueError("Each ingredient must have a name, quantity, and unit of measure.")
+                raise ValueError("Cada ingrediente debe tener un nombre, cantidad y unidad de medida.")
         
         receta = Receta(
             nombre_receta=nombre_receta,
@@ -38,23 +33,19 @@ class RecetasController:
             comensales_base=comensales_base,
             ingredientes=ingredientes
         )
-        receta.create(session)  ## Call the create method from the Receta model
+        receta.create(session)  
         return receta
 
-    @staticmethod
+    ## @brief Retrieve a recipe by its ID.
     def get_recipe_by_id(session: Session, numero_receta: int) -> Receta:
-        ## Retrieve a recipe by its ID.
         receta = session.query(Receta).filter(Receta.numero_receta == numero_receta).first()
         return receta
 
-    @staticmethod
+    ## @brief Update a recipe in the database.
     def update_recipe(session: Session, numero_receta: int, nombre_receta: str = None, clasificacion: str = None, periodo: str = None, comensales_base: int = None, ingredientes: List[dict] = None, user_role: str = None) -> Receta:
-        ## Update an existing recipe. 
-        ## Only admin users are allowed to update recipes.
-        
         if user_role != 'admin':
-            raise PermissionError("Only administrators can update recipes.")
-        
+            raise PermissionError("Solo los administradores pueden actualizar recetas.")
+        ## Validate input parameters
         receta = session.query(Receta).filter(Receta.numero_receta == numero_receta).first()
         if receta:
             if nombre_receta:
@@ -68,22 +59,20 @@ class RecetasController:
             if ingredientes:
                 ## Validate ingredients
                 if not ingredientes or len(ingredientes) == 0:
-                    raise ValueError("Recipe must contain at least one ingredient.")
+                    raise ValueError("La receta debe contener al menos un ingrediente.")
                 for ingrediente in ingredientes:
                     if not ingrediente.get('nombre') or not ingrediente.get('cantidad') or not ingrediente.get('unidad_medida'):
-                        raise ValueError("Each ingredient must have a name, quantity, and unit of measure.")
+                        raise ValueError("Cada ingrediente debe tener un nombre, cantidad y unidad de medida.")
                 receta.ingredientes = ingredientes
             receta.update(session)
         return receta
 
+    ## @brief Delete a recipe from the database.
     @staticmethod
-    def delete_recipe(session: Session, numero_receta: int, user_role: str) -> bool:
-        ## Delete a recipe from the database. 
-        ## Only admin users are allowed to delete recipes.
-        
+    def delete_recipe(session: Session, numero_receta: int, user_role: str) -> bool:  
+        ## Validate input parameters
         if user_role != 'admin':
-            raise PermissionError("Only administrators can delete recipes.")
-        
+            raise PermissionError("Solo los administradores pueden eliminar recetas.")
         receta = session.query(Receta).filter(Receta.numero_receta == numero_receta).first()
         if receta:
             receta.delete(session)
