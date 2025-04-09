@@ -13,10 +13,17 @@ from src.Projections.proyecciones_admin import ProyeccionesAdminView
 from src.Users.cuentas import CuentasAdminView
 from src.Costs.costos import CostosAdminView
 from src.Projections.historial import HistorialAdminView
+import tkinter.font as tkfont
+import os
+import ctypes
+import tkinter.font as tkfont
+
+
 
 ## @brief Set global appearance and theme for CustomTkinter.
 ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("dark-blue")
+
 
 BASE_DIR = Path(__file__).resolve().parent
 IMAGE_PATH = BASE_DIR.parents[2] / "res" / "images"
@@ -42,6 +49,13 @@ class AdminDashboard(ctk.CTk):
         self.title("Dashboard Administrador")
         self.geometry("1920x1080")
         self.configure(fg_color="#1a1a22")
+
+        font_path = BASE_DIR.parents[2] / "res" / "fonts" / "PortLligatSlab-Regular.ttf"
+        if os.name == "nt":
+            ctypes.windll.gdi32.AddFontResourceW(str(font_path))
+
+        self.custom_font = ctk.CTkFont(family="Port Lligat Slab", size=25)
+        self.active_sidebar_button = None
 
         self.navbar = ctk.CTkFrame(self, height=80, fg_color="#B81919", corner_radius=0)
         self.navbar.pack(side="top", fill="x")
@@ -87,7 +101,7 @@ class AdminDashboard(ctk.CTk):
                 text=option,
                 bg="#3e394d",
                 fg="white",
-                font=("Arial", 12, "bold"),
+                font=self.custom_font,
                 activebackground="#681a1a",
                 activeforeground="white",
                 relief="flat",
@@ -120,7 +134,7 @@ class AdminDashboard(ctk.CTk):
 
         self.sidebar_expanded = False
         self.sidebar_frame = ctk.CTkFrame(self.main_container, width=430, fg_color="#1a1a22", corner_radius=0)
-        ctk.CTkLabel(self.sidebar_frame, text="", height=85).pack()
+        ctk.CTkLabel(self.sidebar_frame, text="", height=30).pack()
         self.sidebar_frame.pack(side="left", fill="y")
         self.sidebar_frame.bind("<Enter>", self.expand_sidebar)
         self.sidebar_frame.bind("<Leave>", self.collapse_sidebar)
@@ -146,12 +160,12 @@ class AdminDashboard(ctk.CTk):
                 print(f"Error al cargar {icon_file}")
                 icon_img = None
 
-            icon_label = ctk.CTkLabel(frame, image=icon_img, text="", width=40)
+            icon_label = ctk.CTkLabel(frame, image=icon_img, text="", width=40, height=60, corner_radius=15, fg_color="#681a1a" if name == "Inicio" else "transparent")
             icon_label.pack(side="left", padx=20, pady=5)
             icon_label.bind("<Enter>", self.expand_sidebar)
             icon_label.bind("<Button-1>", lambda e, cmd=command: cmd())
 
-            text_label = ctk.CTkLabel(frame, text=name, text_color="white", font=("Arial", 22))
+            text_label = ctk.CTkLabel(frame, text=name, text_color="white", font=self.custom_font)
             text_label.pack(side="left", padx=5)
             text_label.pack_forget()
             text_label.bind("<Button-1>", lambda e, cmd=command: cmd())
@@ -159,7 +173,7 @@ class AdminDashboard(ctk.CTk):
             self.sidebar_buttons.append((icon_label, text_label))
 
         self.main_content = ctk.CTkFrame(self.main_container, fg_color="#1a1a22")
-        self.main_content.pack(side="left", fill="both", expand=True, padx=0, pady=0)
+        self.main_content.pack(side="left", fill="both", expand=True, padx=(30, 0), pady=(20, 0))
 
         self.create_custom_buttons()
 
@@ -217,8 +231,8 @@ class AdminDashboard(ctk.CTk):
         for widget in self.main_content.winfo_children():
             widget.destroy()
 
-        self.main_content.grid_columnconfigure((0, 1, 2, 3, 4, 5), weight=1)
-        self.main_content.grid_rowconfigure((0, 1, 2, 3, 4), weight=1)
+        self.main_content.grid_columnconfigure((0, 1, 2, 3, 4, 5), weight=0)
+        self.main_content.grid_rowconfigure((0, 1, 2, 3, 4), weight=0)
 
         def create_image_button(img_file, text, row, col, colspan, rowspan, w, h, command):
             try:
@@ -236,10 +250,10 @@ class AdminDashboard(ctk.CTk):
             btn = ctk.CTkButton(
                 self.main_content,
                 image=normal,
-                text=text,
-                font=("Arial Bold", 20),
+                text="",
+                font=self.custom_font,
                 text_color="white",
-                fg_color="transparent",
+                fg_color="#1a1a22",
                 hover_color="#1a1a22",
                 compound="top",
                 corner_radius=20,
@@ -249,18 +263,15 @@ class AdminDashboard(ctk.CTk):
             )
             btn.image_normal = normal
             btn.image_zoom = zoom
-            btn.grid(row=row, column=col, columnspan=colspan, rowspan=rowspan, padx=5, pady=5, sticky="nsew")
+            btn.grid(row=row, column=col, columnspan=colspan, rowspan=rowspan, padx=0, pady=5, sticky="nsew")
             btn.bind("<Enter>", lambda e, b=btn: b.configure(image=b.image_zoom))
             btn.bind("<Leave>", lambda e, b=btn: b.configure(image=b.image_normal))
 
-
-
-        create_image_button("recetas.jpg", "📄 Recetas", 0, 0, 3, 1, 900, 180, lambda: self.load_view(RecetasAdminView))
-        create_image_button("historial.jpg", "📊 Historial", 0, 3, 3, 1, 900, 180, lambda: self.load_view(ProyeccionesAdminView))
-        create_image_button("proyecciones.jpg", "🖼️ Proyecciones", 1, 0, 4, 2, 1200, 360, lambda: self.load_view(ProyeccionesAdminView))
-        create_image_button("cuentas.jpg", "👥 Gestión de cuentas", 1, 4, 4, 2, 600, 360, lambda: self.load_view(CuentasAdminView))
-        create_image_button("costos.jpg", "💰 Costos", 3, 2, 2, 4, 1200, 360, lambda: self.load_view(CostosAdminView))
-
+        create_image_button("recetas0.jpg", "", 0, 0, 2, 1, 500, 140, lambda: self.load_view(RecetasAdminView))
+        create_image_button("historial1.jpg", "", 0, 2, 2, 1, 550, 140, lambda: self.load_view(HistorialAdminView))
+        create_image_button("proyecciones1.jpg", "", 1, 0, 3, 1, 700, 190, lambda: self.load_view(ProyeccionesAdminView))
+        create_image_button("cuentas0.jpg", "", 1, 3, 2, 4, 350,400, lambda: self.load_view(CuentasAdminView))
+        create_image_button("costos1.jpg", "", 2, 0, 3, 1, 700, 190, lambda: self.load_view(CostosAdminView))
 
     ## @brief Shows a popup to confirm logout.
     def show_logout_popup(self):
