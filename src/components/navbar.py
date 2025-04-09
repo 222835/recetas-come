@@ -11,7 +11,7 @@ class Navbar(ctk.CTkFrame):
         logo_path = os.path.join("res", "images", "come.webp")
         if os.path.exists(logo_path):
             self.logo_image = Image.open(logo_path)
-            self.logo_image = self.logo_image.resize((40, 40), Image.ANTIALIAS) 
+            self.logo_image = self.logo_image.resize((40, 40), Image.Resampling.LANCZOS)
             self.logo_photo = ImageTk.PhotoImage(self.logo_image)
             self.logo = ctk.CTkLabel(self, image=self.logo_photo, text="")
             self.logo.pack(side="left", padx=20, pady=5)

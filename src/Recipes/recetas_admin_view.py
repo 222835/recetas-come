@@ -1,81 +1,91 @@
 import customtkinter as ctk
-from src.components.navbar import Navbar
-from src.components.sidebar import Sidebar
+from tkinter import ttk, messagebox
+from src.Recipes.nueva_receta_admin import NuevaRecetaView
+from PIL import Image, ImageTk
 
 class RecetasAdminView(ctk.CTkFrame):
     def __init__(self, master, **kwargs):
         super().__init__(master, **kwargs)
-        self.configure(fg_color="#ECEFF4")  # Fondo claro
+        self.configure(fg_color="#ECEFF4")
 
-        # Navbar
-        self.navbar = Navbar(self)
-        self.navbar.pack(side="top", fill="x")
+        self.title = ctk.CTkLabel(self, text="Recetas", font=("Arial", 28, "bold"), text_color="#B81919")
+        self.title.pack(anchor="nw", padx=30, pady=(30, 10))
 
-        # Sidebar
-        self.sidebar = Sidebar(self)
-        self.sidebar.pack(side="left", fill="y")
+        self.agregar_btn = ctk.CTkButton(self, text="🧾 Agregar nueva receta", fg_color="#B81919", hover_color="#a01515", width=180, command=self.abrir_vista_nueva_receta)
+        self.agregar_btn.pack(anchor="ne", padx=30, pady=(0, 10))
 
-        # Contenido principal
-        self.content_frame = ctk.CTkFrame(self, fg_color="transparent")
-        self.content_frame.pack(fill="both", expand=True, padx=20, pady=20)
+        self.search_frame = ctk.CTkFrame(self, fg_color="transparent")
+        self.search_frame.pack(fill="x", padx=30, pady=(5, 10))
 
-        # Título de la vista
-        self.title_label = ctk.CTkLabel(self.content_frame, text="Administración de Recetas", font=("Arial", 24, "bold"))
-        self.title_label.pack(pady=10)
+        self.buscar_entry = ctk.CTkEntry(self.search_frame, placeholder_text="🔍 Buscar receta", width=300)
+        self.buscar_entry.grid(row=0, column=0, padx=5, pady=5)
 
-        # Tabla de recetas (simulada con un Treeview)
-        self.tree = ctk.CTkTreeview(self.content_frame, columns=("Nombre", "Ingredientes", "Cantidad", "Unidad", "Comensales", "Tiempo", "Categoría"), show="headings")
-        self.tree.heading("Nombre", text="Nombre")
-        self.tree.heading("Ingredientes", text="Ingredientes")
-        self.tree.heading("Cantidad", text="Cantidad")
-        self.tree.heading("Unidad", text="Unidad")
-        self.tree.heading("Comensales", text="Comensales")
-        self.tree.heading("Tiempo", text="Tiempo")
-        self.tree.heading("Categoría", text="Categoría")
-        self.tree.pack(fill="both", expand=True, pady=10)
+        self.filtro_tiempo = ctk.CTkComboBox(self.search_frame, values=["Todos", "Desayuno", "Comida"], width=150)
+        self.filtro_tiempo.grid(row=0, column=1, padx=5)
 
-        # Agregar datos de ejemplo (simulados)
-        self.tree.insert("", "end", values=("ARROZ BLANCO", "ARROZ, ACEITE", "3", "KG", "4", "30 min", "GUARNICION"))
-        self.tree.insert("", "end", values=("PASTA", "PASTA, SALSA", "2", "KG", "6", "20 min", "PLATO PRINCIPAL"))
+        self.filtro_categoria = ctk.CTkComboBox(self.search_frame, values=["Todos", "Guarnicion", "Guisados", "Antojos"], width=150)
+        self.filtro_categoria.grid(row=0, column=2, padx=5)
 
-        # Formulario para agregar nueva receta
-        self.form_frame = ctk.CTkFrame(self.content_frame, fg_color="transparent")
-        self.form_frame.pack(fill="x", pady=20)
+        # Tabla con columna de acciones
+        columnas = ("Nombre", "Ingredientes", "Cantidad", "Unidad", "Comensales", "Tiempo", "Categoría", "Acciones")
+        self.tree = ttk.Treeview(self, columns=columnas, show="headings")
 
-        self.nombre_label = ctk.CTkLabel(self.form_frame, text="Nombre:")
-        self.nombre_label.grid(row=0, column=0, padx=5, pady=5)
-        self.nombre_entry = ctk.CTkEntry(self.form_frame, width=200)
-        self.nombre_entry.grid(row=0, column=1, padx=5, pady=5)
+        for col in columnas:
+            self.tree.heading(col, text=col)
+            ancho = 80 if col == "Acciones" else 120
+            self.tree.column(col, anchor="center", width=ancho)
 
-        self.ingredientes_label = ctk.CTkLabel(self.form_frame, text="Ingredientes:")
-        self.ingredientes_label.grid(row=1, column=0, padx=5, pady=5)
-        self.ingredientes_entry = ctk.CTkEntry(self.form_frame, width=200)
-        self.ingredientes_entry.grid(row=1, column=1, padx=5, pady=5)
+        self.tree.pack(fill="both", expand=True, padx=30, pady=10)
+        self.tree.bind("<ButtonRelease-1>", self.manejar_accion)
 
-        self.cantidad_label = ctk.CTkLabel(self.form_frame, text="Cantidad:")
-        self.cantidad_label.grid(row=2, column=0, padx=5, pady=5)
-        self.cantidad_entry = ctk.CTkEntry(self.form_frame, width=200)
-        self.cantidad_entry.grid(row=2, column=1, padx=5, pady=5)
+        self.cargar_recetas()
 
-        self.unidad_label = ctk.CTkLabel(self.form_frame, text="Unidad:")
-        self.unidad_label.grid(row=3, column=0, padx=5, pady=5)
-        self.unidad_entry = ctk.CTkEntry(self.form_frame, width=200)
-        self.unidad_entry.grid(row=3, column=1, padx=5, pady=5)
+    def cargar_recetas(self):
+        recetas = []  # Aquí va tu consulta a la base de datos real
 
-        self.agregar_button = ctk.CTkButton(self.form_frame, text="Agregar Receta", fg_color="#4C566A", hover_color="#434C5E", command=self.agregar_receta)
-        self.agregar_button.grid(row=4, column=0, columnspan=2, pady=10)
+        for row in self.tree.get_children():
+            self.tree.delete(row)
 
-    def agregar_receta(self):
-        # Obtener los valores del formulario
-        nombre = self.nombre_entry.get()
-        ingredientes = self.ingredientes_entry.get()
-        cantidad = self.cantidad_entry.get()
-        unidad = self.unidad_entry.get()
+        if not recetas:
+            self.tree.insert("", "end", values=("No hay recetas guardadas", "", "", "", "", "", "", ""))
+            return
 
-        # Agregar la nueva receta a la tabla
-        if nombre and ingredientes and cantidad and unidad:
-            self.tree.insert("", "end", values=(nombre, ingredientes, cantidad, unidad, "", "", ""))
-            self.nombre_entry.delete(0, "end")
-            self.ingredientes_entry.delete(0, "end")
-            self.cantidad_entry.delete(0, "end")
-            self.unidad_entry.delete(0, "end")
+        for receta in recetas:
+            # receta debe ser una tupla con los 7 campos, se agrega columna de acciones
+            self.tree.insert("", "end", values=(*receta, "✏️ 🗑️"))
+
+    def manejar_accion(self, event):
+        item = self.tree.identify_row(event.y)
+        col = self.tree.identify_column(event.x)
+
+        if not item or self.tree.item(item, "values")[0] == "No hay recetas guardadas":
+            return
+
+        if col == '#8':  # Columna de acciones
+            respuesta = messagebox.askquestion("Acción", "¿Qué deseas hacer con esta receta?\n\nSí = Editar\nNo = Eliminar", icon="question")
+            if respuesta == 'yes':
+                self.editar_receta()
+            else:
+                self.eliminar_receta()
+
+    def abrir_vista_nueva_receta(self):
+        nueva_ventana = ctk.CTkToplevel(self)
+        nueva_ventana.geometry("1000x700")
+        nueva_ventana.title("Nueva Receta")
+        NuevaRecetaView(nueva_ventana).pack(fill="both", expand=True)
+
+    def editar_receta(self):
+        selected = self.tree.focus()
+        if not selected:
+            messagebox.showwarning("Aviso", "Selecciona una receta para editar.")
+            return
+        print("Editar receta:", self.tree.item(selected)["values"])
+
+    def eliminar_receta(self):
+        selected = self.tree.focus()
+        if not selected:
+            messagebox.showwarning("Aviso", "Selecciona una receta para eliminar.")
+            return
+        confirm = messagebox.askyesno("Confirmar", "¿Estás seguro de eliminar esta receta?")
+        if confirm:
+            self.tree.delete(selected)
