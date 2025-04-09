@@ -147,7 +147,7 @@ class InvitadoDashboard(ctk.CTk):
                 print(f"Error loading {icon_file}")
                 icon_img = None
 
-            icon_label = ctk.CTkLabel(frame, image=icon_img, text="", width=40, height=60, corner_radius=15, fg_color="#681a1a" if name == "Home" else "transparent")
+            icon_label = ctk.CTkLabel(frame, image=icon_img, text="", width=40, height=60, corner_radius=15, fg_color="#681a1a" if name == "Inicio" else "transparent")
             icon_label.pack(side="left", padx=20, pady=5)
             icon_label.bind("<Enter>", self.expand_sidebar)
             icon_label.bind("<Button-1>", lambda e, cmd=command: cmd())
