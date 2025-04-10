@@ -1,16 +1,14 @@
 import unittest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy.inspection import inspect
 import sys
 import os
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from src.Recipes.model import Receta  # Don't delete this line, it is necessary for the imports to work correctly
 
 from src.Ingredients.model import Ingrediente
-from src.Ingredients.controller import IngredienteController
 from src.database.connector import Base
-from src.Recipes.model import Receta
 
 ## @brief Test class for the Ingrediente model, which includes unit tests for CRUD operations.
 class TestIngredienteCRUD(unittest.TestCase):
@@ -33,7 +31,7 @@ class TestIngredienteCRUD(unittest.TestCase):
         new_ingrediente = Ingrediente(nombre='Tomate', clasificacion='Verdura', unidad_medida='kg')
         self.session.add(new_ingrediente)
         self.session.commit()
-     #Print the created ingredient
+        #Print the created ingredient
         print(f"Ingrediente creado: {new_ingrediente.nombre}, {new_ingrediente.clasificacion}, {new_ingrediente.unidad_medida}")
 
         ##Assert that the ingrediente was created and has an auto-incremented ID

@@ -5,7 +5,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '.
 
 from sqlalchemy.orm import Session
 from src.Recipes.model import Receta
-from RecetaIngredientes.Receta_ingredientes import RecetaIngrediente
+from src.RecetaIngredientes.Receta_ingredientes import RecetaIngrediente
 from src.Ingredients.model import Ingrediente
 from src.database.connector import Base
 
@@ -13,17 +13,14 @@ class RecetasController:
     
     ## @brief Create a new recipe in the database.
     @staticmethod
-    
     def create_recipe(session: Session, nombre_receta: str, clasificacion: str, periodo: str, comensales_base: int, user_role: str) -> Receta:
-        
-        ## Create a new recipe in the database
-    def create_recipe(session: Session, nombre_receta: str, clasificacion: str, periodo: str, comensales_base: int, ingredientes: List[dict], user_role: str) -> Receta:
-
         if user_role != 'admin':
             raise PermissionError("Solo los administradores pueden crear recetas.")
+        
         ## Validate input parameters
         if not nombre_receta or not clasificacion or not periodo or comensales_base <= 0:
             raise ValueError("Los campos nombre_receta, clasificacion, periodo y comensales_base son obligatorios y deben ser válidos.")
+        
         ## Validate ingredients.
         if not Ingrediente or len(Ingrediente) == 0:
             raise ValueError("La receta debe contener al menos un ingrediente.")
@@ -33,92 +30,125 @@ class RecetasController:
             clasificacion=clasificacion,
             periodo=periodo,
             comensales_base=comensales_base,
-            ingrediente=Ingrediente
         )
+        
         session.add(receta)
-        session.flush() ## the id of the recipe before commit
-
-        for ing in Ingrediente:
-            if not ing.get('id') or not ing.get('cantidad') or not ing.get('unidad'):
-                raise ValueError("Cada ingrediente debe tener id, cantidad y unidad.")
-
-            ingrediente_db = session.query(Ingrediente).filter_by(id_ingrediente=ing['id']).first()
-            if not ingrediente_db:
-                raise ValueError(f"Ingrediente con id {ing['id']} no encontrado.")
-
-            receta_ingrediente = RecetaIngrediente(
-                id_receta=receta.id_receta,
-                id_ingrediente= ingrediente_db.id_ingrediente,
-                cantidad=ing['cantidad'],
-                unidad=ing['unidad']
-            )
-            session.add(receta_ingrediente)
-
-ingredientes
+        session.flush()  # Get ID before commit
         session.commit()
         return receta
     
     ## @brief This method retrieves a recipe by its ID. This method is static and does not require an instance of the class to be called.
     @staticmethod
-    ## @brief Retrieve a recipe by its ID.
-
-    def get_recipe_by_id(session: Session, numero_receta: int) -> Receta:
-        receta = session.query(Receta).filter(Receta.id_receta == numero_receta).first()
+    def get_recipe_by_id(session: Session, id_receta: int) -> Receta:
+        receta = session.query(Receta).filter(Receta.id_receta == id_receta).first()
         return receta
-
-ingredientes
-    ## @brief This method retrieves all recipes from the database. This method is static and does not require an instance of the class to be called.
+    
+    ## @brief This method updates a recipe in the database. It takes the recipe ID and optional parameters to update the recipe.
     @staticmethod
-    def update_recipe(session: Session, numero_receta: int, nombre_receta: str = None, clasificacion: str = None, periodo: str = None, comensales_base: int = None, user_role: str = None) -> Receta:
-        ## Update a recipe in the database.
-    ## @brief Update a recipe in the database.
-    def update_recipe(session: Session, numero_receta: int, nombre_receta: str = None, clasificacion: str = None, periodo: str = None, comensales_base: int = None, ingredientes: List[dict] = None, user_role: str = None) -> Receta:
-
+    def update_recipe(session: Session, id_receta: int, nombre_receta: str = None, clasificacion: str = None, 
+                      periodo: str = None, comensales_base: int = None, user_role: str = None) -> Receta:
         if user_role != 'admin':
             raise PermissionError("Solo los administradores pueden actualizar recetas.")
-        ## Validate input parameters
-        receta = session.query(Receta).filter(Receta.id_receta == numero_receta).first()
-        if receta:
-            if nombre_receta:
-                receta.nombre_receta = nombre_receta
-            if clasificacion:
-                receta.clasificacion = clasificacion
-            if periodo:
-                receta.periodo = periodo
-            if comensales_base:
-                receta.comensales_base = comensales_base
-            if Ingrediente:
-                ## Validate ingredients
-                if not Ingrediente or len(Ingrediente) == 0:
-                    raise ValueError("La receta debe contener al menos un ingrediente.")
-                for ingrediente in Ingrediente:
-                    if not ingrediente.get('nombre') or not ingrediente.get('cantidad') or not ingrediente.get('unidad_medida'):
-                        raise ValueError("Cada ingrediente debe tener un nombre, cantidad y unidad de medida.")
             
-            receta_ingrediente = RecetaIngrediente(
-                id_receta=numero_receta,
-                id_ingrediente=Base.id_ingrediente,
-                cantidad=['cantidad'],
-                unidad=['unidad']
-            )
-            session.add(receta_ingrediente)
+        # Validate input parameters
+        receta = session.query(Receta).filter(Receta.id_receta == id_receta).first()
+        if not receta:
+            raise ValueError(f"Receta con ID {id} no encontrada.")
+            
+        if nombre_receta:
+            receta.nombre_receta = nombre_receta
+        if clasificacion:
+            receta.clasificacion = clasificacion
+        if periodo:
+            receta.periodo = periodo
+        if comensales_base and comensales_base > 0:
+            receta.comensales_base = comensales_base
 
         session.commit()
         return receta
+    @staticmethod
+    def update_recipe(session: Session, numero_receta: int, nombre_receta: str = None, clasificacion: str = None, 
+                      periodo: str = None, comensales_base: int = None, user_role: str = None) -> Receta:
+        if user_role != 'admin':
+            raise PermissionError("Solo los administradores pueden actualizar recetas.")
+            
+        # Validate input parameters
+        receta = session.query(Receta).filter(Receta.id_receta == numero_receta).first()
+        if not receta:
+            raise ValueError(f"Receta con ID {numero_receta} no encontrada.")
+            
+        if nombre_receta:
+            receta.nombre_receta = nombre_receta
+        if clasificacion:
+            receta.clasificacion = clasificacion
+        if periodo:
+            receta.periodo = periodo
+        if comensales_base and comensales_base > 0:
+            receta.comensales_base = comensales_base
+
+        session.commit()
+        return receta
+    
+    # @brief Add an ingredient to a recipe
+    @staticmethod
+    def add_ingredient_to_recipe(session: Session, id_receta: int, id_ingrediente: int, 
+                               cantidad: float, unidad: str, user_role: str) -> RecetaIngrediente:
+        if user_role != 'admin':
+            raise PermissionError("Solo los administradores pueden añadir ingredientes a recetas.")
+            
+        # Check if recipe exists
+        receta = session.query(Receta).filter(Receta.id_receta == id_receta).first()
+        if not receta:
+            raise ValueError(f"Receta con ID {id_receta} no encontrada.")
+            
+        # Check if ingredient exists
+        ingrediente = session.query(Ingrediente).filter(Ingrediente.id_ingrediente == id_ingrediente).first()
+        if not ingrediente:
+            raise ValueError(f"Ingrediente con ID {id_ingrediente} no encontrado.")
+            
+        # Create the relationship
+        receta_ingrediente = RecetaIngrediente(
+            id_receta=id_receta,
+            id_ingrediente=id_ingrediente,
+            cantidad=cantidad,
+            unidad=unidad
+        )
+        
+        session.add(receta_ingrediente)
+        session.commit()
+        return receta_ingrediente
+    
+    # @brief Remove an ingredient from a recipe
+    @staticmethod
+    def remove_ingredient_from_recipe(session: Session, id_receta: int, id_ingrediente: int, user_role: str) -> bool:
+        if user_role != 'admin':
+            raise PermissionError("Solo los administradores pueden eliminar ingredientes de recetas.")
+            
+        # Find the relationship
+        receta_ingrediente = session.query(RecetaIngrediente).filter(
+            RecetaIngrediente.id_receta == id_receta,
+            RecetaIngrediente.id_ingrediente == id_ingrediente
+        ).first()
+        
+        if receta_ingrediente:
+            session.delete(receta_ingrediente)
+            session.commit()
+            return True
+        return False
 
     ## @brief Delete a recipe from the database.
     @staticmethod
     def delete_recipe(session: Session, numero_receta: int, user_role: str) -> bool:  
-        ## Validate input parameters
         if user_role != 'admin':
             raise PermissionError("Solo los administradores pueden eliminar recetas.")
-ingredientes
-        ## Validate input parameters
+            
         receta = session.query(Receta).filter(Receta.id_receta == numero_receta).first()
 
-        receta = session.query(Receta).filter(Receta.numero_receta == numero_receta).first()
-
         if receta:
-            receta.delete(session)
+            # First delete all recipe-ingredient relationships
+            session.query(RecetaIngrediente).filter(RecetaIngrediente.id_receta == numero_receta).delete()
+            # Then delete the recipe
+            session.delete(receta)
+            session.commit()
             return True
         return False
