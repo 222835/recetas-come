@@ -6,8 +6,10 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '.
 from src.Projections.model import Proyeccion
 from src.Recipes.model import Receta
 
-## ProyeccionController class to handle projection-related operations, this class is responsible for creating, updating, and calculating the total ingredients needed for a projection.
+## @brief Class to handle projection-related operations.
 class ProyeccionController:
+    
+    ## @brief Create a new projection in the database.
     @staticmethod
     def create_projection(session, nombre, periodo, comensales, recetas):
         
@@ -38,7 +40,7 @@ class ProyeccionController:
         
         return proyeccion
     
-    ## Method to delete a projection by its ID, this method will remove the projection from the database.
+    ## @brief Update a projection by its ID.
     @staticmethod
     def update_projection(session, id_proyeccion, nombre, comensales, recetas):
        
@@ -66,7 +68,7 @@ class ProyeccionController:
         
         return proyeccion
     
-    ## Method to delete a projection by its ID, this method will remove the projection from the database, this method will remove the projection from the database.
+    ## @brief Calculate the total ingredients needed per recipe acording to projection percentages.
     @staticmethod
     def calculate_total_ingredients(session, id_proyeccion):
 
