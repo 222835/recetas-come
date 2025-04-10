@@ -40,11 +40,10 @@ def add_rounded_corners(im, radius):
     return im
 
 ## @class AdminDashboard
-## @brief CustomTkinter admin interface.
-## @details Creates a window with a navbar, sidebar, profile menu, and custom image buttons.
+## @brief Admin dashboard interface with navbar, sidebar, and content area..
 class AdminDashboard(ctk.CTk):
     def __init__(self):
-        ## @brief Initialize the admin dashboard window.
+        ## @brief Constructor for AdminDashboard.
         super().__init__()
         self.title("Dashboard Administrador")
         self.geometry("1920x1080")
@@ -148,6 +147,7 @@ class AdminDashboard(ctk.CTk):
         }
 
         self.sidebar_buttons = []
+        self.sidebar_labels = {}  
         for icon_file, (name, command) in self.sections.items():
             frame = ctk.CTkFrame(self.sidebar_frame, fg_color="transparent")
             frame.pack(pady=20, anchor="w")
@@ -160,38 +160,49 @@ class AdminDashboard(ctk.CTk):
                 print(f"Error al cargar {icon_file}")
                 icon_img = None
 
-            icon_label = ctk.CTkLabel(frame, image=icon_img, text="", width=40, height=60, corner_radius=15, fg_color="#681a1a" if name == "Inicio" else "transparent")
+            icon_label = ctk.CTkLabel(frame, image=icon_img, text="", width=40, height=60, corner_radius=15, fg_color="transparent")
             icon_label.pack(side="left", padx=20, pady=5)
             icon_label.bind("<Enter>", self.expand_sidebar)
-            icon_label.bind("<Button-1>", lambda e, cmd=command: cmd())
+            icon_label.bind("<Button-1>", lambda e, cmd=command, lbl=icon_label: [self.set_active_sidebar(lbl), cmd()])
 
             text_label = ctk.CTkLabel(frame, text=name, text_color="white", font=self.custom_font)
             text_label.pack(side="left", padx=5)
             text_label.pack_forget()
-            text_label.bind("<Button-1>", lambda e, cmd=command: cmd())
+            text_label.bind("<Button-1>", lambda e, cmd=command, lbl=icon_label: [self.set_active_sidebar(lbl), cmd()])
 
             self.sidebar_buttons.append((icon_label, text_label))
+            self.sidebar_labels[name] = icon_label  
 
         self.main_content = ctk.CTkFrame(self.main_container, fg_color="#1a1a22")
         self.main_content.pack(side="left", fill="both", expand=True, padx=(30, 0), pady=(20, 0))
 
         self.create_custom_buttons()
+    
+    ## @brief Sets the selected sidebar item visually.
+    ## @param clicked_label The clicked sidebar label to highlight.
+    def set_active_sidebar(self, clicked_label):
+        if self.active_sidebar_button:
+            self.active_sidebar_button.configure(fg_color="transparent")
+        clicked_label.configure(fg_color="#681a1a")
+        self.active_sidebar_button = clicked_label
 
-
+    ## @brief Loads a view into the main content area.
+    ## @param ViewClass Class of the view to load.
     def load_view(self, ViewClass):
         for widget in self.main_content.winfo_children():
             widget.destroy()
         view = ViewClass(self.main_content)
         view.pack(fill="both", expand=True)
 
-
+    ## @brief Repositions dropdown if visible.
     def reposition_dropdown_if_visible(self, event=None):
         if self.dropdown_visible:
             x = self.profile_container.winfo_rootx() - 110
             y = self.profile_container.winfo_rooty() + self.profile_container.winfo_height()
             self.dropdown_menu.geometry(f"+{x}+{y}")
 
-    ## @brief Handles actions from dropdown menu.
+    ## @brief Handles profile menu option clicks.
+    ## @param option Selected option.
     def handle_option(self, option):
         if option == "Cerrar sesión":
             self.show_logout_popup()
@@ -234,7 +245,7 @@ class AdminDashboard(ctk.CTk):
         self.main_content.grid_columnconfigure((0, 1, 2, 3, 4, 5), weight=0)
         self.main_content.grid_rowconfigure((0, 1, 2, 3, 4), weight=0)
 
-        def create_image_button(img_file, text, row, col, colspan, rowspan, w, h, command):
+        def create_image_button(img_file, text, row, col, colspan, rowspan, w, h, command, section_name=None):
             try:
                 image = Image.open(IMAGE_PATH / img_file).convert("RGBA")
                 image = ImageOps.fit(image, (w, h), Image.Resampling.LANCZOS)
@@ -259,7 +270,7 @@ class AdminDashboard(ctk.CTk):
                 corner_radius=20,
                 width=w,
                 height=h,
-                command=command
+                command=lambda: self.handle_dashboard_click(command, section_name)
             )
             btn.image_normal = normal
             btn.image_zoom = zoom
@@ -267,11 +278,19 @@ class AdminDashboard(ctk.CTk):
             btn.bind("<Enter>", lambda e, b=btn: b.configure(image=b.image_zoom))
             btn.bind("<Leave>", lambda e, b=btn: b.configure(image=b.image_normal))
 
-        create_image_button("recetas0.jpg", "", 0, 0, 2, 1, 500, 140, lambda: self.load_view(RecetasAdminView))
-        create_image_button("historial1.jpg", "", 0, 2, 2, 1, 550, 140, lambda: self.load_view(HistorialAdminView))
-        create_image_button("proyecciones1.jpg", "", 1, 0, 3, 1, 700, 190, lambda: self.load_view(ProyeccionesAdminView))
-        create_image_button("cuentas0.jpg", "", 1, 3, 2, 4, 350,400, lambda: self.load_view(CuentasAdminView))
-        create_image_button("costos1.jpg", "", 2, 0, 3, 1, 700, 190, lambda: self.load_view(CostosAdminView))
+        create_image_button("recetas0.jpg", "", 0, 0, 2, 1, 500, 140, lambda: self.load_view(RecetasAdminView), section_name="Inicio")
+        create_image_button("historial1.jpg", "", 0, 2, 2, 1, 550, 140, lambda: self.load_view(HistorialAdminView), section_name="Historial")
+        create_image_button("proyecciones1.jpg", "", 1, 0, 3, 1, 700, 190, lambda: self.load_view(ProyeccionesAdminView), section_name="Proyecciones")
+        create_image_button("cuentas0.jpg", "", 1, 3, 2, 4, 350,400, lambda: self.load_view(CuentasAdminView), section_name="Cuentas")
+        create_image_button("costos1.jpg", "", 2, 0, 3, 1, 700, 190, lambda: self.load_view(CostosAdminView), section_name="Costos")
+
+    ## @brief Highlights sidebar on dashboard button click.
+    ## @param command Function to execute.
+    ## @param section_name Sidebar section to highlight
+    def handle_dashboard_click(self, command, section_name):
+        if section_name and section_name in self.sidebar_labels:
+            self.set_active_sidebar(self.sidebar_labels[section_name])
+        command()
 
     ## @brief Shows a popup to confirm logout.
     def show_logout_popup(self):
