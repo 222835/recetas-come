@@ -129,15 +129,17 @@ class InvitadoDashboard(ctk.CTk):
 
         self.sections = {
             "Home icon.png": ("Inicio", lambda: self.create_custom_buttons()),
-            "historial.png": ("Historial", lambda: self.load_view(HistorialAdminView)),
+            "recetas.png": ("Recetas", lambda: self.load_view(RecetasAdminView)),
             "proyecciones.png": ("Proyecciones", lambda: self.load_view(ProyeccionesAdminView)),
             "costos.png": ("Costos", lambda: self.load_view(CostosAdminView)),
+            "historial.png": ("Historial", lambda: self.load_view(HistorialAdminView))
         }
 
         self.sidebar_buttons = []
+        self.sidebar_labels = {} 
         for icon_file, (name, command) in self.sections.items():
             frame = ctk.CTkFrame(self.sidebar_frame, fg_color="transparent")
-            frame.pack(pady=(30, 20), anchor="w")
+            frame.pack(pady=(25, 15), anchor="w")
 
             try:
                 img_path = IMAGE_PATH / icon_file
@@ -147,22 +149,32 @@ class InvitadoDashboard(ctk.CTk):
                 print(f"Error loading {icon_file}")
                 icon_img = None
 
-            icon_label = ctk.CTkLabel(frame, image=icon_img, text="", width=40, height=60, corner_radius=15, fg_color="#681a1a" if name == "Inicio" else "transparent")
+            icon_label = ctk.CTkLabel(frame, image=icon_img, text="", width=40, height=60, corner_radius=15, fg_color="transparent")
             icon_label.pack(side="left", padx=20, pady=5)
             icon_label.bind("<Enter>", self.expand_sidebar)
-            icon_label.bind("<Button-1>", lambda e, cmd=command: cmd())
+            icon_label.bind("<Button-1>", lambda e, cmd=command, lbl=icon_label: [self.set_active_sidebar(lbl), cmd()])
 
             text_label = ctk.CTkLabel(frame, text=name, text_color="white", font=self.custom_font)
             text_label.pack(side="left", padx=5)
             text_label.pack_forget()
-            text_label.bind("<Button-1>", lambda e, cmd=command: cmd())
+            text_label.bind("<Button-1>", lambda e, cmd=command, lbl=icon_label: [self.set_active_sidebar(lbl), cmd()])
 
             self.sidebar_buttons.append((icon_label, text_label))
-
+            self.sidebar_labels[name] = icon_label
+            
         self.main_content = ctk.CTkFrame(self.main_container, fg_color="#1a1a22")
         self.main_content.pack(side="left", fill="both", expand=True, padx=0, pady=(20, 0))
 
         self.create_custom_buttons()
+
+
+    ## @brief Sets the selected sidebar item visually.
+    ## @param clicked_label The clicked sidebar label to highlight.
+    def set_active_sidebar(self, clicked_label):
+        if self.active_sidebar_button:
+            self.active_sidebar_button.configure(fg_color="transparent")
+        clicked_label.configure(fg_color="#681a1a")
+        self.active_sidebar_button = clicked_label
 
     ## @brief Loads and displays a view class in the main content area.
     ## @param ViewClass The class of the view to be loaded.
@@ -181,7 +193,7 @@ class InvitadoDashboard(ctk.CTk):
 
     ## @brief Handles selected dropdown option.
     def handle_option(self, option):
-        if option == "Log out":
+        if option == "Cerrar sesión":
             self.show_logout_popup()
         else:
             print(f"{option} clicked")
@@ -222,7 +234,7 @@ class InvitadoDashboard(ctk.CTk):
         self.main_content.grid_columnconfigure((0, 1, 2, 3), weight=0)
         self.main_content.grid_rowconfigure((0, 1), weight=0)
 
-        def create_image_button(img_file, text, row, col, colspan, rowspan, w, h, command):
+        def create_image_button(img_file, text, row, col, colspan, rowspan, w, h, command, section_name=None):
 
             try:
                 image = Image.open(IMAGE_PATH / img_file).convert("RGBA")
@@ -248,7 +260,7 @@ class InvitadoDashboard(ctk.CTk):
                 corner_radius=20,
                 width=w,
                 height=h,
-                command=command
+                command=lambda: self.handle_dashboard_click(command, section_name)
             )
             btn.image_normal = normal
             btn.image_zoom = zoom
@@ -256,15 +268,23 @@ class InvitadoDashboard(ctk.CTk):
             btn.bind("<Enter>", lambda e, b=btn: b.configure(image=b.image_zoom))
             btn.bind("<Leave>", lambda e, b=btn: b.configure(image=b.image_normal))
 
-        create_image_button("recetas2.jpg", "", 0, 0, 2, 2, 480, 520, lambda: self.load_view(RecetasAdminView))
-        create_image_button("proyecciones.jpg", "", 0, 2, 2, 1, 650, 240, lambda: self.load_view(ProyeccionesAdminView))
-        create_image_button("costos2.jpg", "", 1, 2, 1, 1, 300, 240, lambda: self.load_view(CostosAdminView))
-        create_image_button("historial2.jpg", "", 1, 3, 1, 1, 300, 240, lambda: self.load_view(HistorialAdminView))
+        create_image_button("recetas2.jpg", "", 0, 0, 2, 2, 480, 520, lambda: self.load_view(RecetasAdminView), section_name="Inicio")
+        create_image_button("proyecciones.jpg", "", 0, 2, 2, 1, 650, 240, lambda: self.load_view(ProyeccionesAdminView), section_name="Proyecciones")
+        create_image_button("costos2.jpg", "", 1, 2, 1, 1, 300, 240, lambda: self.load_view(CostosAdminView), section_name="Costos")
+        create_image_button("historial2.jpg", "", 1, 3, 1, 1, 300, 240, lambda: self.load_view(HistorialAdminView), section_name="Historial")
+
+    ## @brief Highlights sidebar on dashboard button click.
+    ## @param command Function to execute.
+    ## @param section_name Sidebar section to highlight
+    def handle_dashboard_click(self, command, section_name):
+        if section_name and section_name in self.sidebar_labels:
+            self.set_active_sidebar(self.sidebar_labels[section_name])
+        command()
 
     ## @brief Displays a logout confirmation popup.
     def show_logout_popup(self):
         popup = tk.Toplevel(self)
-        popup.title("Log out")
+        popup.title("Cerrar sesión")
         popup.configure(bg="white")
         popup.resizable(False, False)
         popup.geometry("370x170")
@@ -277,8 +297,8 @@ class InvitadoDashboard(ctk.CTk):
         popup.geometry(f"370x170+{x}+{y}")
         popup.grab_set()
 
-        tk.Label(popup, text="Log out", font=("Arial", 16, "bold"), fg="#D32F2F", bg="white").pack(pady=(15, 0))
-        tk.Label(popup, text="Are you sure you want to log out?", font=("Arial", 10), bg="white", fg="#666").pack(pady=10)
+        tk.Label(popup, text="Cerrar sesión", font=("Arial", 16, "bold"), fg="#D32F2F", bg="white").pack(pady=(15, 0))
+        tk.Label(popup, text="¿Estás seguro que quieres cerrar sesión de tu cuenta?", font=("Arial", 10), bg="white", fg="#666").pack(pady=10)
 
         btn_frame = tk.Frame(popup, bg="white")
         btn_frame.pack(pady=10)
@@ -289,7 +309,7 @@ class InvitadoDashboard(ctk.CTk):
         no_btn.pack(side="left", padx=10)
         no_btn.configure(highlightbackground="#D32F2F")
 
-        yes_btn = tk.Button(btn_frame, text="Yes", bg="#D32F2F", fg="white", bd=0, highlightthickness=0, command=lambda: self.logout(popup), **style)
+        yes_btn = tk.Button(btn_frame, text="Si", bg="#D32F2F", fg="white", bd=0, highlightthickness=0, command=lambda: self.logout(popup), **style)
         yes_btn.pack(side="left", padx=10)
 
     ## @brief Handles the logout process.

@@ -140,6 +140,7 @@ class AdminDashboard(ctk.CTk):
 
         self.sections = {
             "Home icon.png": ("Inicio", lambda: self.create_custom_buttons()),
+            "recetas.png": ("Recetas", lambda: self.load_view(RecetasAdminView)),
             "historial.png": ("Historial", lambda: self.load_view(HistorialAdminView)),
             "proyecciones.png": ("Proyecciones", lambda: self.load_view(ProyeccionesAdminView)),
             "costos.png": ("Costos", lambda: self.load_view(CostosAdminView)),
@@ -150,7 +151,7 @@ class AdminDashboard(ctk.CTk):
         self.sidebar_labels = {}  
         for icon_file, (name, command) in self.sections.items():
             frame = ctk.CTkFrame(self.sidebar_frame, fg_color="transparent")
-            frame.pack(pady=20, anchor="w")
+            frame.pack(pady=12, anchor="w")
 
             try:
                 img_path = IMAGE_PATH / icon_file
