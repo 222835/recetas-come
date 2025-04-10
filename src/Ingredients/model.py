@@ -5,18 +5,19 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '.
 
 from typing import Self
 from sqlalchemy import Column, Integer, String
-from sqlalchemy.orm import declarative_base
-
-Base_ingrediente = declarative_base()
+from sqlalchemy.orm import relationship
+from src.database.connector import Base
 
 ##@brief Base class for all models, this class is used to represent an ingredient in the database
-class Ingrediente(Base_ingrediente):
-    __tablename__ = "Ingredientes"
+class Ingrediente(Base):
+    __tablename__ = "ingredientes"
 
     id_ingrediente = Column(Integer, primary_key=True, autoincrement=True)
     nombre = Column(String(100), nullable=False)
     clasificacion = Column(String(50))
-    unidad_medida = Column(String(20))
+    unidad_medida = Column(String(20), nullable=False)
+
+    receta_ingredientes = relationship("RecetaIngrediente", back_populates="ingrediente", cascade="all, delete-orphan")
 
     ##@brief Constructor for the ingredient class, initializes the ingredient with a name, classification, and unit of measurement
     def __init__(self, nombre: str, clasificacion: str | None = None, unidad_medida: str | None = None) -> None:
@@ -53,3 +54,7 @@ class Ingrediente(Base_ingrediente):
     def delete(self, session) -> None:
         session.delete(self)
         session.commit()
+
+##@brief Import the RecetaIngrediente class for the relationship between ingredients and recipes
+##Placed at the end to avoid circular import issues
+from src.RecetaIngredientes.Receta_ingredientes import RecetaIngrediente

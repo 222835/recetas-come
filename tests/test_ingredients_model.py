@@ -1,39 +1,39 @@
 import unittest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.inspection import inspect
 import sys
 import os
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from src.Ingredients.model import Ingrediente, Base_ingrediente
+from src.Ingredients.model import Ingrediente
+from src.Ingredients.controller import IngredienteController
+from src.database.connector import Base
+from src.Recipes.model import Receta
 
-## @brief Test class for the Ingrediente model, this class is used to test the Ingrediente model
-class TestIngredienteModel(unittest.TestCase):
-    
-    ## @brief Set up the test environment, this method is called before each test
+## @brief Test class for the Ingrediente model, which includes unit tests for CRUD operations.
+class TestIngredienteCRUD(unittest.TestCase):
+    ## @brief Set up the test environment by creating an in-memory SQLite database and session.
     def setUp(self):
-        ##Setup: Create an in-memory SQLite database and session for testing.
         self.engine = create_engine('sqlite:///:memory:')
-        Base_ingrediente.metadata.create_all(self.engine)
+        Base.metadata.create_all(self.engine)
         self.Session = sessionmaker(bind=self.engine)
         self.session = self.Session()
 
-    ##  @brief Tear down the test environment, this method is called after each test
+    ## @brief Clean up after each test by closing the session and dropping all tables.
     def tearDown(self):
-        ##Teardown: Close the session and drop all tables after each test.
+       ##Teardown: Close the session and drop all tables after each test.
         self.session.close()
-        Base_ingrediente.metadata.drop_all(self.engine)
+        Base.metadata.drop_all(self.engine)
         self.engine.dispose()
-
-    ## @brief Test creating an Ingrediente, this method is used to test the creation of an Ingrediente
+        
+    ## @brief Test the creation of an Ingrediente object and its addition to the database.
     def test_create_ingrediente(self):
-        ##Test creating a new Ingrediente.
-        new_ingrediente = Ingrediente(nombre="Tomate", clasificacion="Verdura", unidad_medida="kg")
+        new_ingrediente = Ingrediente(nombre='Tomate', clasificacion='Verdura', unidad_medida='kg')
         self.session.add(new_ingrediente)
         self.session.commit()
-
-        #Print the created ingredient
+     #Print the created ingredient
         print(f"Ingrediente creado: {new_ingrediente.nombre}, {new_ingrediente.clasificacion}, {new_ingrediente.unidad_medida}")
 
         ##Assert that the ingrediente was created and has an auto-incremented ID
@@ -102,6 +102,7 @@ class TestIngredienteModel(unittest.TestCase):
         ##Assert that the ingrediente was deleted
         deleted_ingrediente = self.session.query(Ingrediente).filter_by(id_ingrediente=new_ingrediente.id_ingrediente).first()
         self.assertIsNone(deleted_ingrediente)
+   
 
 if __name__ == '__main__':
     unittest.main()
