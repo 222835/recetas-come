@@ -53,29 +53,31 @@ def test_database(engine, SessionLocal):
             session.add_all([ri1, ri2])
             session.commit()
 
-            # READ
+            ## Function to read the recipe and its ingredients
             logger.info("Consultando la receta creada con sus ingredientes...")
             receta_leida = session.query(Receta).filter_by(id_receta=receta.id_receta).first()
             logger.info(f"Receta: {receta_leida.nombre_receta}, {receta_leida.clasificacion}, {receta_leida.periodo}, {receta_leida.comensales_base} comensales")
 
-                ingredientes_receta = session.query(RecetaIngrediente).filter_by(id_receta=receta.id_receta).all()
+            ##@brief Get the ingredients associated with the recipe
+            ingredientes_receta = session.query(RecetaIngrediente).filter_by(id_receta=receta.id_receta).all()
             for ri in ingredientes_receta:
                 ingrediente = session.get(Ingrediente, ri.id_ingrediente)
                 logger.info(f"- {ingrediente.nombre}: {ri.cantidad} {ingrediente.unidad_medida}")
 
-            # UPDATE
+            ##Function to update the recipe and its ingredients
             logger.info("Actualizando receta...")
             receta.update(session, nombre_receta="Pollo con tomate y cebolla", comensales_base=5)
             receta_actualizada = session.get(Receta, receta.id_receta)
             logger.info(f"Receta actualizada: {receta_actualizada.nombre_receta}, Comensales: {receta_actualizada.comensales_base}")
 
-            # DELETE
+            ##Fuction to delete the recipe and its ingredients
             logger.info("Eliminando receta e ingredientes asociados...")
-            # Primero eliminar las asociaciones de ingredientes
+            
+            ##Delete the association between the recipe and ingredients first
             session.query(RecetaIngrediente).filter_by(id_receta=receta.id_receta).delete()
             session.commit()
 
-            # Luego eliminar receta e ingredientes
+            ##Then delete the recipe and ingredients
             receta.delete(session)
             tomate.delete(session)
             pollo.delete(session)
