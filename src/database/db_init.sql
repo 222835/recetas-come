@@ -29,7 +29,7 @@ CREATE TABLE Proveedores (
 
 
 CREATE TABLE Ingredientes (
-    id_ingrediente INT PRIMARY KEY,
+    id_ingrediente INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL,
     clasificacion VARCHAR(50),
     unidad_medida VARCHAR(20)
