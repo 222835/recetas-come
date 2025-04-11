@@ -8,6 +8,8 @@ import ctypes
 from pathlib import Path
 from PIL import Image 
 import tkinter.messagebox as msgbox
+from .agregar_cuentas import AgregarCuentaView
+
 
 class CuentasAdminView(ctk.CTkFrame):
     ## @brief Initializes the account management view.
@@ -55,7 +57,7 @@ class CuentasAdminView(ctk.CTkFrame):
         titulo = ctk.CTkLabel(top_frame, text="Gestión de cuentas", font=self.fuente_titulo, text_color="#b8191a")
         titulo.pack(side="left")
 
-        btn_agregar = ctk.CTkButton(top_frame, image=self.img_add, text="Agregar nueva cuenta", font=self.fuente_button, fg_color="#b8191a", hover_color="#991416", corner_radius=50, compound="left")
+        btn_agregar = ctk.CTkButton(top_frame, image=self.img_add, text="Agregar nueva cuenta", font=self.fuente_button, fg_color="#b8191a", hover_color="#991416", corner_radius=50, compound="left", command=self.mostrar_agregar_cuentas)
         btn_agregar.pack(side="right")
 
         linea = ctk.CTkLabel(self.contenedor, text="─" * 200, text_color="#b8191a")
@@ -74,6 +76,21 @@ class CuentasAdminView(ctk.CTkFrame):
         self.usuarios_scroll_frame.pack(fill="both", expand=True, padx=20, pady=10)
 
         self.cargar_usuarios()
+    
+    def mostrar_agregar_cuentas(self):
+        for widget in self.winfo_children():
+            widget.destroy()
+        nueva_vista = AgregarCuentaView(
+            parent=self,
+            cursor=self.cursor,
+            conn=self.conn,
+            fuente_titulo=self.fuente_titulo,
+            fuente_button=self.fuente_button,
+            fuente_card=self.fuente_small 
+        )
+        nueva_vista.pack(fill="both", expand=True)
+
+
 
     ## @brief Loads user data from the database and creates cards.
     def cargar_usuarios(self):
