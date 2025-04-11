@@ -3,7 +3,7 @@ import sys
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, ForeignKey, Float
 from sqlalchemy.orm import relationship
 from src.database.connector import Base
 
@@ -14,7 +14,7 @@ class Receta(Base):
 
     id_receta = Column(Integer, primary_key=True, autoincrement=True)
     nombre_receta = Column(String(100), nullable=False)
-    clasificacion = Column(String(50),)
+    clasificacion = Column(String(50))
     periodo = Column(String(50), nullable=False) 
     comensales_base = Column(Integer, nullable=False)
     receta_ingredientes = relationship("RecetaIngrediente", back_populates="receta", cascade="all, delete-orphan")
@@ -26,7 +26,7 @@ class Receta(Base):
         self.periodo = periodo
         self.comensales_base = comensales_base
 
-     ## @brief Method to create a new recipe in the database
+    ## @brief Method to create a new recipe in the database
     def create(self, session) -> None:
         session.add(self)
         session.commit()
@@ -54,5 +54,26 @@ class Receta(Base):
 
     ## @brief String representation of the Receta class
     def __repr__(self) -> str:
-        return f"Receta: {self.nombre_receta}, {self.clasificacion}, {self.periodo}, {self.comensales_base} comensales"    
+        return f"Receta: {self.nombre_receta}, {self.clasificacion}, {self.periodo}, {self.comensales_base} comensales"
+
+
+class RecetaIngrediente(Base):
+    __tablename__ = 'receta_ingrediente'
+    __table_args__ = {'extend_existing': True}  # Permite redefinir la tabla si ya existe
     
+    id_receta = Column(Integer, ForeignKey('recetas.id_receta', ondelete='CASCADE'), primary_key=True)
+    id_ingrediente = Column(Integer, ForeignKey('ingredientes.id_ingrediente', ondelete='CASCADE'), primary_key=True)
+    cantidad = Column(Float, nullable=False)
+    
+    receta = relationship("Receta", back_populates="receta_ingredientes")
+    ingrediente = relationship("Ingrediente", back_populates="receta_ingredientes")
+    
+    ## @brief Constructor for the RecetaIngrediente class
+    def __init__(self, id_receta: int, id_ingrediente: int, cantidad: float) -> None:
+        self.id_receta = id_receta
+        self.id_ingrediente = id_ingrediente
+        self.cantidad = cantidad
+        
+    ## @brief String representation of the RecetaIngrediente class
+    def __repr__(self) -> str:
+        return f"RecetaIngrediente: receta_id={self.id_receta}, ingrediente_id={self.id_ingrediente}, cantidad={self.cantidad}"

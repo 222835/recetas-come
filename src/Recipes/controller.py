@@ -4,8 +4,7 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
 from sqlalchemy.orm import Session
-from src.Recipes.model import Receta
-from src.RecetaIngredientes.Receta_ingredientes import RecetaIngrediente
+from src.Recipes.model import Receta, RecetaIngrediente
 from src.Ingredients.model import Ingrediente
 from src.database.connector import Base
 
@@ -54,28 +53,6 @@ class RecetasController:
         receta = session.query(Receta).filter(Receta.id_receta == id_receta).first()
         if not receta:
             raise ValueError(f"Receta con ID {id} no encontrada.")
-            
-        if nombre_receta:
-            receta.nombre_receta = nombre_receta
-        if clasificacion:
-            receta.clasificacion = clasificacion
-        if periodo:
-            receta.periodo = periodo
-        if comensales_base and comensales_base > 0:
-            receta.comensales_base = comensales_base
-
-        session.commit()
-        return receta
-    @staticmethod
-    def update_recipe(session: Session, numero_receta: int, nombre_receta: str = None, clasificacion: str = None, 
-                      periodo: str = None, comensales_base: int = None, user_role: str = None) -> Receta:
-        if user_role != 'admin':
-            raise PermissionError("Solo los administradores pueden actualizar recetas.")
-            
-        # Validate input parameters
-        receta = session.query(Receta).filter(Receta.id_receta == numero_receta).first()
-        if not receta:
-            raise ValueError(f"Receta con ID {numero_receta} no encontrada.")
             
         if nombre_receta:
             receta.nombre_receta = nombre_receta

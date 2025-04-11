@@ -17,7 +17,7 @@ class Ingrediente(Base):
     clasificacion = Column(String(50))
     unidad_medida = Column(String(20), nullable=False)
 
-    receta_ingredientes = relationship("RecetaIngrediente", back_populates="ingrediente", cascade="all, delete-orphan")
+    receta_ingredientes = relationship("RecetaIngrediente", back_populates="ingrediente")
 
     ##@brief Constructor for the ingredient class, initializes the ingredient with a name, classification, and unit of measurement
     def __init__(self, nombre: str, clasificacion: str | None = None, unidad_medida: str | None = None) -> None:
@@ -25,18 +25,10 @@ class Ingrediente(Base):
         self.clasificacion = clasificacion
         self.unidad_medida = unidad_medida
 
-    ##@brief String representation of the ingredient class, this is used for debugging and logging purposes
-    def __repr__(self) -> str:
-        return f"Ingrediente({self.nombre}, {self.clasificacion}, {self.unidad_medida})"
-
     ##@brief Create an ingredient in database.
     def create(self, session) -> None:
         session.add(self)
         session.commit()
-
-    ##@brief Fetch an ingredient from the database by its id.
-    def read(self, session) -> Self:
-        return session.query(Ingrediente).filter(Ingrediente.id_ingrediente == self.id_ingrediente).first()
 
     ##@brief Update an ingredient in database.
     def update(self, session, nombre: str | None = None, clasificacion: str | None = None, 
@@ -50,11 +42,14 @@ class Ingrediente(Base):
             self.unidad_medida = unidad_medida
         session.commit()
 
+    ## @brief Method to read an ingredient from the database
+    def read(self, session) -> "Ingrediente":
+        return session.query(Ingrediente).filter(Ingrediente.id_ingrediente == self.id_ingrediente).first()
+    
     ##@brief Delete an ingredient from the database.
     def delete(self, session) -> None:
         session.delete(self)
         session.commit()
 
-##@brief Import the RecetaIngrediente class for the relationship between ingredients and recipes
-##Placed at the end to avoid circular import issues
-from src.RecetaIngredientes.Receta_ingredientes import RecetaIngrediente
+    def __repr__(self) -> str:
+        return f"Ingrediente: {self.nombre}, {self.clasificacion}, {self.unidad_medida}"
