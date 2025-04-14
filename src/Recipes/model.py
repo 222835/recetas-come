@@ -17,7 +17,7 @@ class Receta(Base):
     clasificacion = Column(String(50))
     periodo = Column(String(50), nullable=False) 
     comensales_base = Column(Integer, nullable=False)
-    receta_ingredientes = relationship("RecetaIngrediente", back_populates="receta", cascade="all, delete-orphan")
+    receta_ingredientes = relationship("Receta_Ingredientes", back_populates="receta", cascade="all, delete-orphan")
     
     ##@brief Constructor for the Receta class, this class is used to represent a recipe in the database
     def __init__(self, nombre_receta: str, clasificacion: str, periodo: str, comensales_base: int) -> None:
@@ -57,7 +57,7 @@ class Receta(Base):
         return f"Receta: {self.nombre_receta}, {self.clasificacion}, {self.periodo}, {self.comensales_base} comensales"
 
 
-class RecetaIngrediente(Base):
+class Receta_Ingredientes(Base):
     __tablename__ = 'receta_ingrediente'
     __table_args__ = {'extend_existing': True}  # Permite redefinir la tabla si ya existe
     

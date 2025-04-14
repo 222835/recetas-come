@@ -11,11 +11,8 @@ from src.database.connector import Base
 import src.utils.constants as constants
 from src.utils.constants import env as env
 
-from src.Users.Login.view import LoginApp
-from src.Users.Dashboard.admin_dashboard import AdminDashboard
-from src.Users.Dashboard.invitado_dashboard import InvitadoDashboard
 from src.Ingredients.model import Ingrediente
-from src.Recipes.model import Receta, RecetaIngrediente
+from src.Recipes.model import Receta, Receta_Ingredientes
 
 # Set up logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -48,8 +45,8 @@ def test_database(engine, SessionLocal):
 
             # Create the association between the recipe and ingredients
             logger.info("Asociando ingredientes a la receta...")
-            ri1 = RecetaIngrediente(id_receta=receta.id_receta, id_ingrediente=tomate.id_ingrediente, cantidad=0.5)
-            ri2 = RecetaIngrediente(id_receta=receta.id_receta, id_ingrediente=pollo.id_ingrediente, cantidad=1.0)
+            ri1 = Receta_Ingredientes(id_receta=receta.id_receta, id_ingrediente=tomate.id_ingrediente, cantidad=0.5)
+            ri2 = Receta_Ingredientes(id_receta=receta.id_receta, id_ingrediente=pollo.id_ingrediente, cantidad=1.0)
             session.add_all([ri1, ri2])
             session.commit()
 
@@ -59,7 +56,7 @@ def test_database(engine, SessionLocal):
             logger.info(f"Receta: {receta_leida.nombre_receta}, {receta_leida.clasificacion}, {receta_leida.periodo}, {receta_leida.comensales_base} comensales")
 
             ##@brief Get the ingredients associated with the recipe
-            ingredientes_receta = session.query(RecetaIngrediente).filter_by(id_receta=receta.id_receta).all()
+            ingredientes_receta = session.query(Receta_Ingredientes).filter_by(id_receta=receta.id_receta).all()
             for ri in ingredientes_receta:
                 ingrediente = session.get(Ingrediente, ri.id_ingrediente)
                 logger.info(f"- {ingrediente.nombre}: {ri.cantidad} {ingrediente.unidad_medida}")
@@ -74,7 +71,7 @@ def test_database(engine, SessionLocal):
             logger.info("Eliminando receta e ingredientes asociados...")
             
             ##Delete the association between the recipe and ingredients first
-            session.query(RecetaIngrediente).filter_by(id_receta=receta.id_receta).delete()
+            session.query(Receta_Ingredientes).filter_by(id_receta=receta.id_receta).delete()
             session.commit()
 
             ##Then delete the recipe and ingredients

@@ -37,14 +37,14 @@ CREATE TABLE Ingredientes (
 
 
 CREATE TABLE Recetas (
-    id_receta INT PRIMARY KEY,
+    id_receta IN  AUTO_INCREMENT PRIMARY KEY,
     nombre_receta VARCHAR(100) NOT NULL,
     clasificacion VARCHAR(50),
     periodo VARCHAR(50) NOT NULL,                       
     comensales_base INT NOT NULL                  
 );
 
-CREATE TABLE Receta_Ingredientes (
+CREATE TABLE Receta_Ingredientes(
     id_receta INT NOT NULL,
     id_ingrediente INT NOT NULL,
     cantidad DECIMAL(10,2) NOT NULL,
@@ -84,7 +84,7 @@ CREATE TABLE Usuario_Recetas (
 
 
 CREATE TABLE Proyecciones (
-    id_proyeccion INT PRIMARY KEY,
+    id_proyeccion INT  AUTO_INCREMENT PRIMARY KEY,
     numero_usuario INT NOT NULL,
     nombre VARCHAR(100),
     periodo VARCHAR(50),

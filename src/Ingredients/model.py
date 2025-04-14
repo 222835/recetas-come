@@ -17,7 +17,7 @@ class Ingrediente(Base):
     clasificacion = Column(String(50))
     unidad_medida = Column(String(20), nullable=False)
 
-    receta_ingredientes = relationship("RecetaIngrediente", back_populates="ingrediente")
+    receta_ingredientes = relationship("Receta_Ingredientes", back_populates="ingrediente")
 
     ##@brief Constructor for the ingredient class, initializes the ingredient with a name, classification, and unit of measurement
     def __init__(self, nombre: str, clasificacion: str | None = None, unidad_medida: str | None = None) -> None:
