@@ -8,7 +8,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from src.database.connector import Base
 from src.Ingredients.model import Ingrediente
-from src.Recipes.model import Receta, RecetaIngrediente  # Import to resolve circular dependency
+from src.Recipes.model import Receta, Receta_Ingredientes  # Import to resolve circular dependency
 
 ## @brief Test class for the Ingrediente model, this class is used to test the Ingrediente model
 class TestIngredienteModel(unittest.TestCase):

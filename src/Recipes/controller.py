@@ -4,7 +4,7 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
 from sqlalchemy.orm import Session
-from src.Recipes.model import Receta, RecetaIngrediente
+from src.Recipes.model import Receta, Receta_Ingredientes
 from src.Ingredients.model import Ingrediente
 from src.database.connector import Base
 
@@ -29,6 +29,7 @@ class RecetasController:
             clasificacion=clasificacion,
             periodo=periodo,
             comensales_base=comensales_base,
+            estatus=True  
         )
         
         session.add(receta)
@@ -45,7 +46,7 @@ class RecetasController:
     ## @brief This method updates a recipe in the database. It takes the recipe ID and optional parameters to update the recipe.
     @staticmethod
     def update_recipe(session: Session, id_receta: int, nombre_receta: str = None, clasificacion: str = None, 
-                      periodo: str = None, comensales_base: int = None, user_role: str = None) -> Receta:
+                      periodo: str = None, comensales_base: int = None, user_role: str = None, status: bool = None) -> Receta:
         if user_role != 'admin':
             raise PermissionError("Solo los administradores pueden actualizar recetas.")
             
@@ -62,6 +63,8 @@ class RecetasController:
             receta.periodo = periodo
         if comensales_base and comensales_base > 0:
             receta.comensales_base = comensales_base
+        if status is not None:
+            receta.estatus = status
 
         session.commit()
         return receta
@@ -69,7 +72,7 @@ class RecetasController:
     # @brief Add an ingredient to a recipe
     @staticmethod
     def add_ingredient_to_recipe(session: Session, id_receta: int, id_ingrediente: int, 
-                               cantidad: float, unidad: str, user_role: str) -> RecetaIngrediente:
+                               cantidad: float, unidad: str, user_role: str) -> Receta_Ingredientes:
         if user_role != 'admin':
             raise PermissionError("Solo los administradores pueden añadir ingredientes a recetas.")
             
@@ -84,7 +87,7 @@ class RecetasController:
             raise ValueError(f"Ingrediente con ID {id_ingrediente} no encontrado.")
             
         # Create the relationship
-        receta_ingrediente = RecetaIngrediente(
+        receta_ingrediente = Receta_Ingredientes(
             id_receta=id_receta,
             id_ingrediente=id_ingrediente,
             cantidad=cantidad,
@@ -102,9 +105,9 @@ class RecetasController:
             raise PermissionError("Solo los administradores pueden eliminar ingredientes de recetas.")
             
         # Find the relationship
-        receta_ingrediente = session.query(RecetaIngrediente).filter(
-            RecetaIngrediente.id_receta == id_receta,
-            RecetaIngrediente.id_ingrediente == id_ingrediente
+        receta_ingrediente = session.query(Receta_Ingredientes).filter(
+            Receta_Ingredientes.id_receta == id_receta,
+            Receta_Ingredientes.id_ingrediente == id_ingrediente
         ).first()
         
         if receta_ingrediente:
@@ -123,7 +126,7 @@ class RecetasController:
 
         if receta:
             # First delete all recipe-ingredient relationships
-            session.query(RecetaIngrediente).filter(RecetaIngrediente.id_receta == numero_receta).delete()
+            session.query(Receta_Ingredientes).filter(Receta_Ingredientes.id_receta == numero_receta).delete()
             # Then delete the recipe
             session.delete(receta)
             session.commit()

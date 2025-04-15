@@ -1,4 +1,3 @@
-
 import os
 import sys
 import unittest
@@ -13,17 +12,19 @@ from src.utils.constants import env as env
 
 from src.Ingredients.model import Ingrediente
 from src.Recipes.model import Receta, Receta_Ingredientes
+from src.Projections.model import Proyeccion, ProyeccionReceta
+from src.Projections.controller import ProyeccionController
 
-# Set up logging
+## Set up logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-# Set ROOT path and constants
+## Set ROOT path and constants
 ROOT_PATH = os.path.dirname(os.path.abspath(__file__))
 constants.init(ROOT_PATH)
 
-##@brief Test class for the database connection in ingridents and recipes
-def test_database(engine, SessionLocal):
+## Test class for the database connection in ingredients and recipes
+def test_proyecciones(engine, SessionLocal):
     try:
         logger.info("Creando tablas en la base de datos...")
         Base.metadata.create_all(bind=engine)
@@ -31,88 +32,161 @@ def test_database(engine, SessionLocal):
         
         session = SessionLocal()
         try:
-            # CREATE
+            ##CREATE INGREDIENTS
             logger.info("Insertando ingredientes de prueba...")
             tomate = Ingrediente(nombre="Tomate", clasificacion="Verdura", unidad_medida="kg")
             pollo = Ingrediente(nombre="Pollo", clasificacion="Proteína", unidad_medida="kg")
-            tomate.create(session)
-            pollo.create(session)
-
-            logger.info("Insertando receta de prueba...")
-            receta = Receta(nombre_receta="Pollo con tomate", clasificacion="Plato fuerte", 
-                            periodo="Comida", comensales_base=4)
-            receta.create(session)
-
-            # Create the association between the recipe and ingredients
-            logger.info("Asociando ingredientes a la receta...")
-            ri1 = Receta_Ingredientes(id_receta=receta.id_receta, id_ingrediente=tomate.id_ingrediente, cantidad=0.5)
-            ri2 = Receta_Ingredientes(id_receta=receta.id_receta, id_ingrediente=pollo.id_ingrediente, cantidad=1.0)
-            session.add_all([ri1, ri2])
-            session.commit()
-
-            ## Function to read the recipe and its ingredients
-            logger.info("Consultando la receta creada con sus ingredientes...")
-            receta_leida = session.query(Receta).filter_by(id_receta=receta.id_receta).first()
-            logger.info(f"Receta: {receta_leida.nombre_receta}, {receta_leida.clasificacion}, {receta_leida.periodo}, {receta_leida.comensales_base} comensales")
-
-            ##@brief Get the ingredients associated with the recipe
-            ingredientes_receta = session.query(Receta_Ingredientes).filter_by(id_receta=receta.id_receta).all()
-            for ri in ingredientes_receta:
-                ingrediente = session.get(Ingrediente, ri.id_ingrediente)
-                logger.info(f"- {ingrediente.nombre}: {ri.cantidad} {ingrediente.unidad_medida}")
-
-            ##Function to update the recipe and its ingredients
-            logger.info("Actualizando receta...")
-            receta.update(session, nombre_receta="Pollo con tomate y cebolla", comensales_base=5)
-            receta_actualizada = session.get(Receta, receta.id_receta)
-            logger.info(f"Receta actualizada: {receta_actualizada.nombre_receta}, Comensales: {receta_actualizada.comensales_base}")
-
-            ##Fuction to delete the recipe and its ingredients
-            logger.info("Eliminando receta e ingredientes asociados...")
+            arroz = Ingrediente(nombre="Arroz", clasificacion="Cereal", unidad_medida="kg")
+            cebolla = Ingrediente(nombre="Cebolla", clasificacion="Verdura", unidad_medida="kg")
             
-            ##Delete the association between the recipe and ingredients first
-            session.query(Receta_Ingredientes).filter_by(id_receta=receta.id_receta).delete()
+            session.add_all([tomate, pollo, arroz, cebolla])
             session.commit()
 
-            ##Then delete the recipe and ingredients
-            receta.delete(session)
-            tomate.delete(session)
-            pollo.delete(session)
+            ##CREATE RECIPES
+            logger.info("Insertando recetas de prueba...")
+            pollo_con_tomate = Receta(nombre_receta="Pollo con tomate", clasificacion="Plato fuerte", 
+                            periodo="Comida", comensales_base=4, estatus=True)
+            arroz_con_pollo = Receta(nombre_receta="Arroz con pollo", clasificacion="Plato fuerte", 
+                            periodo="Comida", comensales_base=4, estatus=True)
+            
+            session.add_all([pollo_con_tomate, arroz_con_pollo])
             session.commit()
 
-            logger.info("Verificando que la receta e ingredientes fueron eliminados...")
-            assert session.query(Receta).filter_by(id_receta=receta.id_receta).first() is None
-            assert session.query(Ingrediente).filter_by(id_ingrediente=tomate.id_ingrediente).first() is None
-            assert session.query(Ingrediente).filter_by(id_ingrediente=pollo.id_ingrediente).first() is None
+            ##Add ingredients to recipes
+            logger.info("Asociando ingredientes a las recetas...")
+           
+            
+            ri1 = Receta_Ingredientes(id_receta=pollo_con_tomate.id_receta, id_ingrediente=tomate.id_ingrediente, cantidad=0.5)
+            ri2 = Receta_Ingredientes(id_receta=pollo_con_tomate.id_receta, id_ingrediente=pollo.id_ingrediente, cantidad=1.0)
+            ri3 = Receta_Ingredientes(id_receta=pollo_con_tomate.id_receta, id_ingrediente=cebolla.id_ingrediente, cantidad=0.2)
+            
+            ri4 = Receta_Ingredientes(id_receta=arroz_con_pollo.id_receta, id_ingrediente=arroz.id_ingrediente, cantidad=0.4)
+            ri5 = Receta_Ingredientes(id_receta=arroz_con_pollo.id_receta, id_ingrediente=pollo.id_ingrediente, cantidad=0.8)
+            ri6 = Receta_Ingredientes(id_receta=arroz_con_pollo.id_receta, id_ingrediente=cebolla.id_ingrediente, cantidad=0.15)
+            
+            session.add_all([ri1, ri2, ri3, ri4, ri5, ri6])
+            session.commit()
 
-            logger.info("CRUD completado exitosamente en la base de datos.")
+            # TEST PROJECTIONS
+            logger.info("\n=== PRUEBAS DE PROYECCIONES, RECETAS E INGREDIENTES ===")
+            
+            ##Create a projection
+            recetas_proyeccion = [
+                {"id_receta": pollo_con_tomate.id_receta, "porcentaje": 60},
+                {"id_receta": arroz_con_pollo.id_receta, "porcentaje": 40}
+            ]
+            
+            proyeccion = ProyeccionController.create_projection(
+                session,
+                "Proyeccion Semanal",
+                "Semanal",
+                12,  # comensales
+                recetas_proyeccion
+            )
+            ## Log the created projection
+            logger.info(f"Proyeccion creada: ID={proyeccion.id_proyeccion}, Nombre={proyeccion.nombre}")
+            logger.info(f"Periodo: {proyeccion.periodo}")
+            logger.info(f"Comensales: {proyeccion.comensales}")
+            logger.info(f"Fecha: {proyeccion.fecha}")
+            logger.info(f"Porcentajes: {recetas_proyeccion[0]['porcentaje']}, {recetas_proyeccion[1]['porcentaje']}")
+           
+            ##Read the projection
+            proyeccion_leida = ProyeccionController.read_projection(session, proyeccion.id_proyeccion)
+            logger.info(f"Proyeccion leida: {proyeccion_leida}")
+            
+            ##Show associated recipes
+            proyeccion_recetas = session.query(ProyeccionReceta).filter_by(id_proyeccion=proyeccion.id_proyeccion).all()
+            logger.info("\nRecetas asociadas:")
+            for pr in proyeccion_recetas:
+                receta = session.get(Receta, pr.id_receta)
+                logger.info(f"- {receta.nombre_receta}")
+            
+            ##Calculate total ingredients needed for the projection
+            ingredientes_totales = ProyeccionController.calculate_total_ingredients(session, proyeccion.id_proyeccion)
+            
+            logger.info("\nIngredientes necesarios para la proyeccion:")
+            for ingrediente, cantidad in ingredientes_totales.items():
+                logger.info(f"- {ingrediente}: {cantidad}")
+        
+            nuevas_recetas = [
+                {"id_receta": pollo_con_tomate.id_receta, "porcentaje": 30},
+                {"id_receta": arroz_con_pollo.id_receta, "porcentaje": 70}
+            ]
+            
+            ##Update the projection with new recipes and percentages
+            proyeccion_actualizada = ProyeccionController.update_projection(
+                session,
+                proyeccion.id_proyeccion,
+                "Proyeccion Semanal",
+                20,  
+                nuevas_recetas
+            )
+            logger.info(f"Proyeccion actualizada: {proyeccion_actualizada}")
+            
+            ##Calculate total ingredients needed after update
+            logger.info("\nRecalculando ingredientes tras actualizacion...")
+            ingredientes_actualizados = ProyeccionController.calculate_total_ingredients(session, proyeccion.id_proyeccion)
+            
+            logger.info("\nIngredientes necesarios (actualizado):")
+            for ingrediente, cantidad in ingredientes_actualizados.items():
+                logger.info(f"- {ingrediente}: {cantidad}")
+            
+            ## Log the update projection
+            logger.info(f"Proyeccion creada: ID={proyeccion.id_proyeccion}, Nombre={proyeccion.nombre}")
+            logger.info(f"Periodo: {proyeccion.periodo}")
+            logger.info(f"Comensales: {proyeccion.comensales}")
+            logger.info(f"Fecha: {proyeccion.fecha}")
+            logger.info(f"Porcentajes: {nuevas_recetas[0]['porcentaje']}, {nuevas_recetas[1]['porcentaje']}")           
+            
+            ##Delete the projection
+            ProyeccionController.delete_projection(session, proyeccion.id_proyeccion)
+            
+            ##Verify deletion
+            try:
+                ProyeccionController.read_projection(session, proyeccion.id_proyeccion)
+                logger.error("¡Error! La proyeccion no se elimino correctamente")
+            except ValueError:
+                logger.info("Proyeccion eliminada correctamente")
+            
+            ## Clean up test data
+            logger.info("\nEliminando recetas e ingredientes de prueba...")
+            for ri in [ri1, ri2, ri3, ri4, ri5, ri6]:
+                session.delete(ri)
+            
+            session.delete(pollo_con_tomate)
+            session.delete(arroz_con_pollo)
+            session.delete(tomate)
+            session.delete(pollo)
+            session.delete(arroz)
+            session.delete(cebolla)
+            session.commit()
+            
+            logger.info("CRUD de proyecciones completado exitosamente.")
             return True
-
+        
         except Exception as e:
-            logger.error(f"Error durante el CRUD: {str(e)}")
+            logger.error(f"Error durante las pruebas de proyecciones: {str(e)}")
             session.rollback()
             return False
-
+            
         finally:
             session.close()
-
+            
     except Exception as e:
         logger.error(f"Error al conectar con la base de datos: {str(e)}")
         return False
 
-# Main function to run the test and launch the app
+##Main function to run the test
 if __name__ == '__main__':
-    # Initialize the database connection
+    ##Initialize the database connection
     from src.database.connector import Connector
     db_url = f"mysql+pymysql://{env['DB_USER']}:{env['DB_PASSWORD']}@{env['DB_HOST']}:{env['DB_PORT']}/{env['DB_DATABASE']}"
     connector = Connector(db_url)
     engine = connector.engine
     SessionLocal = connector.Session
 
-    # Running the database test
-    if test_database(engine, SessionLocal):
-        logger.info("Base de datos lista.")
+    ##Running the projections test
+    if test_proyecciones(engine, SessionLocal):
+        logger.info("Pruebas de proyecciones completadas exitosamente.")
     else:
-        logger.error("Error en la coneccion de base de datos.")
-
-    
+        logger.error("Error en las pruebas de proyecciones.")
