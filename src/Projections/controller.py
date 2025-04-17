@@ -1,0 +1,160 @@
+import os
+import sys
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+
+from src.Projections.model import Proyeccion, ProyeccionReceta
+from src.Recipes.model import Receta, Receta_Ingredientes
+from src.Ingredients.model import Ingrediente
+from datetime import date
+
+## Class for managing projections in the database.
+class ProyeccionController:
+    
+    ## Create a new projection in the database.
+    @staticmethod
+    def create_projection(session, nombre, periodo, comensales, recetas):
+        ##Validate that the projection includes at least 2 recipes.
+        if len(recetas) < 2:
+            raise ValueError("La proyeccion debe incluir al menos 2 recetas")
+        
+        ##Validate that the sum of the percentages is 100.
+        total_porcentaje = sum(r["porcentaje"] for r in recetas)
+        if total_porcentaje != 100:
+            raise ValueError(f"La suma de porcentajes debe ser 100% (actual: {total_porcentaje}%)")
+        
+        ##Create the projection with the current date
+        proyeccion = Proyeccion(
+            numero_usuario=1,  
+            nombre=nombre,
+            periodo=periodo,
+            comensales=comensales,
+            fecha=date.today(),
+            estatus=True
+        )
+        
+        session.add(proyeccion)
+        session.commit()
+        
+        ##Create ProyeccionReceta associations
+        for receta_info in recetas:
+            proyeccion_receta = ProyeccionReceta(
+                id_proyeccion=proyeccion.id_proyeccion,
+                id_receta=receta_info["id_receta"],
+                porcentaje=receta_info["porcentaje"]
+            )
+            session.add(proyeccion_receta)
+        
+        session.commit()
+        
+        return proyeccion
+    ## Read a projection from the database.
+    @staticmethod
+    def read_projection(session, id_proyeccion):
+        ##Retrieve projection from the database
+        projection = session.query(Proyeccion).filter(Proyeccion.id_proyeccion == id_proyeccion).first()
+        if not projection:
+            raise ValueError(f"No se encontro la proyeccion con ID {id_proyeccion}")
+        return projection
+    
+    ## Update an existing projection in the database.
+    @staticmethod
+    def update_projection(session, id_proyeccion, nombre, comensales, recetas):
+        proyeccion = session.query(Proyeccion).filter(Proyeccion.id_proyeccion == id_proyeccion).first()
+        ##Validate that the projection includes at least 2 recipes.
+        if len(recetas) < 2:
+            raise ValueError("La proyeccion debe incluir al menos 2 recetas")
+        
+        ##Validate that the sum of the percentages is 100.
+        total_porcentaje = sum(r["porcentaje"] for r in recetas)
+        if total_porcentaje != 100:
+            raise ValueError(f"La suma de porcentajes debe ser 100% (actual: {total_porcentaje}%)")
+        
+        ##Get the projection
+        proyeccion = session.get(Proyeccion, id_proyeccion)
+        if not proyeccion:
+            raise ValueError(f"No se encontro la proyeccion con ID {id_proyeccion}")
+        
+        ##Update the projection
+        proyeccion.nombre = nombre
+        proyeccion.comensales = comensales
+        
+        ##Delete existing recipe associations
+        session.query(ProyeccionReceta).filter_by(id_proyeccion=id_proyeccion).delete()
+        
+        ##Create new recipe associations
+        for receta_info in recetas:
+            proyeccion_receta = ProyeccionReceta(
+                id_proyeccion=id_proyeccion,
+                id_receta=receta_info["id_receta"],
+                porcentaje=receta_info["porcentaje"]
+            )
+            session.add(proyeccion_receta)
+        
+        session.commit()
+        
+        return proyeccion
+    
+    ## Calculate the total ingredients needed for a projection.
+    @staticmethod
+    def calculate_total_ingredients(session, id_proyeccion):
+        ##Validate that the projection exists.
+        proyeccion = session.get(Proyeccion, id_proyeccion)
+        if not proyeccion:
+            raise ValueError(f"No se encontro la proyeccion con ID {id_proyeccion}")
+        
+        ##Get the associated recipes
+        proyeccion_recetas = session.query(ProyeccionReceta).filter_by(id_proyeccion=id_proyeccion).all()
+        recetas_count = len(proyeccion_recetas)
+        
+        ##If no recipes are associated, return empty dictionary
+        if recetas_count == 0:
+            return {}
+        
+        porcentaje_por_receta = 100 / recetas_count
+        
+        ##Initialize a dictionary to store the total ingredients
+        total_ingredientes = {}
+        
+        ##Iterate through the recipes and calculate the total ingredients needed
+        for pr in proyeccion_recetas:
+            receta = session.get(Receta, pr.id_receta)
+            if not receta:
+                continue
+                
+            factor = (proyeccion.comensales / receta.comensales_base) * (porcentaje_por_receta / 100)
+            
+            ##Get recipe ingredients using proper query
+            receta_ingredientes = session.query(Receta_Ingredientes).filter_by(id_receta=receta.id_receta).all()
+            
+            for ri in receta_ingredientes:
+                ingrediente = session.get(Ingrediente, ri.id_ingrediente)
+                if not ingrediente:
+                    continue
+                
+                nombre = ingrediente.nombre
+                cantidad = ri.cantidad * factor
+                unidad = ingrediente.unidad_medida
+                
+                if nombre in total_ingredientes:
+                    existing_qty_str = total_ingredientes[nombre].split()[0]
+                    existing_qty = float(existing_qty_str)
+                    total_ingredientes[nombre] = f"{existing_qty + cantidad} {unidad}"
+                else:
+                    total_ingredientes[nombre] = f"{cantidad} {unidad}"
+        
+        return total_ingredientes
+    
+    ## Delete a projection from the database.
+    @staticmethod
+    def delete_projection(session, id_proyeccion):
+        ##Delete related records in ProyeccionReceta first
+        session.query(ProyeccionReceta).filter_by(id_proyeccion=id_proyeccion).delete()
+        
+        ##Then delete the Proyeccion record
+        proyeccion = session.get(Proyeccion, id_proyeccion)
+        if proyeccion:
+            session.delete(proyeccion)
+            session.commit()
+        else:
+            raise ValueError(f"No se encontro la proyeccion con ID {id_proyeccion}")
