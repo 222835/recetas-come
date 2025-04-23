@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 from src.Recipes.model import Receta, Receta_Ingredientes
 from src.Ingredients.model import Ingrediente
 from src.database.connector import Base
+from datetime import date
 
 class RecetasController:
     
@@ -116,7 +117,22 @@ class RecetasController:
             return True
         return False
 
-    ## @brief Delete a recipe from the database.
+    ## @brief Deactivate a recipe (send it to the trash can).
+    @staticmethod
+    def deactivate_recipe(session: Session, numero_receta: int, user_role: str) -> bool:
+        if user_role != 'admin':
+            raise PermissionError("Solo los administradores pueden desactivar recetas.")
+            
+        receta = session.query(Receta).filter(Receta.id_receta == numero_receta).first()
+
+        if receta:
+            receta.estatus = False
+            receta.fecha_eliminado = date.today()
+            session.commit()
+            return True
+        return False
+    
+    ## @brief Delete a recipe (permanently) from the database.
     @staticmethod
     def delete_recipe(session: Session, numero_receta: int, user_role: str) -> bool:  
         if user_role != 'admin':
