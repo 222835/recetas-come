@@ -30,6 +30,11 @@ class Costos(Base):
         session.add(self)
         session.commit()
 
+    def bulk_create(self, session, costs: list[Self]) -> None:
+        """Insert multiple costs into the database"""
+        session.add_all(costs)
+        session.commit()
+    
     def read(self, session) -> Self:
         """Fetch a cost from the database by its id"""
         return session.query(Costos).filter(Costos.id_costo == self.id_costo).first()
@@ -46,4 +51,8 @@ class Costos(Base):
         """Delete the cost from the database"""
         session.delete(self)
         session.commit()
+
+    def get_all_costs(self, session) -> list[Self]:
+        """Fetch all costs from the database"""
+        return session.query(Costos).all()
     

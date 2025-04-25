@@ -52,3 +52,25 @@ class Proveedor(Base):
     def delete(self, session) -> None:
         session.delete(self)
         session.commit()
+
+    ##@brief Fetch all providers from the database
+    ##@param session The SQLAlchemy session
+    ##@return A list of all provider objects
+    def get_all_providers(self, session) -> list[Self]:
+        return session.query(Proveedor).all()
+    
+    ##@brief Fetch all providers by name from the database
+    ##@param session The SQLAlchemy session
+    ##@param nombre The name of the provider
+    ##@return A list of provider objects that match the name
+    def get_providers_by_name(self, session, nombre: str) -> list[Self]:
+        return session.query(Proveedor).filter(Proveedor.nombre == nombre).all()
+    
+    ##@brief Fetch all providers by category from the database
+    ##@param session The SQLAlchemy session
+    ##@param categoria The category of the provider
+    ##@return A list of provider objects that match the category
+    def get_providers_by_category(self, session, categoria: str) -> list[Self]:
+        return session.query(Proveedor).filter(Proveedor.categoria == categoria).all()
+    
+    
