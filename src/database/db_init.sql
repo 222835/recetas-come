@@ -44,7 +44,9 @@ CREATE TABLE Receta_Ingredientes(
 );
 
 CREATE TABLE Costos (
+    id_costo INT AUTO_INCREMENT PRIMARY KEY,
     id_proveedor INT NOT NULL,
+    nombre_ingrediente VARCHAR(100) NOT NULL,
     precio DECIMAL(10,2) NOT NULL,
     FOREIGN KEY (id_proveedor) REFERENCES Proveedores(id_proveedor)
 );
