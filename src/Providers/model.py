@@ -17,7 +17,7 @@ class Proveedor(Base):
     ##@brief Constructor for the provider class
     ##@param nombre The name of the provider
     ##@param categoria The category of the provider (optional)
-    def __init__(self, nombre: str, categoria: str | None = None) -> None:
+    def __init__(self, nombre: str|None = None, categoria: str | None = None) -> None:
         self.nombre = nombre
         self.categoria = categoria
 
@@ -27,8 +27,14 @@ class Proveedor(Base):
     ##@brief Insert a new provider into the database
     ##@param session The SQLAlchemy session
     def create(self, session) -> None:
+        if not self.nombre:
+            raise ValueError("El nombre del proveedor no puede estar vacío")
         session.add(self)
-        session.commit()
+        try:
+            session.commit()
+        except Exception as e:
+            session.rollback()
+            raise e
 
     ##@brief Fetch a provider from the database by its id
     ##@param session The SQLAlchemy session

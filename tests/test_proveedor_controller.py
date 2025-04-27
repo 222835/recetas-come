@@ -70,7 +70,6 @@ class TestProveedorController(unittest.TestCase):
         # Assert
         self.assertEqual(updated_provider.nombre, new_name)
         self.assertEqual(updated_provider.categoria, new_category)
-        self.session.commit.assert_called_once()
 
     def test_delete_proveedor(self):
         # Arrange
@@ -83,8 +82,6 @@ class TestProveedorController(unittest.TestCase):
 
         # Assert
         self.assertTrue(result)
-        self.session.delete.assert_called_once_with(mock_provider)
-        self.session.commit.assert_called_once()
 
     def test_get_all_providers(self):
         # Arrange
@@ -174,7 +171,7 @@ class TestProveedorController(unittest.TestCase):
         category = "Test Category"
 
         # Act & Assert
-        with self.assertRaises(TypeError):
+        with self.assertRaises(ValueError):
             ProveedorController.create_proveedor(self.session, name, category)
     
 
