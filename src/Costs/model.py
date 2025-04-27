@@ -11,16 +11,18 @@ class Costos(Base):
     __tablename__ = "Costos"
 
     id_costo = Column(Integer, primary_key=True, autoincrement=True)
-    id_proveedor = Column(Integer, foreign_key="Proveedores.id_proveedor", nullable=False)
+    id_proveedor = Column(Integer, nullable=False)
     nombre = Column(String(100), nullable=False)
     precio = Column(Integer, nullable=False)
 
     """@brief Constructor for the cost class
     @param nombre The name of the cost
     @param categoria The category of the cost (optional)"""
-    def __init__(self, nombre: str, categoria: str | None = None) -> None:
+    def __init__(self, nombre: str | None = None, categoria: str | None = None, precio:int | None = None, id_proveedor :int| None = None) -> None:
         self.nombre = nombre
         self.categoria = categoria
+        self.precio = precio
+        self.id_proveedor = id_proveedor
 
     def __repr__(self) -> str:
         return f"Costo({self.nombre}, {self.categoria})"
