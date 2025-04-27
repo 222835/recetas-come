@@ -31,7 +31,8 @@ CREATE TABLE Recetas (
     clasificacion VARCHAR(50),
     periodo VARCHAR(50) NOT NULL,                       
     comensales_base INT NOT NULL,
-    estatus boolean NOT NULL                 
+    estatus boolean NOT NULL,
+    fecha_eliminado DATE
 );
 
 CREATE TABLE Receta_Ingredientes(
@@ -55,7 +56,8 @@ CREATE TABLE Proyecciones (
     periodo VARCHAR(50),
     comensales INT NOT NULL,
     fecha DATE NOT NULL,
-    estatus BOOLEAN NOT NULL                
+    estatus BOOLEAN NOT NULL,
+    fecha_eliminado DATE
 );
 
 CREATE TABLE Proyeccion_Recetas (
