@@ -6,6 +6,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '.
 from sqlalchemy.orm import Session
 from src.Recipes.model import Receta, Receta_Ingredientes
 from src.Ingredients.model import Ingrediente
+from src.Users.model import Usuario
 from src.database.connector import Base
 from datetime import date
 
@@ -119,8 +120,9 @@ class RecetasController:
 
     ## @brief Deactivate a recipe (send it to the trash can).
     @staticmethod
-    def deactivate_recipe(session: Session, numero_receta: int, user_role: str) -> bool:
-        if user_role != 'admin':
+    def deactivate_recipe(session: Session, numero_receta: int, numero_usuario: int) -> bool:
+        user = session.get(Usuario, numero_usuario)
+        if not user or user.rol != 'admin':
             raise PermissionError("Solo los administradores pueden desactivar recetas.")
             
         receta = session.query(Receta).filter(Receta.id_receta == numero_receta).first()
