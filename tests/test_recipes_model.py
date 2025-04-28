@@ -8,6 +8,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from src.database.connector import Base
 from src.Recipes.model import Receta, Receta_Ingredientes
+from src.Recipes.controller import RecetasController
 from src.Ingredients.model import Ingrediente
 
 ##Test class for Receta model, using SQLite in-memory database
@@ -124,9 +125,36 @@ class TestRecetaModel(unittest.TestCase):
         receta.delete(self.session)
         deleted = self.session.query(Receta).filter_by(nombre_receta="Chilaquiles").first()
 
-       
-
         self.assertIsNone(deleted)
 
+    ## Test list all recipes with ingredients
+    def test_list_all_recipes_with_ingredients(self):
+        from src.Recipes.controller import RecetasController
+
+        ##Create a recipe and add ingredients
+        receta1 = Receta(nombre_receta="Chilaquiles verdes", clasificacion="Platillo principal", periodo="Desayuno", comensales_base=5, estatus=True)
+        receta1.create(self.session)
+        self.add_ingredients_to_chilaquiles(receta1)
+
+        receta2 = Receta(nombre_receta="Chilaquiles rojos", clasificacion="Platillo principal", periodo="Comida", comensales_base=4, estatus=True)
+        receta2.create(self.session)
+        self.add_ingredients_to_chilaquiles(receta2)
+
+        ##Call the method to list all recipes with ingredients
+        listado = RecetasController.list_all_recipes_with_ingredients(self.session)
+
+        print(f"\n***LISTAR RECETAS CON INGREDIENTES***\n")
+        for receta_data in listado:
+            print(f"Receta: {receta_data['nombre_receta']}")
+            print(f"Clasificacion: {receta_data['clasificacion_receta']}")
+            print(f"Periodo: {receta_data['periodo']}")
+            print(f"Comensales base: {receta_data['comensales_base']}")
+            print(f"ID Receta: {receta_data['id_receta']}")
+            print(f"Ingredientes:")
+            for ingrediente in receta_data['ingredientes']:
+                print(f"- {ingrediente['nombre_ingrediente']}: {ingrediente['Cantidad']} {ingrediente['Unidad']}")
+            print("\n")
+            
+      
 if __name__ == '__main__':
     unittest.main()

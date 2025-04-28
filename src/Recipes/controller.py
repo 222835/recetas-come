@@ -164,8 +164,9 @@ class RecetasController:
                 ingredientes.append({
                     "nombre_ingrediente": ingrediente.nombre,
                     "clasificacion": ingrediente.clasificacion,
-                    "cantidad": ri.cantidad,
-                    "unidad": ri.unidad
+                    "id_ingrediente": ingrediente.id_ingrediente,
+                    "Cantidad": ri.cantidad,
+                    "Unidad": ingrediente.unidad_medida 
                 })
             
             receta_data = {
