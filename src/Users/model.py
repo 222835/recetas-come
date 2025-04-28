@@ -1,13 +1,18 @@
+import os
+import sys
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
+ 
 from typing import Self
 from sqlalchemy import Column, Integer, String
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, declarative_base
 from sqlalchemy import create_engine
 from src.security.password_utils import Security
 
 Base = declarative_base()
 
-class Usuario(Base):  # Renamed to Usuario to match the database table name
+## @brief User model class, this class is used to represent a user in the database
+class Usuario(Base):  
     """@brief User model class
     @details This class is used to represent a user in the database
     """
@@ -19,6 +24,7 @@ class Usuario(Base):  # Renamed to Usuario to match the database table name
     contrasenia = Column(String(50))
     rol = Column(String(20))
 
+    ## @brief Constructor of the class
     def __init__(self, nombre_completo: str, contrasenia: str, rol: str, nombre_usuario: str) -> None:
         """@brief Constructor
         @details Creates a new user object
@@ -32,25 +38,30 @@ class Usuario(Base):  # Renamed to Usuario to match the database table name
         self.contrasenia = Security.generate_password(contrasenia)
         self.rol = rol
 
+    ## @brief String representation of the class
     def __repr__(self) -> str:
         return f"<Usuario(numero_usuario='{self.numero_usuario}', nombre_completo='{self.nombre_completo}', rol='{self.rol}')>"
 
+    ## @brief Get the session for the database
     def create(self, session) -> None:
         """@brief Create a new user in the database
         """
         session.add(self)
         session.commit()
 
+    ## @brief Get the session for the database
     def read(self, session) -> Self:
         """@brief Read a user from the database
         """
         return session.query(Usuario).filter(Usuario.numero_usuario == self.numero_usuario).first()
     
+    ## @brief Get the session for the database
     def read_by_username(self, session, nombre_usuario:str) -> Self:
          """@brief Read a user from the database by username
          """
          return session.query(Usuario).filter(Usuario.nombre_usuario == nombre_usuario).first()
-
+    
+    ## @brief Get the session for the database
     def update(self, session, nombre_completo:str|None=None, contrasenia:str|None=None, 
                nombre_usuario:str|None = None, rol:str|None=None) -> None:
         """@brief Update the user in the database
@@ -65,12 +76,14 @@ class Usuario(Base):  # Renamed to Usuario to match the database table name
             self.rol = rol
         session.commit()
 
+    ## @brief Get the session for the database
     def delete(self, session) -> None:
         """@brief Delete the user from the database
         """
         session.delete(self)
         session.commit()
         
+    ## @brief Get the session for the database     
     def edit_account_info(editor, target, session, nombre_completo: str | None = None, 
               contrasenia: str | None = None, nombre_usuario: str | None = None) -> None:
         """@brief Allows users to edit account information, depending on their roles and other constraints
@@ -89,6 +102,7 @@ class Usuario(Base):  # Renamed to Usuario to match the database table name
         else:
             target.update(session, contrasenia = contrasenia, nombre_usuario = nombre_usuario)
 
+    ## @brief Get the session for the database
     def delete_account(editor, target, session) -> None:
         """@brief Allows only admins to delete other accounts
         """

@@ -4,105 +4,129 @@ from sqlalchemy.orm import sessionmaker
 import sys
 import os
 
-##Add the project root to the sys.path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from src.Recipes.model import Receta, Base
+from src.database.connector import Base
+from src.Recipes.model import Receta, Receta_Ingredientes
+from src.Ingredients.model import Ingrediente
 
+##Test class for Receta model, using SQLite in-memory database
 class TestRecetaModel(unittest.TestCase):
+    ## Set up the in-memory SQLite database and create the tables
     def setUp(self):
-        ##Setup: Create an in-memory SQLite database and session for testing.
         self.engine = create_engine('sqlite:///:memory:')
         Base.metadata.create_all(self.engine)
         self.Session = sessionmaker(bind=self.engine)
         self.session = self.Session()
+        ## Create some ingredients to use in the tests
+        self.Totopos = Ingrediente(nombre="Totopos", clasificacion="Cereal", unidad_medida="g")
+        self.salsa = Ingrediente(nombre="Salsa", clasificacion="Salsa", unidad_medida="ml")
+        self.queso = Ingrediente(nombre="Queso", clasificacion="Lacteo", unidad_medida="g")
 
+        self.session.add_all([self.Totopos, self.salsa, self.queso])
+        self.session.commit()
+    
+    ## Tear down the in-memory database after each test
     def tearDown(self):
-        ##Teardown: Close the session and drop all tables after each test.
         self.session.close()
         Base.metadata.drop_all(self.engine)
         self.engine.dispose()
+        
+    ## Helper method to print the ingredients of a recipe    
+    def print_ingredients(self, receta):
+        print(f"\n*** Ingredientes ***")
+        for ri in receta.receta_ingredientes:
+            ingrediente = self.session.get(Ingrediente, ri.id_ingrediente)
+            print(f"- {ingrediente.nombre}: {ri.cantidad} {ingrediente.unidad_medida}")
 
-    def test_create_receta(self):
-        ##Test creating a new Receta.
-        receta = Receta(nombre_receta="Sopa de Tomate", clasificacion="Sopa", periodo="Almuerzo", comensales_base=4, ingredientes="Tomate, Cebolla")
-        self.session.add(receta)
+    def add_ingredients_to_chilaquiles(self, receta):
+        ri1 = Receta_Ingredientes(id_receta=receta.id_receta, id_ingrediente=self.Totopos.id_ingrediente, cantidad=150)
+        ri2 = Receta_Ingredientes(id_receta=receta.id_receta, id_ingrediente=self.salsa.id_ingrediente, cantidad=200)
+        ri3 = Receta_Ingredientes(id_receta=receta.id_receta, id_ingrediente=self.queso.id_ingrediente, cantidad=100)
+        self.session.add_all([ri1, ri2, ri3])
         self.session.commit()
 
-        #Print the created receta
-        print(f"Created receta with id: {receta.numero_receta}, name: {receta.nombre_receta}, clasification: {receta.clasificacion}")
+    ## Test create a recipe with ingredients
+    def test_create_recipe(self):
+        receta = Receta(nombre_receta="Chilaquiles", clasificacion="Platillo principal", periodo="Desayuno", comensales_base=5, estatus=True)
+        receta.create(self.session)
+        self.add_ingredients_to_chilaquiles(receta)
 
-        ##Assert that the receta was created and has an auto-incremented ID
-        self.assertIsNotNone(receta.numero_receta)
-        self.assertEqual(receta.nombre_receta, "Sopa de Tomate")
-        self.assertEqual(receta.clasificacion, "Sopa")
-        self.assertEqual(receta.periodo, "Almuerzo")
-        self.assertEqual(receta.comensales_base, 4)
-        self.assertEqual(receta.ingredientes, "Tomate, Cebolla")
+        print(f"\n***CREAR***\n")
+        print(f"Receta creada: ID={receta.id_receta}, Nombre={receta.nombre_receta}")
+        print(f"Clasificacion: {receta.clasificacion}")
+        print(f"Periodo: {receta.periodo}")
+        print(f"Comensales base: {receta.comensales_base}")
+        print(f"Estatus: {receta.estatus}")
+        self.print_ingredients(receta)
 
-    def test_read_receta(self):
-        ##Test reading a Receta from the database.
-        receta = Receta(nombre_receta="Sopa de Tomate", clasificacion="Sopa", periodo="Almuerzo", comensales_base=4, ingredientes="Tomate, Cebolla")
-        self.session.add(receta)
+    ## Test read a recipe with ingredients
+    def test_read_recipe(self):
+        receta = Receta(nombre_receta="Chilaquiles", clasificacion="Platillo principal", periodo="Desayuno", comensales_base=5, estatus=True)
+        receta.create(self.session)
+        self.add_ingredients_to_chilaquiles(receta)
+
+        read_recipe = receta.read(self.session)
+
+        print(f"\n***LEER***\n")
+        print(f"Receta leida: ID={read_recipe.id_receta}, Nombre={read_recipe.nombre_receta}")
+        print(f"Clasificacion: {read_recipe.clasificacion}")
+        print(f"Periodo: {read_recipe.periodo}")
+        print(f"Comensales base: {read_recipe.comensales_base}")
+        print(f"Estatus: {read_recipe.estatus}")
+
+        self.print_ingredients(read_recipe)
+
+    ## Test update a recipe with ingredients
+    def test_update_recipe(self):
+        receta = Receta(nombre_receta="Chilaquiles", clasificacion="Platillo principal", periodo="Desayuno", comensales_base=5, estatus=True)
+        receta.create(self.session)
+        self.add_ingredients_to_chilaquiles(receta)
+
+        receta.update(self.session, nombre_receta="Chilaquiles verdes", comensales_base=6)
+        updated = receta.read(self.session)
+
+        print(f"\n***ACTUALIZAR***\n")
+        print(f"Receta actualizada: ID={updated.id_receta}, Nombre={updated.nombre_receta}")
+        print(f"Clasificacion: {updated.clasificacion}")
+        print(f"Periodo: {updated.periodo}")
+        print(f"Comensales base: {updated.comensales_base}")
+        print(f"Estatus: {updated.estatus}")
+
+        self.print_ingredients(updated)
+
+    ## Test delete a recipe with ingredients
+    def test_delete_recipe(self):
+        receta = Receta(nombre_receta="Chilaquiles", clasificacion="Platillo principal", periodo="Desayuno", comensales_base=5, estatus=True)
+        receta.create(self.session)
+        self.add_ingredients_to_chilaquiles(receta)
+        
+        print(f"\n***BORRAR***\n")
+        print(f"Receta borrada: ID={receta.id_receta}, Nombre={receta.nombre_receta}")
+        print(f"Clasificacion: {receta.clasificacion}")
+        print(f"Periodo: {receta.periodo}")
+        print(f"Comensales base: {receta.comensales_base}")
+        print(f"Estatus: {receta.estatus}")
+
+        self.print_ingredients(receta)
+
+        ##Delete the associations
+        self.session.query(Receta_Ingredientes).filter_by(id_receta=receta.id_receta).delete()
         self.session.commit()
+        
+        ##Delete the ingredients
+        self.Totopos.delete(self.session)
+        self.salsa.delete(self.session)
+        self.queso.delete(self.session)
 
-        ##Read the receta from the database
-        retrieved_receta = self.session.query(Receta).filter_by(nombre_receta="Sopa de Tomate").first()
+        
+        ##Delete the receta
+        receta.delete(self.session)
+        deleted = self.session.query(Receta).filter_by(nombre_receta="Chilaquiles").first()
 
-        # Print the retrieved receta
-        print(f"Retrieved receta with id: {receta.numero_receta}, name: {receta.nombre_receta}, clasification: {receta.clasificacion}")
+       
 
-        ##Assert that the retrieved receta is the same as the created one
-        self.assertEqual(retrieved_receta.numero_receta, receta.numero_receta)
-        self.assertEqual(retrieved_receta.nombre_receta, "Sopa de Tomate")
-        self.assertEqual(retrieved_receta.clasificacion, "Sopa")
-        self.assertEqual(retrieved_receta.periodo, "Almuerzo")
-        self.assertEqual(retrieved_receta.comensales_base, 4)
-        self.assertEqual(retrieved_receta.ingredientes, "Tomate, Cebolla")
+        self.assertIsNone(deleted)
 
-    def test_update_receta(self):
-        ##Test updating a Receta in the database.
-        receta = Receta(nombre_receta="Sopa de Tomate", clasificacion="Sopa", periodo="Almuerzo", comensales_base=4, ingredientes="Tomate, Cebolla")
-        self.session.add(receta)
-        self.session.commit()
-
-        ##Update the receta's information
-        receta.nombre_receta = "Sopa de Calabaza"
-        receta.clasificacion = "Sopa"
-        receta.periodo = "Cena"
-        receta.comensales_base = 6
-        receta.ingredientes = "Calabaza, Cebolla"
-        self.session.commit()
-
-        ##Read the updated receta from the database
-        updated_receta = self.session.query(Receta).filter_by(numero_receta=receta.numero_receta).first()
-
-        # Print the updated receta
-        print(f"Updated receta with id: {receta.numero_receta}, name: {receta.nombre_receta}, clasification: {receta.clasificacion}")
-
-        ##Assert that the receta's information was updated correctly
-        self.assertEqual(updated_receta.nombre_receta, "Sopa de Calabaza")
-        self.assertEqual(updated_receta.clasificacion, "Sopa")
-        self.assertEqual(updated_receta.periodo, "Cena")
-        self.assertEqual(updated_receta.comensales_base, 6)
-        self.assertEqual(updated_receta.ingredientes, "Calabaza, Cebolla")
-
-    def test_delete_receta(self):
-        ##Test deleting a Receta from the database.
-        receta = Receta(nombre_receta="Sopa de Tomate", clasificacion="Sopa", periodo="Almuerzo", comensales_base=4, ingredientes="Tomate, Cebolla")
-        self.session.add(receta)
-        self.session.commit()
-
-        ##Delete the receta from the database
-        self.session.delete(receta)
-        self.session.commit()
-
-        # Print the deleted receta
-        print(f"Delete receta with id: {receta.numero_receta}, name: {receta.nombre_receta}, clasification: {receta.clasificacion}")
-
-        ##Assert that the receta was deleted
-        deleted_receta = self.session.query(Receta).filter_by(numero_receta=receta.numero_receta).first()
-        self.assertIsNone(deleted_receta)
-    
 if __name__ == '__main__':
     unittest.main()

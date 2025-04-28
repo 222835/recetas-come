@@ -159,7 +159,7 @@ class LoginApp(ctk.CTk):
         from src.database.connector import Connector
         from src.utils.constants import env
 
-        connection_string = f"mariadb://{env['DB_USER']}:{env['DB_PASSWORD']}@{env['DB_HOST']}:3307/{env['DB_DATABASE']}"
+        connection_string = f"mariadb://{env['DB_USER']}:{env['DB_PASSWORD']}@{env['DB_HOST']}:{env['DB_PORT']}/{env['DB_DATABASE']}"
         connector = Connector(connection_string)
 
         query = f"SELECT rol, contrasenia FROM Usuarios WHERE nombre_usuario = '{usuario}'"

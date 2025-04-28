@@ -1,54 +1,38 @@
+import os
+import sys
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+
 from typing import Self
 from sqlalchemy import Column, Integer, String
-from sqlalchemy.orm import declarative_base
+from sqlalchemy.orm import relationship
+from src.database.connector import Base
 
-Base = declarative_base()
-
+##@brief Base class for all models, this class is used to represent an ingredient in the database
 class Ingrediente(Base):
-    ##@brief Ingredient model class
-    ##@details This class is used to represent an ingredient in the database
-    
-    __tablename__ = "Ingredientes"
+    __tablename__ = "ingredientes"
 
     id_ingrediente = Column(Integer, primary_key=True, autoincrement=True)
     nombre = Column(String(100), nullable=False)
     clasificacion = Column(String(50))
-    unidad_medida = Column(String(20))
+    unidad_medida = Column(String(20), nullable=False)
 
+    receta_ingredientes = relationship("Receta_Ingredientes", back_populates="ingrediente")
+
+    ##@brief Constructor for the ingredient class, initializes the ingredient with a name, classification, and unit of measurement
     def __init__(self, nombre: str, clasificacion: str | None = None, unidad_medida: str | None = None) -> None:
-        ##@brief Constructor for the ingredient class
-        ##@param nombre The name of the ingredient
-        ##@param clasificacion The classification of the ingredient (optional)
-        ##@param unidad_medida The unit of measurement for the ingredient (optional)
-    
         self.nombre = nombre
         self.clasificacion = clasificacion
         self.unidad_medida = unidad_medida
 
-    def __repr__(self) -> str:
-        return f"Ingrediente({self.nombre}, {self.clasificacion}, {self.unidad_medida})"
-
+    ##@brief Create an ingredient in database.
     def create(self, session) -> None:
-        ##@brief Insert a new ingredient into the database
-        ##@param session The SQLAlchemy session
-
         session.add(self)
         session.commit()
 
-    def read(self, session) -> Self:
-        ##@brief Fetch an ingredient from the database by its id
-        ##@param session The SQLAlchemy session
-        ##@return The ingredient object
-
-        return session.query(Ingrediente).filter(Ingrediente.id_ingrediente == self.id_ingrediente).first()
-
+    ##@brief Update an ingredient in database.
     def update(self, session, nombre: str | None = None, clasificacion: str | None = None, 
                unidad_medida: str | None = None) -> None:
-        ##@brief Update an ingredient's information in the database
-        ##@param session The SQLAlchemy session
-        ##@param nombre The name of the ingredient (optional)
-        ##@param clasificacion The classification of the ingredient (optional)
-        ##@param unidad_medida The unit of measurement (optional)
 
         if nombre:
             self.nombre = nombre
@@ -58,8 +42,14 @@ class Ingrediente(Base):
             self.unidad_medida = unidad_medida
         session.commit()
 
+    ## @brief Method to read an ingredient from the database
+    def read(self, session) -> "Ingrediente":
+        return session.query(Ingrediente).filter(Ingrediente.id_ingrediente == self.id_ingrediente).first()
+    
+    ##@brief Delete an ingredient from the database.
     def delete(self, session) -> None:
-        ##@brief Delete the ingredient from the database
-        ##@param session The SQLAlchemy session
         session.delete(self)
         session.commit()
+
+    def __repr__(self) -> str:
+        return f"Ingrediente: {self.nombre}, {self.clasificacion}, {self.unidad_medida}"
