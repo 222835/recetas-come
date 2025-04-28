@@ -46,9 +46,9 @@ def test_proyecciones(engine, SessionLocal):
             ##CREATE RECIPES
             logger.info("Insertando recetas de prueba...")
             pollo_con_tomate = Receta(nombre_receta="Pollo con tomate", clasificacion="Plato fuerte", 
-                            periodo="Comida", comensales_base=4, estatus=True)
+                            periodo="Comida", comensales_base=4, estatus=True, fecha_eliminado=None)
             arroz_con_pollo = Receta(nombre_receta="Arroz con pollo", clasificacion="Plato fuerte", 
-                            periodo="Comida", comensales_base=4, estatus=True)
+                            periodo="Comida", comensales_base=4, estatus=True, fecha_eliminado=None)
             
             session.add_all([pollo_con_tomate, arroz_con_pollo])
             session.commit()
@@ -69,7 +69,7 @@ def test_proyecciones(engine, SessionLocal):
             session.commit()
 
             ##Test list all recipes with ingredients
-            listado = RecetasController.list_all_recipes_with_ingredients.all()
+            listado = RecetasController.list_all_recipes_with_ingredients(session)
             logger.info("\n***LISTAR RECETAS CON INGREDIENTES***\n")
             for receta_data in listado:
                 logger.info(f"Receta: {receta_data['nombre_receta']}")
