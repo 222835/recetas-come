@@ -17,18 +17,20 @@ class Proyeccion(Base):
     comensales = Column(Integer, nullable=False)
     fecha = Column(Date, nullable=False)
     estatus = Column(Boolean, default=True)
+    fecha_eliminado = Column(Date, nullable=True)
 
     ## Relationship with Recetas and ProyeccionRecetas.
     proyeccion_recetas = relationship("ProyeccionReceta", back_populates="proyeccion")
 
     ## Constructor of the class.
-    def __init__(self, numero_usuario: int, nombre: str, periodo: str, comensales: int, fecha, estatus: bool = True) -> None:
+    def __init__(self, numero_usuario: int, nombre: str, periodo: str, comensales: int, fecha, estatus: bool = True, fecha_eliminado: Date | None = None) -> None:
         self.numero_usuario = numero_usuario
         self.nombre = nombre
         self.periodo = periodo
         self.comensales = comensales
         self.fecha = fecha
         self.estatus = estatus
+        self.fecha_eliminado = fecha_eliminado
 
     ## Method to create a new projection in the database.
     def create(self, session):
@@ -43,7 +45,7 @@ class Proyeccion(Base):
             return session.query(Proyeccion).all()
 
     ## Method to update projections in the database.
-    def update(self, session, nombre: str = None, periodo: str = None, comensales: int = None, fecha = None, estatus: bool = None):
+    def update(self, session, nombre: str = None, periodo: str = None, comensales: int = None, fecha = None, estatus: bool = None, fecha_eliminado: Date | None = None):
         if nombre:
             self.nombre = nombre
         if periodo:
@@ -54,6 +56,8 @@ class Proyeccion(Base):
             self.fecha = fecha
         if estatus is not None:
             self.estatus = estatus
+        if fecha_eliminado is not None:
+            self.fecha_eliminado = fecha_eliminado
         session.commit()
 
     ## Method to delete a projection from the database.
@@ -62,7 +66,7 @@ class Proyeccion(Base):
         session.commit()
 
     def __repr__(self):
-        return f"Proyeccion: {self.nombre}, Periodo: {self.periodo}, Comensales: {self.comensales}, Fecha: {self.fecha}, Estatus: {self.estatus}"
+        return f"Proyeccion: {self.nombre}, Periodo: {self.periodo}, Comensales: {self.comensales}, Fecha: {self.fecha}, Estatus: {self.estatus}, Fecha eliminada: {self.fecha_eliminado}"
 
 ### Data model for ProyeccionRecetas. This model is used to store the recipes of the projections.
 class ProyeccionReceta(Base):

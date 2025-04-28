@@ -145,6 +145,18 @@ class ProyeccionController:
         
         return total_ingredientes
     
+    ## @brief Deactivate a projection (send it to the trash can).
+    @staticmethod
+    def deactivate_projection(session, id_proyeccion: int) -> bool:
+            
+        proyeccion = session.get(Proyeccion, id_proyeccion)
+        if proyeccion:
+            proyeccion.estatus = False
+            proyeccion.fecha_eliminado = date.today()
+            session.commit()
+        else:
+            raise ValueError(f"No se encontro la proyeccion con ID {id_proyeccion}")
+    
     ## Delete a projection from the database.
     @staticmethod
     def delete_projection(session, id_proyeccion):
