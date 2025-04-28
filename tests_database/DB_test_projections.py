@@ -12,6 +12,7 @@ from src.utils.constants import env as env
 
 from src.Ingredients.model import Ingrediente
 from src.Recipes.model import Receta, Receta_Ingredientes
+from src.Recipes.controller import RecetasController
 from src.Projections.model import Proyeccion, ProyeccionReceta
 from src.Projections.controller import ProyeccionController
 
@@ -67,6 +68,20 @@ def test_proyecciones(engine, SessionLocal):
             session.add_all([ri1, ri2, ri3, ri4, ri5, ri6])
             session.commit()
 
+            ##Test list all recipes with ingredients
+            listado = RecetasController.list_all_recipes_with_ingredients.all()
+            logger.info("\n***LISTAR RECETAS CON INGREDIENTES***\n")
+            for receta_data in listado:
+                logger.info(f"Receta: {receta_data['nombre_receta']}")
+                logger.info(f"Clasificacion: {receta_data['clasificacion_receta']}")
+                logger.info(f"Periodo: {receta_data['periodo']}")
+                logger.info(f"Comensales base: {receta_data['comensales_base']}")
+                logger.info(f"ID Receta: {receta_data['id_receta']}")
+                logger.info(f"Ingredientes:")
+                for ingrediente in receta_data['ingredientes']:
+                    print(f"- {ingrediente['nombre_ingrediente']}: {ingrediente['Cantidad']} {ingrediente['Unidad']}")
+                print("\n")
+                
             # TEST PROJECTIONS
             logger.info("\n=== PRUEBAS DE PROYECCIONES, RECETAS E INGREDIENTES ===")
             

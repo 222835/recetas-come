@@ -129,8 +129,6 @@ class TestRecetaModel(unittest.TestCase):
 
     ## Test list all recipes with ingredients
     def test_list_all_recipes_with_ingredients(self):
-        from src.Recipes.controller import RecetasController
-
         ##Create a recipe and add ingredients
         receta1 = Receta(nombre_receta="Chilaquiles verdes", clasificacion="Platillo principal", periodo="Desayuno", comensales_base=5, estatus=True)
         receta1.create(self.session)
