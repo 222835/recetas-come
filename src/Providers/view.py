@@ -1,3 +1,5 @@
+import tkinter as tk
+from tkinter import ttk
 import customtkinter as ctk
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -33,7 +35,7 @@ class ProveedorScreen(ctk.CTkFrame):
         self.crear_button.grid(row=0, column=4, padx=10, pady=5)
 
         # Treeview para listar los proveedores
-        self.treeview = ctk.CTkTreeview(self, column=("Nombre", "Categoría"), show="headings")
+        self.treeview = ttk.Treeview(self, column=("Nombre", "Categoría"), show="headings")
         self.treeview.heading("#1", text="Nombre")
         self.treeview.heading("#2", text="Categoría")
         self.treeview.grid(row=1, column=0, columnspan=5, padx=10, pady=10, sticky="nsew")
