@@ -15,12 +15,17 @@ constants.init(ROOT_PATH)  ## Initialize constants and resource paths
 from src.Users.Login.view import LoginApp
 from src.Users.Dashboard.admin_dashboard import AdminDashboard
 from src.Users.Dashboard.invitado_dashboard import InvitadoDashboard
+from src.Trashcan.controller import clear_trashcan
 
 ## @brief Main function
 ## @details Initializes the database, launches the login window, and opens the dashboard based on the authenticated user's role.
 if __name__ == '__main__':
     print("database initialized")
     print(f"mysql+pymysql://{env['DB_USER']}:{env['DB_PASSWORD']}@{env['DB_HOST']}:3307/{env['DB_DATABASE']}")
+
+    connector = Connector(f"mysql+pymysql://{env['DB_USER']}:{env['DB_PASSWORD']}@{env['DB_HOST']}:{env['DB_PORT']}/{env['DB_DATABASE']}")
+    session = connector.get_session()
+    clear_trashcan(session)
 
     login_view = LoginApp()
     login_view.mainloop()
