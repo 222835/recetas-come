@@ -150,3 +150,33 @@ class RecetasController:
             session.commit()
             return True
         return False
+ 
+    ## @brief List all active recipes along with their ingredients.
+    @staticmethod
+    def list_all_recipes_with_ingredients(session: Session) -> list[dict]:
+        recetas = session.query(Receta).filter(Receta.estatus == True).all()
+        listado = []
+
+        for receta in recetas:
+            ingredientes = []
+            for ri in receta.receta_ingredientes:
+                ingrediente = session.query(Ingrediente).filter(Ingrediente.id_ingrediente == ri.id_ingrediente).first()
+                ingredientes.append({
+                    "nombre_ingrediente": ingrediente.nombre,
+                    "clasificacion": ingrediente.clasificacion,
+                    "id_ingrediente": ingrediente.id_ingrediente,
+                    "Cantidad": ri.cantidad,
+                    "Unidad": ingrediente.unidad_medida 
+                })
+            
+            receta_data = {
+                "id_receta": receta.id_receta,
+                "nombre_receta": receta.nombre_receta,
+                "clasificacion_receta": receta.clasificacion,
+                "periodo": receta.periodo,
+                "comensales_base": receta.comensales_base,
+                "ingredientes": ingredientes
+            }
+            listado.append(receta_data)
+        
+        return listado
