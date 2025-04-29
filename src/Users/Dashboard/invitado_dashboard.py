@@ -162,7 +162,7 @@ class InvitadoDashboard(ctk.CTk):
         self.main_content.pack(side="left", fill="both", expand=True, padx=0, pady=(20, 0))
 
         self.create_custom_buttons()
-
+        self.set_active_sidebar(self.sidebar_labels["Inicio"])
 
     ## @brief Sets the selected sidebar item visually.
     ## @param clicked_label The clicked sidebar label to highlight.
@@ -238,8 +238,8 @@ class InvitadoDashboard(ctk.CTk):
                 image = add_rounded_corners(image, radius=20)
                 normal = ctk.CTkImage(light_image=image, size=(w, h))
 
-                zoom_img = ImageOps.fit(image, (int(w * 1.03), int(h * 1.03)), Image.Resampling.LANCZOS)
-                zoom = ctk.CTkImage(light_image=zoom_img, size=(int(w * 1.03), int(h * 1.03)))
+                zoom_img = ImageOps.fit(image, (int(w * 1.005), int(h * 1.005)), Image.Resampling.LANCZOS)
+                zoom = ctk.CTkImage(light_image=zoom_img, size=(int(w * 1.005), int(h * 1.005)))
             except FileNotFoundError:
                 print(f"Image '{img_file}' not found.")
                 return
@@ -264,7 +264,7 @@ class InvitadoDashboard(ctk.CTk):
             btn.bind("<Enter>", lambda e, b=btn: b.configure(image=b.image_zoom))
             btn.bind("<Leave>", lambda e, b=btn: b.configure(image=b.image_normal))
 
-        create_image_button("recetas2.jpg", "", 0, 0, 2, 2, 480, 520, lambda: self.load_view(RecetasAdminView), section_name="Inicio")
+        create_image_button("recetas2.jpg", "", 0, 0, 2, 2, 480, 520, lambda: self.load_view(RecetasAdminView), section_name="Recetas")
         create_image_button("proyecciones.jpg", "", 0, 2, 2, 1, 650, 240, lambda: self.load_view(ProyeccionesAdminView), section_name="Proyecciones")
         create_image_button("costos2.jpg", "", 1, 2, 1, 1, 300, 240, lambda: self.load_view(CostosAdminView), section_name="Costos")
         create_image_button("historial2.jpg", "", 1, 3, 1, 1, 300, 240, lambda: self.load_view(HistorialAdminView), section_name="Historial")

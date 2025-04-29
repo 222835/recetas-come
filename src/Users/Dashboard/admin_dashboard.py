@@ -131,8 +131,8 @@ class AdminDashboard(ctk.CTk):
         self.sidebar_frame = ctk.CTkFrame(self.main_container, width=430, fg_color="#1a1a22", corner_radius=0)
         ctk.CTkLabel(self.sidebar_frame, text="", height=30).pack()
         self.sidebar_frame.pack(side="left", fill="y")
-        self.sidebar_frame.bind("<Enter>", self.expand_sidebar)
-        self.sidebar_frame.bind("<Leave>", self.collapse_sidebar)
+        self.sidebar_frame.bind("<Enter>", lambda event: self.expand_sidebar())
+        self.sidebar_frame.bind("<Leave>", lambda event: self.collapse_sidebar())
 
         self.sections = {
             "Home icon.png": ("Inicio", lambda: self.create_custom_buttons()),
@@ -159,13 +159,12 @@ class AdminDashboard(ctk.CTk):
 
             icon_label = ctk.CTkLabel(frame, image=icon_img, text="", width=40, height=60, corner_radius=15, fg_color="transparent")
             icon_label.pack(side="left", padx=20, pady=5)
-            icon_label.bind("<Enter>", self.expand_sidebar)
-            icon_label.bind("<Button-1>", lambda e, cmd=command, lbl=icon_label: [self.set_active_sidebar(lbl), cmd()])
+            icon_label.bind("<Button-1>", lambda e, cmd=command, lbl=icon_label: [self.expand_sidebar(), self.set_active_sidebar(lbl), cmd()])
 
             text_label = ctk.CTkLabel(frame, text=name, text_color="white", font=self.custom_font)
             text_label.pack(side="left", padx=5)
             text_label.pack_forget()
-            text_label.bind("<Button-1>", lambda e, cmd=command, lbl=icon_label: [self.set_active_sidebar(lbl), cmd()])
+            text_label.bind("<Button-1>", lambda e, cmd=command, lbl=icon_label: [self.expand_sidebar(), self.set_active_sidebar(lbl), cmd()])
 
             self.sidebar_buttons.append((icon_label, text_label))
             self.sidebar_labels[name] = icon_label  
@@ -174,6 +173,7 @@ class AdminDashboard(ctk.CTk):
         self.main_content.pack(side="left", fill="both", expand=True, padx=(30, 0), pady=(20, 0))
 
         self.create_custom_buttons()
+        self.set_active_sidebar(self.sidebar_labels["Inicio"])
     
     ## @brief Sets the selected sidebar item visually.
     ## @param clicked_label The clicked sidebar label to highlight.
@@ -218,7 +218,7 @@ class AdminDashboard(ctk.CTk):
             self.dropdown_menu.deiconify()
             self.dropdown_visible = True
 
-    ## @brief Expands the sidebar to show text.
+    ## @brief Expands the sidebar to show section names.
     def expand_sidebar(self, event=None):
         if not self.sidebar_expanded:
             self.sidebar_frame.configure(width=250)
@@ -226,7 +226,7 @@ class AdminDashboard(ctk.CTk):
                 text_label.pack(side="left", padx=5)
             self.sidebar_expanded = True
 
-    ## @brief Collapses the sidebar to hide text.
+    ## @brief Collapses the sidebar to hide section names.
     def collapse_sidebar(self, event=None):
         if self.sidebar_expanded:
             self.sidebar_frame.configure(width=150)
@@ -249,8 +249,8 @@ class AdminDashboard(ctk.CTk):
                 image = add_rounded_corners(image, radius=20)
                 normal = ctk.CTkImage(light_image=image, size=(w, h))
 
-                zoom_img = ImageOps.fit(image, (int(w * 1.03), int(h * 1.03)), Image.Resampling.LANCZOS)
-                zoom = ctk.CTkImage(light_image=zoom_img, size=(int(w * 1.03), int(h * 1.03)))
+                zoom_img = ImageOps.fit(image, (int(w * 1.005), int(h * 1.005)), Image.Resampling.LANCZOS)
+                zoom = ctk.CTkImage(light_image=zoom_img, size=(int(w * 1.005), int(h * 1.005)))
             except FileNotFoundError:
                 print(f"Imagen '{img_file}' no encontrada.")
                 return
@@ -275,7 +275,7 @@ class AdminDashboard(ctk.CTk):
             btn.bind("<Enter>", lambda e, b=btn: b.configure(image=b.image_zoom))
             btn.bind("<Leave>", lambda e, b=btn: b.configure(image=b.image_normal))
 
-        create_image_button("recetas0.jpg", "", 0, 0, 2, 1, 500, 140, lambda: self.load_view(RecetasAdminView), section_name="Inicio")
+        create_image_button("recetas0.jpg", "", 0, 0, 2, 1, 500, 140, lambda: self.load_view(RecetasAdminView), section_name="Recetas")
         create_image_button("historial1.jpg", "", 0, 2, 2, 1, 550, 140, lambda: self.load_view(HistorialAdminView), section_name="Historial")
         create_image_button("proyecciones1.jpg", "", 1, 0, 3, 1, 700, 190, lambda: self.load_view(ProyeccionesAdminView), section_name="Proyecciones")
         create_image_button("cuentas0.jpg", "", 1, 3, 2, 4, 350,400, lambda: self.load_view(CuentasAdminView), section_name="Cuentas")
