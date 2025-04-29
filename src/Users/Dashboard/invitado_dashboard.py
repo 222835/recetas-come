@@ -56,10 +56,6 @@ class InvitadoDashboard(ctk.CTk):
 
         ctk.CTkLabel(self.navbar, image=self.logo_image, text="", fg_color="transparent").place(x=25, y=7)
 
-        ctk.CTkEntry(self.navbar, placeholder_text="🔍 Buscar funcionalidad", width=400, height=35,
-                     fg_color="transparent", border_color="white", border_width=1,
-                     text_color="white", placeholder_text_color="white", font=("Arial", 16)).place(x=250, y=18)
-
         try:
             profile_img = Image.open(IMAGE_PATH / "perfil.jpg").resize((40, 40))
             self.profile_photo = ImageTk.PhotoImage(profile_img)
