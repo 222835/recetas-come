@@ -136,6 +136,7 @@ class LoginApp(ctk.CTk):
                                           command=self.login, 
                                           font=("Arial", 13))
         self.login_button.pack(pady=20)
+        self.bind("<Return>", lambda event: self.login())
 
     ## @brief Toggles password visibility.
     ## @details Switches between masked and plain text, and updates the button icon accordingly.
@@ -185,8 +186,6 @@ class LoginApp(ctk.CTk):
             messagebox.showerror("Error", f"El rol '{stored_role}' no está reconocido.",  parent=self)
             self.login_button.configure(state="normal")
             return
-
-        messagebox.showinfo("Éxito", f"Bienvenido {usuario}. Rol asignado: {self.user_role}",  parent=self)
 
         self.destroy()
 
