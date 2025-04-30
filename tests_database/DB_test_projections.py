@@ -202,7 +202,7 @@ def test_proyecciones(engine, SessionLocal):
                 logger.info("Proyeccion eliminada correctamente")
             
             ## Clean up test data
-            logger.info("\nEliminando recetas e ingredientes de prueba...")
+            logger.info("\nEliminando recetas e ingredientes de prueba.")
             for ri in [ri1, ri2, ri3, ri4, ri5, ri6]:
                 session.delete(ri)
             
