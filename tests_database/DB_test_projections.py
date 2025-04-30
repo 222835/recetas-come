@@ -154,7 +154,7 @@ def test_proyecciones(engine, SessionLocal):
             logger.info(f"Porcentajes: {nuevas_recetas[0]['porcentaje']}, {nuevas_recetas[1]['porcentaje']}")           
 
             ## List of projections
-            logger.info("\n LISTADO DE PROYECCIONES ACTIVAS ")
+            logger.info(" LISTADO DE PROYECCIONES ACTIVAS ")
             listado = ProyeccionController.list_all_projections(session)
 
             for p in listado:
