@@ -69,9 +69,9 @@ def test_proyecciones(engine, SessionLocal):
 
             
             pollo_con_tomate = RecetasController.create_recipe(session,nombre_receta="Pollo con tomate", clasificacion="Plato fuerte", 
-                            periodo="Comida", comensales_base=4, user_role="admin")
+                            periodo="Comida", comensales_base=4)
             arroz_con_pollo = RecetasController.create_recipe(session, nombre_receta="Arroz con pollo", clasificacion="Plato fuerte", 
-                            periodo="Comida", comensales_base=4, user_role="admin")
+                            periodo="Comida", comensales_base=4)
             
             session.add_all([pollo_con_tomate, arroz_con_pollo])
             session.commit()
@@ -206,13 +206,12 @@ def test_proyecciones(engine, SessionLocal):
             for ri in [ri1, ri2, ri3, ri4, ri5, ri6]:
                 session.delete(ri)
             
-            session.delete(pollo_con_tomate)
-            session.delete(arroz_con_pollo)
-            session.delete(tomate)
-            session.delete(pollo)
-            session.delete(arroz)
-            session.delete(cebolla)
-            session.commit()
+            RecetasController.delete_recipe(session, pollo_con_tomate.id_receta)
+            RecetasController.delete_recipe(session, arroz_con_pollo.id_receta)
+            IngredienteController.delete_ingrediente(session, tomate.id_ingrediente)
+            IngredienteController.delete_ingrediente(session, pollo.id_ingrediente)
+            IngredienteController.delete_ingrediente(session, arroz.id_ingrediente)
+            IngredienteController.delete_ingrediente(session, cebolla.id_ingrediente)
            
             ## List of projections
             logger.info(" LISTADO DE PROYECCIONES ACTIVAS ")
