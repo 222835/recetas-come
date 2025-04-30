@@ -19,9 +19,7 @@ class RecetasController:
         if not nombre_receta or not clasificacion or not periodo or comensales_base <= 0:
             raise ValueError("Los campos nombre_receta, clasificacion, periodo y comensales_base son obligatorios y deben ser válidos.")
         
-        ## Validate ingredients.
-        if not Ingrediente or len(Ingrediente) == 0:
-            raise ValueError("La receta debe contener al menos un ingrediente.")
+        
         
         receta = Receta(
             nombre_receta=nombre_receta,
@@ -68,7 +66,7 @@ class RecetasController:
     # @brief Add an ingredient to a recipe
     @staticmethod
     def add_ingredient_to_recipe(session: Session, id_receta: int, id_ingrediente: int, 
-                               cantidad: float, unidad: str) -> Receta_Ingredientes:
+                               cantidad: float) -> Receta_Ingredientes:
         # Check if recipe exists
         receta = session.query(Receta).filter(Receta.id_receta == id_receta).first()
         if not receta:
@@ -83,8 +81,7 @@ class RecetasController:
         receta_ingrediente = Receta_Ingredientes(
             id_receta=id_receta,
             id_ingrediente=id_ingrediente,
-            cantidad=cantidad,
-            unidad=unidad
+            cantidad=cantidad
         )
         
         session.add(receta_ingrediente)
