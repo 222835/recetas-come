@@ -66,10 +66,10 @@ class CuentasAdminView(ctk.CTkFrame):
         encabezado = ctk.CTkFrame(self.contenedor, fg_color="#dcd1cd")
         encabezado.pack(fill="x", padx=25)
 
-        ctk.CTkLabel(encabezado, text="Usuario", text_color="#3A3A3A", font=self.fuente_small).grid(row=0, column=1, padx=(50,0))
-        ctk.CTkLabel(encabezado, text="Nombre completo", text_color="#3A3A3A", font=self.fuente_small).grid(row=0, column=2, padx=(0,30))
-        ctk.CTkLabel(encabezado, text="Contraseña", text_color="#3A3A3A", font=self.fuente_small).grid(row=0, column=3, padx=(0,60))
-        ctk.CTkLabel(encabezado, text="Rol de acceso", text_color="#3A3A3A", font=self.fuente_small).grid(row=0, column=4, padx=(0,120))
+        ctk.CTkLabel(encabezado, text="Usuario", text_color="#3A3A3A", font=self.fuente_small, anchor="center", justify="center").grid(row=0, column=1, padx=(50,0), sticky="nsew")
+        ctk.CTkLabel(encabezado, text="Nombre completo", text_color="#3A3A3A", font=self.fuente_small, anchor="center", justify="center").grid(row=0, column=2, padx=(0,25), sticky="nsew")
+        ctk.CTkLabel(encabezado, text="Contraseña", text_color="#3A3A3A", font=self.fuente_small, anchor="center", justify="center").grid(row=0, column=3, padx=(0,50), sticky="nsew")
+        ctk.CTkLabel(encabezado, text="Rol de acceso", text_color="#3A3A3A", font=self.fuente_small, anchor="center", justify="center").grid(row=0, column=4, padx=(0,140), sticky="nsew")
         encabezado.grid_columnconfigure((1, 2, 3, 4), weight=1)
 
         self.usuarios_scroll_frame = ctk.CTkScrollableFrame(self.contenedor, fg_color="#dcd1cd", corner_radius=0)
@@ -109,10 +109,13 @@ class CuentasAdminView(ctk.CTkFrame):
         icono = ctk.CTkLabel(card, text="👤", font=self.fuente_card)
         icono.grid(row=0, column=0, padx=(10, 10), pady=10)
 
-        ctk.CTkLabel(card, text=nombre_usuario, text_color="black", font=self.fuente_card, anchor="w").grid(row=0, column=1, padx=10)
-        ctk.CTkLabel(card, text=nombre_completo, text_color="black", font=self.fuente_card, anchor="w").grid(row=0, column=2, padx=10)
-        ctk.CTkLabel(card, text="**********", text_color="black", font=self.fuente_card, anchor="w").grid(row=0, column=3, padx=10)
-        ctk.CTkLabel(card, text=rol, text_color="black", font=self.fuente_card, anchor="w").grid(row=0, column=4, padx=10)
+        def truncar(texto, largo=25):
+            return texto if len(texto) <= largo else texto[:largo-3] + "..."
+
+        ctk.CTkLabel(card, text=truncar(nombre_usuario), width=100, text_color="black", font=self.fuente_card, anchor="w", justify="left").grid(row=0, column=1, padx=(60,0), sticky="nsew")
+        ctk.CTkLabel(card, text=nombre_completo, width=200, text_color="black", font=self.fuente_card, anchor="w", justify="left").grid(row=0, column=2, padx=(75,0), sticky="w")
+        ctk.CTkLabel(card, text="**********", width=140, text_color="black", font=self.fuente_card, anchor="center", justify="center").grid(row=0, column=3, padx=(0,20), sticky="nsew")
+        ctk.CTkLabel(card, text=rol, width=130, text_color="black", font=self.fuente_card, anchor="w", justify="left").grid(row=0, column=4,  padx=(130,8), sticky="w")
 
         btn_editar = ctk.CTkButton(card, image=self.img_pen, text="", width=30, height=40, fg_color="white", hover_color="#E8E8E8", corner_radius=5, command=lambda: print(f"Editar usuario: {nombre_usuario}"))
         btn_editar.grid(row=0, column=5, padx=10)
