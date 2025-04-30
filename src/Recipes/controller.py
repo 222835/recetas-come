@@ -14,10 +14,7 @@ class RecetasController:
     
     ## @brief Create a new recipe in the database.
     @staticmethod
-    def create_recipe(session: Session, nombre_receta: str, clasificacion: str, periodo: str, comensales_base: int, user_role: str) -> Receta:
-        if user_role != 'admin':
-            raise PermissionError("Solo los administradores pueden crear recetas.")
-        
+    def create_recipe(session: Session, nombre_receta: str, clasificacion: str, periodo: str, comensales_base: int) -> Receta:
         ## Validate input parameters
         if not nombre_receta or not clasificacion or not periodo or comensales_base <= 0:
             raise ValueError("Los campos nombre_receta, clasificacion, periodo y comensales_base son obligatorios y deben ser válidos.")
@@ -48,10 +45,7 @@ class RecetasController:
     ## @brief This method updates a recipe in the database. It takes the recipe ID and optional parameters to update the recipe.
     @staticmethod
     def update_recipe(session: Session, id_receta: int, nombre_receta: str = None, clasificacion: str = None, 
-                      periodo: str = None, comensales_base: int = None, user_role: str = None, status: bool = None) -> Receta:
-        if user_role != 'admin':
-            raise PermissionError("Solo los administradores pueden actualizar recetas.")
-            
+                      periodo: str = None, comensales_base: int = None, status: bool = None) -> Receta:
         # Validate input parameters
         receta = session.query(Receta).filter(Receta.id_receta == id_receta).first()
         if not receta:
@@ -74,10 +68,7 @@ class RecetasController:
     # @brief Add an ingredient to a recipe
     @staticmethod
     def add_ingredient_to_recipe(session: Session, id_receta: int, id_ingrediente: int, 
-                               cantidad: float, unidad: str, user_role: str) -> Receta_Ingredientes:
-        if user_role != 'admin':
-            raise PermissionError("Solo los administradores pueden añadir ingredientes a recetas.")
-            
+                               cantidad: float, unidad: str) -> Receta_Ingredientes:
         # Check if recipe exists
         receta = session.query(Receta).filter(Receta.id_receta == id_receta).first()
         if not receta:
@@ -102,9 +93,7 @@ class RecetasController:
     
     # @brief Remove an ingredient from a recipe
     @staticmethod
-    def remove_ingredient_from_recipe(session: Session, id_receta: int, id_ingrediente: int, user_role: str) -> bool:
-        if user_role != 'admin':
-            raise PermissionError("Solo los administradores pueden eliminar ingredientes de recetas.")
+    def remove_ingredient_from_recipe(session: Session, id_receta: int, id_ingrediente: int) -> bool:
             
         # Find the relationship
         receta_ingrediente = session.query(Receta_Ingredientes).filter(
@@ -136,10 +125,7 @@ class RecetasController:
     
     ## @brief Delete a recipe (permanently) from the database.
     @staticmethod
-    def delete_recipe(session: Session, numero_receta: int, user_role: str) -> bool:  
-        if user_role != 'admin':
-            raise PermissionError("Solo los administradores pueden eliminar recetas.")
-            
+    def delete_recipe(session: Session, numero_receta: int) -> bool:  
         receta = session.query(Receta).filter(Receta.id_receta == numero_receta).first()
 
         if receta:

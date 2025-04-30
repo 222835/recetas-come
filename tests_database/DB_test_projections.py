@@ -190,7 +190,21 @@ def test_proyecciones(engine, SessionLocal):
             session.delete(arroz)
             session.delete(cebolla)
             session.commit()
+           
+            ## List of projections
+            logger.info(" LISTADO DE PROYECCIONES ACTIVAS ")
+            listado = ProyeccionController.list_all_projections(session)
+
+            for p in listado:
+                logger.info(f"ID: {p['id_proyeccion']}, Nombre: {p['nombre']}")
+                logger.info(f"Periodo: {p['periodo']}, Comensales: {p['comensales']}, Fecha: {p['fecha']}")
+                logger.info("Recetas:")
+                for r in p['recetas']:
+                    logger.info(f" - {r['nombre_receta']} ({r['porcentaje']}%)")
+                logger.info("")
+
             
+            logger.info("Listado verificado correctamente")
             logger.info("CRUD de proyecciones completado exitosamente.")
             return True
         
