@@ -25,7 +25,7 @@ if __name__ == '__main__':
     login_view = LoginApp()
     login_view.mainloop()
 
-    if hasattr(login_view, 'user_role'):
+    if hasattr(login_view, 'user_role') and login_view.user_role is not None:
         if login_view.user_role == 'admin':
             admin_app = AdminDashboard()
             admin_app.mainloop()
@@ -34,8 +34,9 @@ if __name__ == '__main__':
             invitado_app.mainloop()
         else:
             print("Unknown role or login was not completed successfully.")
+            exit()
     else:
         print("No user_role found; the user might have closed the login window.")
-
+        exit()
     # connector.close_connection()
     print("database closed")

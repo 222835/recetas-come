@@ -42,6 +42,8 @@ class LoginApp(ctk.CTk):
         self.background_label.place(relwidth=1, relheight=1)
 
         self.create_widgets()
+        self.protocol("WM_DELETE_WINDOW", self.on_close)
+
 
     ## @brief Creates a radial gradient image.
     ## @param width Image width.
@@ -197,6 +199,14 @@ class LoginApp(ctk.CTk):
             from src.Users.Dashboard.invitado_dashboard import InvitadoDashboard
             invitado_app = InvitadoDashboard()
             invitado_app.mainloop()
+            
+    ## @brief Handles window close event from the window manager (X button).
+    ## @details Safely destroys the window and exits the application completely to prevent lingering processes or after() errors.       
+    def on_close(self):
+        self.destroy()
+        import sys
+        sys.exit()
+
 
 ## @brief Runs the login application.
 ## @details Creates an instance of LoginApp and starts its main event loop.

@@ -174,6 +174,7 @@ class AdminDashboard(ctk.CTk):
 
         self.create_custom_buttons()
         self.set_active_sidebar(self.sidebar_labels["Inicio"])
+        self.protocol("WM_DELETE_WINDOW", self.on_close)
     
     ## @brief Sets the selected sidebar item visually.
     ## @param clicked_label The clicked sidebar label to highlight.
@@ -337,6 +338,14 @@ class AdminDashboard(ctk.CTk):
         from src.Users.Login.view import LoginApp
         login = LoginApp()
         login.mainloop()
+
+    ## @brief Handles window close event from the window manager (X button).
+    ## @details Safely destroys the window and exits the application completely to prevent lingering processes or after() errors. 
+    def on_close(self):
+        self.destroy()
+        import sys
+        sys.exit()
+
 
 
 ## @brief Draws a rounded rectangle on a canvas.
