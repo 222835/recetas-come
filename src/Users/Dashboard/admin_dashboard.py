@@ -127,12 +127,14 @@ class AdminDashboard(ctk.CTk):
         self.main_container = ctk.CTkFrame(self, fg_color="#1a1a22")
         self.main_container.pack(side="top", fill="both", expand=True)
 
+        self.mouse_in_sidebar = False
         self.sidebar_expanded = False
         self.sidebar_frame = ctk.CTkFrame(self.main_container, width=430, fg_color="#1a1a22", corner_radius=0)
         ctk.CTkLabel(self.sidebar_frame, text="", height=30).pack()
         self.sidebar_frame.pack(side="left", fill="y")
-        self.sidebar_frame.bind("<Enter>", lambda event: self.expand_sidebar())
-        self.sidebar_frame.bind("<Leave>", lambda event: self.collapse_sidebar())
+        self.sidebar_frame.bind("<Enter>", self.on_sidebar_enter)
+        self.sidebar_frame.bind("<Leave>", self.on_sidebar_leave)
+
 
         self.sections = {
             "Home icon.png": ("Inicio", lambda: self.create_custom_buttons()),
@@ -159,6 +161,8 @@ class AdminDashboard(ctk.CTk):
 
             icon_label = ctk.CTkLabel(frame, image=icon_img, text="", width=40, height=60, corner_radius=15, fg_color="transparent")
             icon_label.pack(side="left", padx=20, pady=5)
+            icon_label.bind("<Enter>", self.on_sidebar_enter)
+            icon_label.bind("<Leave>", self.on_sidebar_leave)
             icon_label.bind("<Button-1>", lambda e, cmd=command, lbl=icon_label: [self.expand_sidebar(), self.set_active_sidebar(lbl), cmd()])
 
             text_label = ctk.CTkLabel(frame, text=name, text_color="white", font=self.custom_font)
@@ -220,20 +224,59 @@ class AdminDashboard(ctk.CTk):
             self.dropdown_visible = True
 
     ## @brief Expands the sidebar to show section names.
+    ## @param event Optional tkinter event.
     def expand_sidebar(self, event=None):
         if not self.sidebar_expanded:
-            self.sidebar_frame.configure(width=250)
-            for icon_label, text_label in self.sidebar_buttons:
-                text_label.pack(side="left", padx=5)
             self.sidebar_expanded = True
+            self.sidebar_frame.configure(width=250)
+            for _, label in self.sidebar_buttons:
+                label.pack(side="left", padx=5)
 
     ## @brief Collapses the sidebar to hide section names.
+    ## @param event Optional tkinter event.
     def collapse_sidebar(self, event=None):
         if self.sidebar_expanded:
-            self.sidebar_frame.configure(width=150)
-            for icon_label, text_label in self.sidebar_buttons:
-                text_label.pack_forget()
             self.sidebar_expanded = False
+            self.sidebar_frame.configure(width=150)
+            for _, label in self.sidebar_buttons:
+                label.pack_forget()
+
+    ## @brief Triggered when the cursor enters the sidebar.
+    ## @param event Optional tkinter event.
+    def on_sidebar_enter(self, event=None):
+        self.expand_sidebar()
+
+    ## @brief Triggered when the cursor leaves the sidebar.
+    ## @param event Optional tkinter event.
+    def on_sidebar_leave(self, event=None):
+        self.check_cursor_position()
+
+    ## @brief Continuously checks if the cursor is outside the sidebar.
+    ## @details Collapses the sidebar immediately if cursor is outside.
+    def check_cursor_position(self):
+        x, y = self.winfo_pointerxy()
+        widget = self.winfo_containing(x, y)
+        if not widget or not str(widget).startswith(str(self.sidebar_frame)):
+            self.collapse_sidebar()
+
+    ## @brief Continuously checks if the cursor is still over the sidebar or its elements.
+    def monitor_sidebar_cursor(self):
+        x, y = self.winfo_pointerxy()
+        widget = self.winfo_containing(x, y)
+        inside_sidebar = self.sidebar_frame.winfo_containing(x, y) is not None
+
+        # Verifica si está dentro de alguno de los íconos del sidebar
+        inside_icon = any(icon.winfo_containing(x, y) is not None for icon, _ in self.sidebar_buttons)
+
+        if inside_sidebar or inside_icon:
+            self.mouse_in_sidebar = True
+        else:
+            if self.mouse_in_sidebar:
+                self.mouse_in_sidebar = False
+                self.collapse_sidebar()
+                return
+
+        self.after(50, self.monitor_sidebar_cursor)
 
     ## @brief Creates image-based buttons in the main content area.
     def create_custom_buttons(self):
