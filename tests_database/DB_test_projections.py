@@ -152,7 +152,22 @@ def test_proyecciones(engine, SessionLocal):
             logger.info(f"Comensales: {proyeccion.comensales}")
             logger.info(f"Fecha: {proyeccion.fecha}")
             logger.info(f"Porcentajes: {nuevas_recetas[0]['porcentaje']}, {nuevas_recetas[1]['porcentaje']}")           
-            
+
+            ## List of projections
+            logger.info("\n LISTADO DE PROYECCIONES ACTIVAS ")
+            listado = ProyeccionController.list_all_projections(session)
+
+            for p in listado:
+                logger.info(f"ID: {p['id_proyeccion']}, Nombre: {p['nombre']}")
+                logger.info(f"Periodo: {p['periodo']}, Comensales: {p['comensales']}, Fecha: {p['fecha']}")
+                logger.info("Recetas:")
+                for r in p['recetas']:
+                    logger.info(f" - {r['nombre_receta']} ({r['porcentaje']}%)")
+                logger.info("")
+
+            assert any(p['nombre'] == "Proyeccion Semanal" for p in listado), "Proyeccion 'Proyeccion Semanal' no encontrada en listado"
+            logger.info("Listado verificado correctamente")
+
             ##Delete the projection
             ProyeccionController.delete_projection(session, proyeccion.id_proyeccion)
             
