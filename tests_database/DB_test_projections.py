@@ -69,9 +69,9 @@ def test_proyecciones(engine, SessionLocal):
 
             
             pollo_con_tomate = RecetasController.create_recipe(session,nombre_receta="Pollo con tomate", clasificacion="Plato fuerte", 
-                            periodo="Comida", comensales_base=4, user_role="admin")
+                            periodo="Comida", comensales_base=4)
             arroz_con_pollo = RecetasController.create_recipe(session, nombre_receta="Arroz con pollo", clasificacion="Plato fuerte", 
-                            periodo="Comida", comensales_base=4, user_role="admin")
+                            periodo="Comida", comensales_base=4)
             
             session.add_all([pollo_con_tomate, arroz_con_pollo])
             session.commit()
@@ -175,7 +175,22 @@ def test_proyecciones(engine, SessionLocal):
             logger.info(f"Comensales: {proyeccion.comensales}")
             logger.info(f"Fecha: {proyeccion.fecha}")
             logger.info(f"Porcentajes: {nuevas_recetas[0]['porcentaje']}, {nuevas_recetas[1]['porcentaje']}")           
-            
+
+            ## List of projections
+            logger.info(" LISTADO DE PROYECCIONES ACTIVAS ")
+            listado = ProyeccionController.list_all_projections(session)
+
+            for p in listado:
+                logger.info(f"ID: {p['id_proyeccion']}, Nombre: {p['nombre']}")
+                logger.info(f"Periodo: {p['periodo']}, Comensales: {p['comensales']}, Fecha: {p['fecha']}")
+                logger.info("Recetas:")
+                for r in p['recetas']:
+                    logger.info(f" - {r['nombre_receta']} ({r['porcentaje']}%)")
+                logger.info("")
+
+            assert any(p['nombre'] == "Proyeccion Semanal" for p in listado), "Proyeccion 'Proyeccion Semanal' no encontrada en listado"
+            logger.info("Listado verificado correctamente")
+
             ##Delete the projection
             ProyeccionController.delete_projection(session, proyeccion.id_proyeccion)
             
@@ -187,18 +202,31 @@ def test_proyecciones(engine, SessionLocal):
                 logger.info("Proyeccion eliminada correctamente")
             
             ## Clean up test data
-            logger.info("\nEliminando recetas e ingredientes de prueba...")
+            logger.info("\nEliminando recetas e ingredientes de prueba.")
             for ri in [ri1, ri2, ri3, ri4, ri5, ri6]:
                 session.delete(ri)
             
-            session.delete(pollo_con_tomate)
-            session.delete(arroz_con_pollo)
-            session.delete(tomate)
-            session.delete(pollo)
-            session.delete(arroz)
-            session.delete(cebolla)
-            session.commit()
+            RecetasController.delete_recipe(session, pollo_con_tomate.id_receta)
+            RecetasController.delete_recipe(session, arroz_con_pollo.id_receta)
+            IngredienteController.delete_ingrediente(session, tomate.id_ingrediente)
+            IngredienteController.delete_ingrediente(session, pollo.id_ingrediente)
+            IngredienteController.delete_ingrediente(session, arroz.id_ingrediente)
+            IngredienteController.delete_ingrediente(session, cebolla.id_ingrediente)
+           
+            ## List of projections
+            logger.info(" LISTADO DE PROYECCIONES ACTIVAS ")
+            listado = ProyeccionController.list_all_projections(session)
+
+            for p in listado:
+                logger.info(f"ID: {p['id_proyeccion']}, Nombre: {p['nombre']}")
+                logger.info(f"Periodo: {p['periodo']}, Comensales: {p['comensales']}, Fecha: {p['fecha']}")
+                logger.info("Recetas:")
+                for r in p['recetas']:
+                    logger.info(f" - {r['nombre_receta']} ({r['porcentaje']}%)")
+                logger.info("")
+
             
+            logger.info("Listado verificado correctamente")
             logger.info("CRUD de proyecciones completado exitosamente.")
             return True
         
