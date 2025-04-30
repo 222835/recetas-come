@@ -10,7 +10,7 @@ from src.database.connector import Base
 import src.utils.constants as constants
 from src.utils.constants import env as env
 
-from src.Ingredients.model import Ingrediente
+from src.Ingredients.controller import IngredienteController
 from src.Recipes.model import Receta, Receta_Ingredientes
 from src.Recipes.controller import RecetasController
 from src.Projections.model import Proyeccion, ProyeccionReceta
@@ -35,20 +35,43 @@ def test_proyecciones(engine, SessionLocal):
         try:
             ##CREATE INGREDIENTS
             logger.info("Insertando ingredientes de prueba...")
-            tomate = Ingrediente(nombre="Tomate", clasificacion="Verdura", unidad_medida="kg")
-            pollo = Ingrediente(nombre="Pollo", clasificacion="Proteína", unidad_medida="kg")
-            arroz = Ingrediente(nombre="Arroz", clasificacion="Cereal", unidad_medida="kg")
-            cebolla = Ingrediente(nombre="Cebolla", clasificacion="Verdura", unidad_medida="kg")
-            
-            session.add_all([tomate, pollo, arroz, cebolla])
+
+            tomate = IngredienteController.create_ingrediente(
+                session,
+                nombre="Tomate",
+                unidad_medida="kg",
+                clasificacion="Vegetal"
+            )
+            pollo = IngredienteController.create_ingrediente(
+                session,
+                nombre="Pollo",
+                unidad_medida="kg",
+                clasificacion="Carne"
+            )
+            arroz = IngredienteController.create_ingrediente(
+                session,
+                nombre="Arroz",
+                unidad_medida="kg",
+                clasificacion="Cereal"
+            )
+
+            cebolla = IngredienteController.create_ingrediente(
+                session,
+                nombre="Cebolla",
+                unidad_medida="kg",
+                clasificacion="Vegetal"
+            )
+            session.add_all([pollo, tomate, cebolla, arroz])
             session.commit()
 
             ##CREATE RECIPES
             logger.info("Insertando recetas de prueba...")
-            pollo_con_tomate = Receta(nombre_receta="Pollo con tomate", clasificacion="Plato fuerte", 
-                            periodo="Comida", comensales_base=4, estatus=True, fecha_eliminado=None)
-            arroz_con_pollo = Receta(nombre_receta="Arroz con pollo", clasificacion="Plato fuerte", 
-                            periodo="Comida", comensales_base=4, estatus=True, fecha_eliminado=None)
+
+            
+            pollo_con_tomate = RecetasController.create_recipe(session,nombre_receta="Pollo con tomate", clasificacion="Plato fuerte", 
+                            periodo="Comida", comensales_base=4, user_role="admin")
+            arroz_con_pollo = RecetasController.create_recipe(session, nombre_receta="Arroz con pollo", clasificacion="Plato fuerte", 
+                            periodo="Comida", comensales_base=4, user_role="admin")
             
             session.add_all([pollo_con_tomate, arroz_con_pollo])
             session.commit()
@@ -57,13 +80,13 @@ def test_proyecciones(engine, SessionLocal):
             logger.info("Asociando ingredientes a las recetas...")
            
             
-            ri1 = Receta_Ingredientes(id_receta=pollo_con_tomate.id_receta, id_ingrediente=tomate.id_ingrediente, cantidad=0.5)
-            ri2 = Receta_Ingredientes(id_receta=pollo_con_tomate.id_receta, id_ingrediente=pollo.id_ingrediente, cantidad=1.0)
-            ri3 = Receta_Ingredientes(id_receta=pollo_con_tomate.id_receta, id_ingrediente=cebolla.id_ingrediente, cantidad=0.2)
+            ri1 = RecetasController.add_ingredient_to_recipe(session,id_receta=pollo_con_tomate.id_receta, id_ingrediente=tomate.id_ingrediente, cantidad=0.5)
+            ri2 = RecetasController.add_ingredient_to_recipe(session, id_receta=pollo_con_tomate.id_receta, id_ingrediente=pollo.id_ingrediente, cantidad=1.0)
+            ri3 = RecetasController.add_ingredient_to_recipe(session, id_receta=pollo_con_tomate.id_receta, id_ingrediente=cebolla.id_ingrediente, cantidad=0.2)
             
-            ri4 = Receta_Ingredientes(id_receta=arroz_con_pollo.id_receta, id_ingrediente=arroz.id_ingrediente, cantidad=0.4)
-            ri5 = Receta_Ingredientes(id_receta=arroz_con_pollo.id_receta, id_ingrediente=pollo.id_ingrediente, cantidad=0.8)
-            ri6 = Receta_Ingredientes(id_receta=arroz_con_pollo.id_receta, id_ingrediente=cebolla.id_ingrediente, cantidad=0.15)
+            ri4 = RecetasController.add_ingredient_to_recipe(session,id_receta=arroz_con_pollo.id_receta, id_ingrediente=arroz.id_ingrediente, cantidad=0.4)
+            ri5 = RecetasController.add_ingredient_to_recipe(session,id_receta=arroz_con_pollo.id_receta, id_ingrediente=pollo.id_ingrediente, cantidad=0.8)
+            ri6 = RecetasController.add_ingredient_to_recipe(session,id_receta=arroz_con_pollo.id_receta, id_ingrediente=cebolla.id_ingrediente, cantidad=0.15)
             
             session.add_all([ri1, ri2, ri3, ri4, ri5, ri6])
             session.commit()
