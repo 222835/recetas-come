@@ -69,9 +69,9 @@ def test_proyecciones(engine, SessionLocal):
 
             
             pollo_con_tomate = RecetasController.create_recipe(session,nombre_receta="Pollo con tomate", clasificacion="Plato fuerte", 
-                            periodo="Comida", comensales_base=4, user_role="admin")
+                            periodo="Comida", comensales_base=4)
             arroz_con_pollo = RecetasController.create_recipe(session, nombre_receta="Arroz con pollo", clasificacion="Plato fuerte", 
-                            periodo="Comida", comensales_base=4, user_role="admin")
+                            periodo="Comida", comensales_base=4)
             
             session.add_all([pollo_con_tomate, arroz_con_pollo])
             session.commit()
@@ -213,7 +213,21 @@ def test_proyecciones(engine, SessionLocal):
             session.delete(arroz)
             session.delete(cebolla)
             session.commit()
+           
+            ## List of projections
+            logger.info(" LISTADO DE PROYECCIONES ACTIVAS ")
+            listado = ProyeccionController.list_all_projections(session)
+
+            for p in listado:
+                logger.info(f"ID: {p['id_proyeccion']}, Nombre: {p['nombre']}")
+                logger.info(f"Periodo: {p['periodo']}, Comensales: {p['comensales']}, Fecha: {p['fecha']}")
+                logger.info("Recetas:")
+                for r in p['recetas']:
+                    logger.info(f" - {r['nombre_receta']} ({r['porcentaje']}%)")
+                logger.info("")
+
             
+            logger.info("Listado verificado correctamente")
             logger.info("CRUD de proyecciones completado exitosamente.")
             return True
         
