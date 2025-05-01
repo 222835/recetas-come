@@ -9,6 +9,7 @@ from pathlib import Path
 from PIL import Image 
 import tkinter.messagebox as msgbox
 from .agregar_cuentas import AgregarCuentaView
+from .editar_cuentas import EditarCuentaView
 
 
 class CuentasAdminView(ctk.CTkFrame):
@@ -115,13 +116,38 @@ class CuentasAdminView(ctk.CTkFrame):
         ctk.CTkLabel(card, text=truncar(nombre_usuario), width=100, text_color="black", font=self.fuente_card, anchor="w", justify="left").grid(row=0, column=1, padx=(60,0), sticky="nsew")
         ctk.CTkLabel(card, text=nombre_completo, width=200, text_color="black", font=self.fuente_card, anchor="w", justify="left").grid(row=0, column=2, padx=(75,0), sticky="w")
         ctk.CTkLabel(card, text="**********", width=140, text_color="black", font=self.fuente_card, anchor="center", justify="center").grid(row=0, column=3, padx=(0,20), sticky="nsew")
-        ctk.CTkLabel(card, text=rol, width=130, text_color="black", font=self.fuente_card, anchor="w", justify="left").grid(row=0, column=4,  padx=(130,8), sticky="w")
+        ctk.CTkLabel(card, text=rol, width=130, text_color="black", font=self.fuente_card, anchor="w", justify="left").grid(row=0, column=4, padx=(130,8), sticky="w")
 
-        btn_editar = ctk.CTkButton(card, image=self.img_pen, text="", width=30, height=40, fg_color="white", hover_color="#E8E8E8", corner_radius=5, command=lambda: print(f"Editar usuario: {nombre_usuario}"))
+        # 1) defines btn_editar
+        btn_editar = ctk.CTkButton(
+            card,
+            image=self.img_pen,
+            text="",
+            width=30,
+            height=40,
+            fg_color="white",
+            hover_color="#E8E8E8",
+            corner_radius=5,
+            command=lambda: self.mostrar_editar_cuentas(nombre_usuario)
+        )
         btn_editar.grid(row=0, column=5, padx=10)
 
-        btn_eliminar = ctk.CTkButton(card, image=self.img_bote, text="", width=28, height=35, fg_color="white", hover_color="#E8E8E8", corner_radius=5, command=lambda: self.confirmar_eliminacion(nombre_usuario, card))
-        btn_eliminar.grid(row=0, column=6, padx=(0, 10))
+        if rol.strip().lower() not in ("administrador", "admin"):
+            btn_eliminar = ctk.CTkButton(
+                card,
+                image=self.img_bote,
+                text="",
+                width=28,
+                height=35,
+                fg_color="white",
+                hover_color="#E8E8E8",
+                corner_radius=5,
+                command=lambda: self.confirmar_eliminacion(nombre_usuario, card)
+            )
+            btn_eliminar.grid(row=0, column=6, padx=(0, 10))
+        else:
+            spacer = ctk.CTkLabel(card, text="", width=28)
+            spacer.grid(row=0, column=6, padx=(0, 10))
 
         card.grid_columnconfigure((1, 2, 3, 4), weight=1)
 
@@ -186,3 +212,19 @@ class CuentasAdminView(ctk.CTkFrame):
         ctk.CTkLabel(ventana_mensaje, text=mensaje, font=self.fuente_card, text_color="black", wraplength=380, justify="center").pack(pady=5)
 
         ctk.CTkButton(ventana_mensaje, text="Aceptar", font=self.fuente_button, width=120, fg_color=color, hover_color="#991416" if color == "#b8191a" else "#a12a28", command=ventana_mensaje.destroy).pack(pady=20)
+
+    def mostrar_editar_cuentas(self, nombre_usuario):
+        # Limpia la vista actual
+        for widget in self.winfo_children():
+            widget.destroy()
+        # Crea e instala la vista de edición pasándole el usuario a editar
+        editar_vista = EditarCuentaView(
+            parent=self,
+            cursor=self.cursor,
+            conn=self.conn,
+            fuente_titulo=self.fuente_titulo,
+            fuente_button=self.fuente_button,
+            fuente_card=self.fuente_small,
+            nombre_usuario=nombre_usuario
+        )
+        editar_vista.pack(fill="both", expand=True)

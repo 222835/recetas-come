@@ -42,7 +42,7 @@ class AgregarCuentaView(ctk.CTkFrame):
 
         load_dotenv()
 
-        self.contenedor = ctk.CTkFrame(self, fg_color="#E8E3E3", corner_radius=25, width=880, height=500)
+        self.contenedor = ctk.CTkFrame(self, fg_color="#dcd1cd", corner_radius=25, width=880, height=500)
         self.contenedor.pack(padx=40, pady=40, fill="both", expand=True)
         self.contenedor.pack_propagate(False)
 
@@ -50,7 +50,7 @@ class AgregarCuentaView(ctk.CTkFrame):
         top_frame.pack(fill="x", padx=30, pady=(10, 5))
 
         titulo = ctk.CTkLabel(top_frame, text="Agregar nueva cuenta", font=self.fuente_titulo, text_color="#b8191a")
-        titulo.pack(side="left")
+        titulo.pack(side="left", pady=(10, 0))
 
         btn_volver = ctk.CTkButton(
             top_frame,
