@@ -15,7 +15,6 @@ constants.init(ROOT_PATH)  ## Initialize constants and resource paths
 from src.Users.Login.view import LoginApp
 from src.Users.Dashboard.admin_dashboard import AdminDashboard
 from src.Users.Dashboard.invitado_dashboard import InvitadoDashboard
-from src.Trashcan.controller import clear_trashcan
 
 ## @brief Main function
 ## @details Initializes the database, launches the login window, and opens the dashboard based on the authenticated user's role.
@@ -23,14 +22,10 @@ if __name__ == '__main__':
     print("database initialized")
     print(f"mysql+pymysql://{env['DB_USER']}:{env['DB_PASSWORD']}@{env['DB_HOST']}:3307/{env['DB_DATABASE']}")
 
-    connector = Connector(f"mysql+pymysql://{env['DB_USER']}:{env['DB_PASSWORD']}@{env['DB_HOST']}:{env['DB_PORT']}/{env['DB_DATABASE']}")
-    session = connector.get_session()
-    clear_trashcan(session)
-
     login_view = LoginApp()
     login_view.mainloop()
 
-    if hasattr(login_view, 'user_role'):
+    if hasattr(login_view, 'user_role') and login_view.user_role is not None:
         if login_view.user_role == 'admin':
             admin_app = AdminDashboard()
             admin_app.mainloop()
@@ -39,8 +34,9 @@ if __name__ == '__main__':
             invitado_app.mainloop()
         else:
             print("Unknown role or login was not completed successfully.")
+            exit()
     else:
         print("No user_role found; the user might have closed the login window.")
-
+        exit()
     # connector.close_connection()
     print("database closed")
