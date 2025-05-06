@@ -1,14 +1,21 @@
 ## @file agregar_proveedor.py
-## @brief Provides the view for adding a new provider and its products.
+## @brief Provides the view for adding a new provider and their products.
 
 import customtkinter as ctk
 from tkcalendar import DateEntry
 from tkinter import ttk
+import random
 
 ## @class AgregarProveedorView
 ## @brief Displays the interface to add a new provider and their products.
 class AgregarProveedorView(ctk.CTkFrame):
-    ## @brief Initializes the provider addition view.
+    ## @brief Constructor.
+    ## @param parent The parent container.
+    ## @param conn Database connection object.
+    ## @param cursor Database cursor.
+    ## @param fuente_titulo Title font.
+    ## @param fuente_card Font for labels and entries.
+    ## @param fuente_button Font for buttons.
     def __init__(self, parent, conn, cursor, fuente_titulo, fuente_card, fuente_button):
         super().__init__(parent)
         self.configure(fg_color="transparent")
@@ -20,92 +27,149 @@ class AgregarProveedorView(ctk.CTkFrame):
 
         self.build_interface()
 
-    ## @brief Builds the UI components.
-    def build_interface(self):
-        contenedor = ctk.CTkFrame(self, fg_color="#E8E3E3", corner_radius=25, width=880, height=580)
-        contenedor.pack(padx=40, pady=40, fill="both", expand=True)
-        contenedor.pack_propagate(False)
+    ## @brief Validates the contact field to allow only numbers up to 10 digits.
+    ## @param proposed Proposed text input.
+    ## @return True if valid, False otherwise.
+    def _validate_contacto(self, proposed: str) -> bool:
+        return proposed.isdigit() and len(proposed) <= 10 or proposed == ""
 
-        top_frame = ctk.CTkFrame(contenedor, fg_color="transparent")
+    ## @brief Builds the user interface.
+    def build_interface(self):
+        style = ttk.Style()
+        style.theme_use("clam")
+        style.configure('TCombobox',
+                        fieldbackground='white',
+                        background='white',
+                        bordercolor='white',
+                        lightcolor='white',
+                        darkcolor='white',
+                        arrowcolor='black',
+                        borderwidth=0,
+                        relief='flat')
+
+        container = ctk.CTkFrame(self, fg_color="#dcd1cd", corner_radius=25, width=880, height=580)
+        container.pack(padx=40, pady=40, fill="both", expand=True)
+        container.pack_propagate(False)
+
+        top_frame = ctk.CTkFrame(container, fg_color="transparent")
         top_frame.pack(fill="x", padx=30, pady=(10, 5))
 
-        titulo = ctk.CTkLabel(top_frame, text="Nuevo proveedor", font=self.fuente_titulo, text_color="#b8191a")
-        titulo.pack(side="left")
+        title = ctk.CTkLabel(top_frame, text="Nuevo proveedor", font=self.fuente_titulo, text_color="#b8191a")
+        title.pack(side="left")
 
-        btn_volver = ctk.CTkButton(
-            top_frame,
-            text="← Volver",
-            font=self.fuente_button,
-            fg_color="#b8191a",
-            hover_color="#991416",
-            corner_radius=50,
-            width=130,
-            command=self.volver_a_costos
-        )
-        btn_volver.pack(side="right")
+        btn_back = ctk.CTkButton(top_frame, text="← Volver", font=self.fuente_button, fg_color="#b8191a",
+                                 hover_color="#991416", corner_radius=50, width=130, command=self.volver_a_costos)
+        btn_back.pack(side="right")
 
-        linea = ctk.CTkLabel(contenedor, text="─" * 200, text_color="#b8191a")
-        linea.pack(fill="x", padx=30, pady=(0, 10))
+        line = ctk.CTkLabel(container, text="─" * 200, text_color="#b8191a")
+        line.pack(fill="x", padx=60, pady=(0, 10))
 
-        scroll = ctk.CTkScrollableFrame(contenedor, fg_color="white", corner_radius=25)
+        scroll = ctk.CTkScrollableFrame(container, fg_color="white", corner_radius=25)
         scroll.pack(padx=30, pady=10, fill="both", expand=True)
 
-        entradas_frame = ctk.CTkFrame(scroll, fg_color="transparent")
-        entradas_frame.pack(padx=20, pady=20, fill="x")
+        entries_frame = ctk.CTkFrame(scroll, fg_color="transparent")
+        entries_frame.pack(padx=(110, 0), pady=(0, 30), anchor="w", fill="x")
+        entries_frame.grid_columnconfigure((0, 1, 2), weight=1, uniform="a")
+        entries_frame.grid_columnconfigure((3, 4), weight=1, uniform="b")
 
-        nombre_frame = ctk.CTkFrame(entradas_frame, fg_color="transparent")
-        nombre_frame.pack(side="left", padx=(0, 40))
+        name_frame = ctk.CTkFrame(entries_frame, fg_color="transparent")
+        name_frame.grid(row=0, column=0, padx=(0, 5), pady=(0, 10), sticky="nw")
+        ctk.CTkLabel(name_frame, text="Nombre", font=self.fuente_card, text_color="#3A3A3A").pack(anchor="w")
+        ctk.CTkLabel(name_frame, text="* campo obligatorio", font=ctk.CTkFont(size=10), text_color="#E1222A").pack(anchor="w")
+        self.entry_nombre = ctk.CTkEntry(name_frame, width=300, fg_color="#F4F4F4", text_color="black",
+                                         border_color="#E1222A", border_width=1)
+        self.entry_nombre.pack(anchor="w", pady=(5, 0))
 
-        ctk.CTkLabel(nombre_frame, text="Nombre", font=self.fuente_card, text_color="#3A3A3A").pack(anchor="w", padx=(80, 0))
-        ctk.CTkLabel(nombre_frame, text="* campo obligatorio", font=ctk.CTkFont(size=10), text_color="#E1222A").pack(anchor="w", padx=(80, 0))
-        self.entry_nombre = ctk.CTkEntry(nombre_frame, width=400, fg_color="#F4F4F4", text_color="black", border_color="#E1222A", border_width=1)
-        self.entry_nombre.pack(pady=(5, 0), padx=(80, 0), anchor="w")
+        contact_frame = ctk.CTkFrame(entries_frame, fg_color="transparent")
+        contact_frame.grid(row=0, column=1, padx=(5, 5), pady=(0, 10), sticky="nw")
+        ctk.CTkLabel(contact_frame, text="Contacto", font=self.fuente_card, text_color="#3A3A3A").pack(anchor="w")
+        ctk.CTkLabel(contact_frame, text="* campo obligatorio", font=ctk.CTkFont(size=10), text_color="#E1222A").pack(anchor="w")
+        self.entry_contacto = ctk.CTkEntry(contact_frame, width=250, fg_color="#F4F4F4", text_color="black",
+                                           border_color="#E1222A", border_width=1,
+                                           validate='key',
+                                           validatecommand=(self.register(self._validate_contacto), '%P'))
+        self.entry_contacto.pack(anchor="w", pady=(5, 0))
 
-        contacto_frame = ctk.CTkFrame(entradas_frame, fg_color="transparent")
-        contacto_frame.pack(side="left")
+        category_frame = ctk.CTkFrame(entries_frame, fg_color="transparent")
+        category_frame.grid(row=0, column=2, padx=(5, 0), pady=(0, 10), sticky="nw")
+        ctk.CTkLabel(category_frame, text="Categoría", font=self.fuente_card, text_color="#3A3A3A").pack(anchor="w")
+        ctk.CTkLabel(category_frame, text="* campo obligatorio", font=ctk.CTkFont(size=10), text_color="#E1222A").pack(anchor="w")
+        self.combo_categoria = ctk.CTkOptionMenu(category_frame,
+                                                 values=["Carnes", "Frutas y verduras", "Lácteos",
+                                                         "Panadería y tortillería", "Bebidas", "Abarrotes",
+                                                         "Desechables y químicos"],
+                                                 font=self.fuente_card, fg_color="#F4F4F4", button_color="#E1222A",
+                                                 button_hover_color="#b8191a", text_color="black",
+                                                 dropdown_font=self.fuente_card, dropdown_fg_color="#F4F4F4",
+                                                 dropdown_text_color="black", width=180)
+        self.combo_categoria.set("Selecciona una categoría")
+        self.combo_categoria.pack(anchor="w", pady=(5, 0))
 
-        ctk.CTkLabel(contacto_frame, text="Contacto", font=self.fuente_card, text_color="#3A3A3A").pack(anchor="w", padx=(30, 0))
-        ctk.CTkLabel(contacto_frame, text="* campo obligatorio", font=ctk.CTkFont(size=10), text_color="#E1222A").pack(anchor="w", padx=(30, 0))
-        self.entry_contacto = ctk.CTkEntry(contacto_frame, width=300, fg_color="#F4F4F4", text_color="black", border_color="#E1222A", border_width=1)
-        self.entry_contacto.pack(pady=(5, 0), padx=(30, 0), anchor="w")
+        family = self.fuente_card.cget("family")
+        size = self.fuente_card.cget("size")
 
-        fechas_frame = ctk.CTkFrame(scroll, fg_color="transparent")
-        fechas_frame.pack(padx=20, pady=(10, 0), fill="x")
+        issue_frame = ctk.CTkFrame(entries_frame, fg_color="transparent")
+        issue_frame.grid(row=1, column=0, padx=(0, 5), pady=(0, 10), sticky="nw")
+        ctk.CTkLabel(issue_frame, text="Fecha de expedición", font=self.fuente_card, text_color="#3A3A3A").pack(anchor="w")
+        self.fecha_expedicion = DateEntry(issue_frame, font=(family, size), background="#F4F4F4",
+                                          foreground="black", borderwidth=0, relief="flat", state="readonly",
+                                          date_pattern="yyyy-mm-dd")
+        self.fecha_expedicion.configure(width=220)
+        self.fecha_expedicion.pack(anchor="w", pady=(5, 0))
 
-        expedicion_frame = ctk.CTkFrame(fechas_frame, fg_color="transparent")
-        expedicion_frame.pack(side="left", padx=(0, 40))
-
-        ctk.CTkLabel(expedicion_frame, text="Fecha de expedición", font=self.fuente_card, text_color="#3A3A3A").pack(anchor="w", padx=(80, 0))
-        ctk.CTkLabel(expedicion_frame, text="* campo obligatorio", font=ctk.CTkFont(size=10), text_color="#E1222A").pack(anchor="w", padx=(80, 0))
-        self.fecha_expedicion = DateEntry(expedicion_frame, width=18, background='#b8191a', foreground='white', borderwidth=2, date_pattern='yyyy-mm-dd')
-        self.fecha_expedicion.pack(pady=(5, 0), padx=(30, 0), anchor="w")
-
-        vigencia_frame = ctk.CTkFrame(fechas_frame, fg_color="transparent")
-        vigencia_frame.pack(side="left")
-
-        ctk.CTkLabel(vigencia_frame, text="Fecha de vigencia", font=self.fuente_card, text_color="#3A3A3A").pack(anchor="w")
-        ctk.CTkLabel(vigencia_frame, text="* campo obligatorio", font=ctk.CTkFont(size=10), text_color="#E1222A").pack(anchor="w")
-        self.fecha_vigencia = DateEntry(vigencia_frame, width=18, background='#b8191a', foreground='white', borderwidth=2, date_pattern='yyyy-mm-dd')
-        self.fecha_vigencia.pack(pady=(5, 0), padx=(30, 0), anchor="w")
+        valid_frame = ctk.CTkFrame(entries_frame, fg_color="transparent")
+        valid_frame.grid(row=1, column=1, padx=(5, 0), pady=(0, 10), sticky="nw")
+        ctk.CTkLabel(valid_frame, text="Fecha de vigencia", font=self.fuente_card, text_color="#3A3A3A").pack(anchor="w")
+        self.fecha_vigencia = DateEntry(valid_frame, font=(family, size), background="#F4F4F4", foreground="black",
+                                        borderwidth=0, relief="flat", state="readonly", date_pattern="yyyy-mm-dd")
+        self.fecha_vigencia.configure(width=220)
+        self.fecha_vigencia.pack(anchor="w", pady=(5, 0))
 
         self.tabla_frame = ctk.CTkFrame(scroll, fg_color="white", corner_radius=25)
-        self.tabla_frame.pack(padx=20, pady=20, fill="both", expand=True)
+        self.tabla_frame.pack(padx=(110, 0), pady=(10, 30), anchor="nw")
 
-        self.tree = ttk.Treeview(self.tabla_frame, columns=("Descripcion", "Unidad", "Precio", "Moneda"), show="headings", height=8)
+        tabla_con_scroll = ctk.CTkFrame(self.tabla_frame, fg_color="white")  
+        tabla_con_scroll.pack()
+
+        self.tree = ttk.Treeview(tabla_con_scroll, columns=("Descripcion", "Unidad", "Precio", "Moneda"),
+                         show="headings", height=10)
         self.tree.heading("Descripcion", text="Descripción del producto")
         self.tree.heading("Unidad", text="Unidad")
         self.tree.heading("Precio", text="Precio")
         self.tree.heading("Moneda", text="Moneda")
 
-        self.tree.column("Descripcion", anchor="w", width=250)
-        self.tree.column("Unidad", anchor="center", width=100)
-        self.tree.column("Precio", anchor="center", width=100)
-        self.tree.column("Moneda", anchor="center", width=100)
+        self.tree.column("Descripcion", width=300, anchor="w")
+        self.tree.column("Unidad", width=180, anchor="center")
+        self.tree.column("Precio", width=160, anchor="center")
+        self.tree.column("Moneda", width=160, anchor="center")
+        self.tree.pack(side="left", fill="y")
 
-        self.tree.pack(padx=20, pady=10, fill="both", expand=True)
+        scrollbar = ttk.Scrollbar(tabla_con_scroll, orient="vertical", command=self.tree.yview)
+        self.tree.configure(yscrollcommand=scrollbar.set)
+        scrollbar.pack(side="right", fill="y")
 
-        btn_guardar = ctk.CTkButton(scroll, text="Guardar proveedor", font=self.fuente_button, width=500, corner_radius=50, fg_color="#b8191a", hover_color="#991416", command=self.guardar_proveedor)
-        btn_guardar.pack(pady=(10, 20))
+        ## @brief Enables pasting Excel data into the table
+        def paste_from_clipboard(event=None):
+            try:
+                pasted_data = self.clipboard_get()
+                rows = pasted_data.strip().split("\n")
+                for row in rows:
+                    values = row.strip().split("\t")
+                    if len(values) == 4:
+                        self.tree.insert("", "end", values=values)
+                    else:
+                        print("Formato no válido:", row)
+            except Exception as e:
+                print("Error al pegar datos:", e)
+
+        self.tree.bind("<Control-v>", paste_from_clipboard)
+        self.tree.bind("<Control-V>", paste_from_clipboard)
+
+        btn_save = ctk.CTkButton(scroll, text="Guardar proveedor", font=self.fuente_button, width=500,
+                                 corner_radius=50, fg_color="#b8191a", hover_color="#991416",
+                                 command=self.guardar_proveedor)
+        btn_save.pack(pady=(30, 80))
+
 
     ## @brief Saves the new provider to the database.
     def guardar_proveedor(self):
@@ -113,19 +177,33 @@ class AgregarProveedorView(ctk.CTkFrame):
         contacto = self.entry_contacto.get().strip()
         fecha_expedicion = self.fecha_expedicion.get_date()
         fecha_vigencia = self.fecha_vigencia.get_date()
+        categoria = self.combo_categoria.get()
+        if categoria == "Selecciona una categoría":
+            self.master.mostrar_mensaje_personalizado("Error", "Selecciona una categoría válida.", "#e03d3d")
+            return
 
-        if not nombre or not contacto or not fecha_expedicion or not fecha_vigencia:
-            from tkinter import messagebox
-            messagebox.showerror("Campos incompletos", "Por favor llena todos los campos obligatorios.")
+        if not nombre or not contacto or not categoria or not fecha_expedicion or not fecha_vigencia:
+            self.master.mostrar_mensaje_personalizado("Error", "Por favor llena todos los campos obligatorios.",
+                                                      "#e03d3d")
             return
 
         try:
-            self.cursor.execute("INSERT INTO Proveedores (nombre, categoria) VALUES (%s, %s)", (nombre, "General"))
+            while True:
+                id_prov = random.randint(1, 999999)
+                self.cursor.execute("SELECT 1 FROM Proveedores WHERE id_proveedor = %s", (id_prov,))
+                if not self.cursor.fetchone():
+                    break
+
+            self.cursor.execute("INSERT INTO Proveedores (id_proveedor, nombre, categoria) VALUES (%s, %s, %s)",
+                                (id_prov, nombre, categoria))
             self.conn.commit()
-            self.master.mostrar_mensaje_personalizado("Agregado", f"Proveedor '{nombre}' agregado correctamente.", "#b8191a")
+            self.master.mostrar_mensaje_personalizado("Agregado",
+                                                      f"Proveedor '{nombre}' agregado correctamente.",
+                                                      "#b8191a")
             self.volver_a_costos()
         except Exception as e:
-            self.master.mostrar_mensaje_personalizado("Error", f"No se pudo agregar el proveedor.\n\n{e}", "#d9534f")
+            self.master.mostrar_mensaje_personalizado("Error", f"No se pudo agregar el proveedor.\n\n{e}",
+                                                      "#d9534f")
 
     ## @brief Returns to the cost management view.
     def volver_a_costos(self):
