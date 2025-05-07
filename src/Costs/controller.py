@@ -174,7 +174,7 @@ class CostController:
         # Read the Excel file
         df = pd.read_excel(file_location)
         
-        costos = [Costos(nombre=row['nombre'], precio=row['precio'], id_proveedor=id_proveedor) for index, row in df.iterrows()]
+        costos = [Costos(nombre=row['nombre'], precio=row['precio'], id_proveedor=id_proveedor, categoria=row['categoria']) for index, row in df.iterrows()]
         
         # Insert the costs into the database
         CostController.create_costs(session, costos)
