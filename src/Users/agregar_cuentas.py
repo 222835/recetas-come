@@ -5,6 +5,8 @@ import os
 import ctypes
 from pathlib import Path
 import tkinter.messagebox as msgbox
+import tkinter as tk
+
 
 
 ## @class AgregarCuentaView
@@ -82,21 +84,19 @@ class AgregarCuentaView(ctk.CTkFrame):
         self.nombre_completo.pack(pady=(0, 15), padx=(80,0), anchor="w")
 
         ctk.CTkLabel(izquierda, text="Rol de acceso:", font=self.fuente_card, text_color="#333333", anchor="w", justify="left").pack( padx=(80,0), anchor="w")
-        self.rol = ctk.CTkOptionMenu(
+        self.rol_var = tk.StringVar(value="Invitado")
+        self.rol = ctk.CTkEntry(
             izquierda,
-            values=["Administrador", "Invitado"],
+            textvariable=self.rol_var,
             font=self.fuente_card,
-            fg_color="#F4F4F4",
-            button_color="#F4F4F4",
-            text_color="#1a1a1a",
-            dropdown_fg_color="#FFFFFF",
-            dropdown_text_color="#1a1a1a",
-            corner_radius=10,
-            dropdown_font=self.fuente_card,
             width=240,
+            fg_color="#e0e0e0",
+            border_color="#b8191a",
+            border_width=1,
+            text_color="#666666",
+            state="disabled"
         )
         self.rol.pack(pady=(0, 15), padx=(80, 0), anchor="w")
-        
 
         derecha = ctk.CTkFrame(cuerpo, fg_color="#f5f5f5", width=500, corner_radius=25)
         derecha.pack(side="left", fill="both", expand=True, pady=10)
