@@ -1,10 +1,13 @@
 import customtkinter as ctk
 from tkinter import ttk, messagebox
+from src.Recipes.controller import RecetasController
+from src.database.connector import Connector
 from src.Recipes.nueva_receta_admin import NuevaRecetaView
 from PIL import Image, ImageTk
 
 class RecetasAdminView(ctk.CTkFrame):
     def __init__(self, master, **kwargs):
+        self.connector = Connector()
         super().__init__(master, **kwargs)
         self.configure(fg_color="#ECEFF4")
 
@@ -41,18 +44,31 @@ class RecetasAdminView(ctk.CTkFrame):
         self.cargar_recetas()
 
     def cargar_recetas(self):
-        recetas = []  # Aquí va tu consulta a la base de datos real
+        session = self.connector.get_session()
+        recetas = RecetasController.list_all_recipes_with_ingredients(session)
 
         for row in self.tree.get_children():
             self.tree.delete(row)
 
         if not recetas:
             self.tree.insert("", "end", values=("No hay recetas guardadas", "", "", "", "", "", "", ""))
+            session.close()
             return
 
         for receta in recetas:
-            # receta debe ser una tupla con los 7 campos, se agrega columna de acciones
-            self.tree.insert("", "end", values=(*receta, "✏️ 🗑️"))
+            for ingrediente in receta["ingredientes"]:
+                self.tree.insert("", "end", values=(
+                    receta["nombre_receta"],
+                    ingrediente["nombre_ingrediente"],
+                    ingrediente["Cantidad"],
+                    ingrediente["Unidad"],
+                    receta["comensales_base"],
+                    receta["periodo"],
+                    receta["clasificacion_receta"],
+                    "✏️ 🗑️"
+                ))
+
+        session.close()
 
     def manejar_accion(self, event):
         item = self.tree.identify_row(event.y)
