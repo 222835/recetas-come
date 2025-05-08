@@ -159,6 +159,7 @@ class LoginApp(ctk.CTk):
         contrasena = self.password_entry.get()
         print(f"Usuario: {usuario}, Contraseña: {contrasena}")
 
+        #idealmente mover import al inicio y el connector y session al init
         from src.database.connector import Connector
         connector = Connector()
 

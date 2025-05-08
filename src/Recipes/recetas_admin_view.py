@@ -8,6 +8,7 @@ from PIL import Image, ImageTk
 class RecetasAdminView(ctk.CTkFrame):
     def __init__(self, master, **kwargs):
         self.connector = Connector()
+        self.session = self.connector.get_session()
         super().__init__(master, **kwargs)
         self.configure(fg_color="#ECEFF4")
 
@@ -44,15 +45,14 @@ class RecetasAdminView(ctk.CTkFrame):
         self.cargar_recetas()
 
     def cargar_recetas(self):
-        session = self.connector.get_session()
-        recetas = RecetasController.list_all_recipes_with_ingredients(session)
+        recetas = RecetasController.list_all_recipes_with_ingredients(self.session)
 
         for row in self.tree.get_children():
             self.tree.delete(row)
 
         if not recetas:
             self.tree.insert("", "end", values=("No hay recetas guardadas", "", "", "", "", "", "", ""))
-            session.close()
+            self.session.close()
             return
 
         for receta in recetas:
@@ -67,8 +67,6 @@ class RecetasAdminView(ctk.CTkFrame):
                     receta["clasificacion_receta"],
                     "✏️ 🗑️"
                 ))
-
-        session.close()
 
     def manejar_accion(self, event):
         item = self.tree.identify_row(event.y)
@@ -88,6 +86,7 @@ class RecetasAdminView(ctk.CTkFrame):
         nueva_ventana = ctk.CTkToplevel(self)
         nueva_ventana.geometry("1000x700")
         nueva_ventana.title("Nueva Receta")
+        #Cuando se cambie esto a redirigir y no crear una nueva ventana, cerrar session antes de destruir el widget
         NuevaRecetaView(nueva_ventana).pack(fill="both", expand=True)
 
     def editar_receta(self):
