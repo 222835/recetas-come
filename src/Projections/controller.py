@@ -1,5 +1,7 @@
 import os
 import sys
+from pdf_reports import pug_to_html, write_report
+from plotly import graph_objects as go
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
@@ -170,3 +172,76 @@ class ProyeccionController:
             session.commit()
         else:
             raise ValueError(f"No se encontro la proyeccion con ID {id_proyeccion}")
+        
+    ## Generate a report of the projection.
+    @staticmethod
+    def generate_projection_report(session, id_proyeccion):
+        proyeccion = session.get(Proyeccion, id_proyeccion)
+        if not proyeccion:
+            raise ValueError(f"No se encontro la proyeccion con ID {id_proyeccion}")
+        
+        ##Get the associated recipes
+        proyeccion_recetas = session.query(ProyeccionReceta).filter_by(id_proyeccion=id_proyeccion).all()
+        
+        ##Initialize a list to store the report data
+        report_data = []
+        
+        for pr in proyeccion_recetas:
+            receta = session.get(Receta, pr.id_receta)
+            if not receta:
+                continue
+
+            ingredientes = session.query(Receta_Ingredientes).filter_by(id_receta=receta.id_receta).all()
+            ingredientes_list = []
+            for ing in ingredientes:
+                ingrediente = session.get(Ingrediente, ing.id_ingrediente)
+                if not ingrediente:
+                    continue
+                
+                ingredientes_list.append({
+                    "nombre": ingrediente.nombre,
+                    "cantidad": ing.cantidad,
+                    "unidad": ingrediente.unidad_medida
+                })
+            
+            report_data.append({
+                "receta": receta.nombre,
+                "ingredientes": ingredientes_list,
+                "porcentaje": pr.porcentaje,
+                "comensales": proyeccion.comensales,
+                "fecha": proyeccion.fecha
+            })
+        
+        ##Calculate total ingredients needed
+        total_ingredientes = ProyeccionController.calculate_total_ingredients(session, id_proyeccion)
+
+        report_data.append({
+            "total_ingredientes": total_ingredientes
+        })
+
+        # Generate pie chart data for the report
+
+        pie_chart_data = []
+        for pr in proyeccion_recetas:
+            receta = session.get(Receta, pr.id_receta)
+            if not receta:
+                continue
+            
+            pie_chart_data.append({
+                "receta": receta.nombre,
+                "porcentaje": pr.porcentaje
+            })
+        
+        # Generate pie chart using plotly
+        fig = go.Figure(data=[
+            go.Pie(labels=[d["receta"] for d in pie_chart_data], values=[d["porcentaje"] for d in pie_chart_data])
+        ])
+        fig.update_layout(title_text="Distribución de Porcentajes por Receta")
+        fig.write_image("pie_chart.png")
+
+        # Generate the report in pdf format
+        template_path = os.path.join(os.path.dirname(__file__), 'templates', 'report.pug')
+
+        pug_to_html(template_path, report_data, 'report.html')
+        write_report('report.html', f'proyeccion_report_{proyeccion.fecha}.pdf')
+        return 'proyeccion_report.pdf'
