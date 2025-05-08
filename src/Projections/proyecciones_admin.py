@@ -1,6 +1,8 @@
 import customtkinter as ctk
 from PIL import Image
 from pathlib import Path
+from .proyecciones_seleccion import ProyeccionesSeleccionView
+
 
 ## @class ProyeccionesAdminView
 ## @brief Displays the projection time selection interface with large icons, buttons, and a center divider.
@@ -52,7 +54,7 @@ class ProyeccionesAdminView(ctk.CTkFrame):
             fg_color="#b8191a",
             hover_color="#991416",
             corner_radius=8,
-            command=self.accion_desayuno
+            command=lambda: self.cambiar_a_seleccion("Desayuno")
         ).pack(pady=10)
 
         ctk.CTkLabel(
@@ -74,13 +76,22 @@ class ProyeccionesAdminView(ctk.CTkFrame):
             fg_color="#b8191a",
             hover_color="#991416",
             corner_radius=8,
-            command=self.accion_comida
+            command=lambda: self.cambiar_a_seleccion("Comida")
         ).pack(pady=10)
 
+    ## @brief Loads the selection view and passes the meal type.
+    def cambiar_a_seleccion(self, tipo):
+        for widget in self.winfo_children():
+            widget.destroy()
+        vista = ProyeccionesSeleccionView(self, tipo_comida=tipo)
+        vista.pack(fill="both", expand=True)
+
+    ##conectar con db
     ## @brief Handles "Desayuno" button click.
     def accion_desayuno(self):
-        print("Desayuno selected")
+        self.cambiar_a_seleccion("Desayuno")
 
     ## @brief Handles "Comida" button click.
     def accion_comida(self):
-        print("Comida selected")
+        self.cambiar_a_seleccion("Comida")
+
