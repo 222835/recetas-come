@@ -45,7 +45,7 @@ class ProveedorScreen(ctk.CTkFrame):
     def crear_proveedor(self):
         nombre = self.nombre_entry.get()
         categoria = self.categoria_entry.get()
-        ProveedorController.create_proveedor(self.session, nombre=nombre, categoria=categoria)
+        ProveedorController.create_proveedor(self.session, name=nombre, category=categoria)
         self.actualizar_tabla()
         # Limpiar los campos de entrada
         self.nombre_entry.delete(0, ctk.END)
