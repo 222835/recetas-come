@@ -10,6 +10,8 @@ from PIL import Image
 from dotenv import load_dotenv
 import tkinter.messagebox as msgbox
 from .agregar_proveedor import AgregarProveedorView
+from .actualizar_proveedores import ActualizarProveedoresView
+
 
 ## @class CostosAdminView
 ## @brief Displays the list of providers and costs.
@@ -95,6 +97,17 @@ class CostosAdminView(ctk.CTkFrame):
         self.sort_option.set("Menor precio")
         self.sort_option.pack(side="left")
 
+        btn_proveedores = ctk.CTkButton(
+            top_frame,
+            text="Proveedores",
+            font=self.fuente_button,
+            fg_color="#b8191a",
+            hover_color="#991416",
+            corner_radius=50,
+            command=self.mostrar_actualizar_proveedores
+        )
+        btn_proveedores.pack(side="right", padx=(10, 20))
+
         btn_agregar = ctk.CTkButton(top_frame, image=self.img_add, text="Agregar nuevo proveedor", font=self.fuente_button, fg_color="#b8191a", hover_color="#991416", corner_radius=50, compound="left", command=self.mostrar_agregar_proveedor)
         btn_agregar.pack(side="right")
 
@@ -113,6 +126,12 @@ class CostosAdminView(ctk.CTkFrame):
         self.costos_scroll_frame.pack(fill="both", expand=True, padx=20, pady=10)
 
         self.cargar_costos()
+
+    def mostrar_actualizar_proveedores(self):
+        for widget in self.winfo_children():
+            widget.destroy()
+        nueva_vista = ActualizarProveedoresView(self) 
+        nueva_vista.pack(fill="both", expand=True) 
 
     ## @brief Loads cost data from the database and creates cards.
     def cargar_costos(self):
