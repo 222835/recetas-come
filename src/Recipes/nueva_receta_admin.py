@@ -3,12 +3,13 @@ from tkinter import messagebox
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
 from src.Recipes.controller import RecetasController
-
-engine = create_engine("mysql+mysqlconnector://root:1234@localhost/COME", echo=False)
-Session = sessionmaker(bind=engine)
+from src.database.connector import Connector
 
 class NuevaRecetaView(ctk.CTkFrame):
     def __init__(self, master, **kwargs):
+        self.connector = Connector()
+        self.session = self.connector.get_session()
+
         super().__init__(master, **kwargs)
         self.configure(fg_color="#ECEFF4")
 
@@ -38,7 +39,6 @@ class NuevaRecetaView(ctk.CTkFrame):
         return entry
 
     def guardar_receta(self):
-        session = Session()
         try:
             nombre = self.nombre.get()
             periodo = self.periodo.get()
@@ -46,7 +46,7 @@ class NuevaRecetaView(ctk.CTkFrame):
             comensales = int(self.comensales.get())
 
             texto_ingredientes = self.ingredientes_text.get("1.0", "end").strip().split("\n")
-            ingredientes = []
+            ingredientes = [] #cuando se vuelva a ver la vista tener en cuenta que los ingredientes se agregan de manera individual a las recetas
             for linea in texto_ingredientes:
                 partes = linea.split(",")
                 if len(partes) == 3:
@@ -56,10 +56,10 @@ class NuevaRecetaView(ctk.CTkFrame):
                         "unidad_medida": partes[2].strip()
                     })
 
-            RecetasController.create_recipe(session, nombre, clasificacion, periodo, comensales, ingredientes, user_role="admin")
+            RecetasController.create_recipe(self.session, nombre, clasificacion, periodo, comensales)
             messagebox.showinfo("Éxito", "Receta guardada correctamente")
             self.master.destroy()
         except Exception as e:
             messagebox.showerror("Error", str(e))
         finally:
-            session.close()
+            self.session.close()

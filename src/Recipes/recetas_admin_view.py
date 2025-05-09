@@ -1,10 +1,14 @@
 import customtkinter as ctk
 from tkinter import ttk, messagebox
+from src.Recipes.controller import RecetasController
+from src.database.connector import Connector
 from src.Recipes.nueva_receta_admin import NuevaRecetaView
 from PIL import Image, ImageTk
 
 class RecetasAdminView(ctk.CTkFrame):
     def __init__(self, master, **kwargs):
+        self.connector = Connector()
+        self.session = self.connector.get_session()
         super().__init__(master, **kwargs)
         self.configure(fg_color="#ECEFF4")
 
@@ -41,18 +45,28 @@ class RecetasAdminView(ctk.CTkFrame):
         self.cargar_recetas()
 
     def cargar_recetas(self):
-        recetas = []  # Aquí va tu consulta a la base de datos real
+        recetas = RecetasController.list_all_recipes_with_ingredients(self.session)
 
         for row in self.tree.get_children():
             self.tree.delete(row)
 
         if not recetas:
             self.tree.insert("", "end", values=("No hay recetas guardadas", "", "", "", "", "", "", ""))
+            self.session.close()
             return
 
         for receta in recetas:
-            # receta debe ser una tupla con los 7 campos, se agrega columna de acciones
-            self.tree.insert("", "end", values=(*receta, "✏️ 🗑️"))
+            for ingrediente in receta["ingredientes"]:
+                self.tree.insert("", "end", values=(
+                    receta["nombre_receta"],
+                    ingrediente["nombre_ingrediente"],
+                    ingrediente["Cantidad"],
+                    ingrediente["Unidad"],
+                    receta["comensales_base"],
+                    receta["periodo"],
+                    receta["clasificacion_receta"],
+                    "✏️ 🗑️"
+                ))
 
     def manejar_accion(self, event):
         item = self.tree.identify_row(event.y)
@@ -72,6 +86,7 @@ class RecetasAdminView(ctk.CTkFrame):
         nueva_ventana = ctk.CTkToplevel(self)
         nueva_ventana.geometry("1000x700")
         nueva_ventana.title("Nueva Receta")
+        #Cuando se cambie esto a redirigir y no crear una nueva ventana, cerrar session antes de destruir el widget
         NuevaRecetaView(nueva_ventana).pack(fill="both", expand=True)
 
     def editar_receta(self):

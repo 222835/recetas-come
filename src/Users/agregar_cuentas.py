@@ -1,10 +1,10 @@
 import customtkinter as ctk
-from dotenv import load_dotenv
-import mysql.connector
 import os
 import ctypes
 from pathlib import Path
 import tkinter.messagebox as msgbox
+from src.database.connector import Connector
+from src.Users.model import Usuario
 
 
 ## @class AgregarCuentaView
@@ -26,11 +26,11 @@ class AgregarCuentaView(ctk.CTkFrame):
     ## @param fuente_button Font used for buttons.
     ## @param fuente_card Font used for input labels and entries.
 
-    def __init__(self, parent, cursor, conn, fuente_titulo, fuente_button, fuente_card):
+    def __init__(self, parent, fuente_titulo, fuente_button, fuente_card):
         super().__init__(parent)
         self.configure(fg_color="transparent")
-        self.cursor = cursor
-        self.conn = conn
+        self.connection = Connector()
+        self.session = self.connection.get_session()
         self.fuente_titulo = fuente_titulo
         self.fuente_button = fuente_button
         self.fuente_card = ctk.CTkFont(family="Port Lligat Slab", size=17)
@@ -39,8 +39,6 @@ class AgregarCuentaView(ctk.CTkFrame):
         font_path = BASE_DIR.parents[2] / "res" / "fonts" / "PortLligatSlab-Regular.ttf"
         if os.name == "nt":
             ctypes.windll.gdi32.AddFontResourceW(str(font_path))
-
-        load_dotenv()
 
         self.contenedor = ctk.CTkFrame(self, fg_color="#E8E3E3", corner_radius=25, width=880, height=500)
         self.contenedor.pack(padx=40, pady=40, fill="both", expand=True)
@@ -145,12 +143,17 @@ class AgregarCuentaView(ctk.CTkFrame):
             msgbox.showerror("Error", "Las contraseñas no coinciden.")
             return
         try:
-            self.cursor.execute("INSERT INTO Usuarios (nombre_usuario, nombre_completo, contrasenia, rol) VALUES (%s, %s, %s, %s)",
-                                (usuario, nombre, contra, rol))
-            self.conn.commit()
+            nuevo_usuario = Usuario(
+                nombre_usuario=usuario,
+                nombre_completo=nombre,
+                contrasenia=contra,
+                rol=rol
+            )
+            nuevo_usuario.create(self.session)
             msgbox.showinfo("Éxito", "Cuenta agregada correctamente.")
-            self.volver_a_cuentas() 
+            self.volver_a_cuentas()
         except Exception as e:
+            self.session.rollback()
             msgbox.showerror("Error", f"No se pudo agregar el usuario.\n\n{e}")
 
     ## @brief Returns to the main account management view.
@@ -159,6 +162,7 @@ class AgregarCuentaView(ctk.CTkFrame):
     def volver_a_cuentas(self):
         from .cuentas import CuentasAdminView
         for widget in self.master.winfo_children():
+            self.session.close()
             widget.destroy()
         vista_cuentas = CuentasAdminView(self.master)
         vista_cuentas.pack(fill="both", expand=True)
