@@ -1,7 +1,8 @@
 ## @file main.py
 ## @brief Entry point of the application.
 ## @details Initializes the database and displays the appropriate dashboard depending on the user's role.
-
+import pymysql
+pymysql.install_as_MySQLdb()
 from ast import main
 import os
 import customtkinter as ctk
