@@ -7,6 +7,8 @@ from src.Projections.proyecciones_admin import ProyeccionesAdminView
 from src.Users.cuentas import CuentasAdminView
 from src.Costs.costos import CostosAdminView
 from src.Projections.historial import HistorialAdminView
+from src.components.ajustes import AjustesView
+from src.components.ayuda import AyudaView
 import os
 import ctypes
 
@@ -198,6 +200,23 @@ class InvitadoDashboard(ctk.CTk):
     def handle_option(self, option):
         if option == "Cerrar sesión":
             self.show_logout_popup()
+        elif option == "Ajustes":
+            for w in self.main_content.winfo_children():
+                w.destroy()
+            AjustesView(
+                self.main_content,
+                self.custom_font,  
+                self.custom_font,   
+                self.custom_font   
+            ).pack(fill="both", expand=True)
+        elif option == "Ayuda":
+            for w in self.main_content.winfo_children():
+                w.destroy()
+            AyudaView(
+                self.main_content,
+                self.custom_font,  
+                self.custom_font   
+            ).pack(fill="both", expand=True)
         else:
             print(f"{option} clicked")
 
