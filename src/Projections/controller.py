@@ -170,3 +170,34 @@ class ProyeccionController:
             session.commit()
         else:
             raise ValueError(f"No se encontro la proyeccion con ID {id_proyeccion}")
+    
+    ## List all active projections including related recipes.
+    @staticmethod
+    def list_all_projections(session) -> list[dict]:
+        proyecciones = session.query(Proyeccion).filter(Proyeccion.estatus == True).all()
+        listado = []
+
+        for proyeccion in proyecciones:
+            recetas = []
+            for pr in proyeccion.proyeccion_recetas:
+                receta = session.query(Receta).filter(Receta.id_receta == pr.id_receta).first()
+                recetas.append({
+                    "id_receta": receta.id_receta,
+                    "nombre_receta": receta.nombre_receta,
+                    "clasificacion": receta.clasificacion,
+                    "periodo": receta.periodo,
+                    "comensales_base": receta.comensales_base,
+                    "porcentaje": pr.porcentaje
+                })
+            
+            proyeccion_data = {
+            "id_proyeccion": proyeccion.id_proyeccion,
+            "nombre": proyeccion.nombre,
+            "periodo": proyeccion.periodo,
+            "comensales": proyeccion.comensales,
+            "fecha": proyeccion.fecha,
+            "recetas": recetas
+            }
+            listado.append(proyeccion_data)
+
+        return listado

@@ -247,7 +247,50 @@ class TestProyeccionController(unittest.TestCase):
         self.print_projection_details(proyeccion, "BORRAR PROYECCION")
         ProyeccionController.delete_projection(self.session, proyeccion.id_proyeccion)
         
-        
+    ## Test list of projections
+    def test_list_all_projections(self):
+        proyeccionA = ProyeccionController.create_projection(
+            self.session,
+            "Proyeccion A",
+            "Semanal",
+            20,
+            [
+                {"id_receta": self.receta1.id_receta, "porcentaje": 60},
+                {"id_receta": self.receta2.id_receta, "porcentaje": 40}
+            ]
+        )
+
+        proyeccionB = ProyeccionController.create_projection(
+            self.session,
+            "Proyeccion B",
+            "Semanal",
+            50,
+            [
+                {"id_receta": self.receta1.id_receta, "porcentaje": 20},
+                {"id_receta": self.receta2.id_receta, "porcentaje": 80}
+            ]
+        )
+
+        listado = ProyeccionController.list_all_projections(self.session)
+
+        print("\n*** LISTADO DE PROYECCIONES ***")
+        for p in listado:
+            print(f"ID: {p['id_proyeccion']}, Nombre: {p['nombre']}")
+            print(f"Periodo: {p['periodo']}, Comensales: {p['comensales']}, Fecha: {p['fecha']}")
+            print("Recetas:")
+            for r in p['recetas']:
+                print(f" - {r['nombre_receta']} ({r['porcentaje']}%)")
+            print("")
+
+        self.assertEqual(len(listado), 2)
+        self.assertEqual(listado[0]['nombre'], "Proyeccion A")
+        self.assertEqual(listado[1]['nombre'], "Proyeccion B")
+        self.assertEqual(len(listado[0]['recetas']), 2)
+        self.assertEqual(len(listado[1]['recetas']), 2)
+        self.assertEqual(listado[0]['recetas'][0]['id_receta'], self.receta1.id_receta)
+        self.assertEqual(listado[0]['recetas'][1]['id_receta'], self.receta2.id_receta)
+        self.assertEqual(listado[1]['recetas'][0]['id_receta'], self.receta1.id_receta)
+        self.assertEqual(listado[1]['recetas'][1]['id_receta'], self.receta2.id_receta)
 
 if __name__ == '__main__':
     unittest.main()
