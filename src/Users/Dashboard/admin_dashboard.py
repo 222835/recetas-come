@@ -13,6 +13,8 @@ from src.Projections.proyecciones_admin import ProyeccionesAdminView
 from src.Users.cuentas import CuentasAdminView
 from src.Costs.costos import CostosAdminView
 from src.Projections.historial import HistorialAdminView
+from src.components.ajustes import AjustesView
+from src.components.ayuda import AyudaView
 import tkinter.font as tkfont
 import os
 import ctypes
@@ -203,11 +205,29 @@ class AdminDashboard(ctk.CTk):
             y = self.profile_container.winfo_rooty() + self.profile_container.winfo_height()
             self.dropdown_menu.geometry(f"+{x}+{y}")
 
+
     ## @brief Handles profile menu option clicks.
     ## @param option Selected option.
     def handle_option(self, option):
         if option == "Cerrar sesión":
             self.show_logout_popup()
+        elif option == "Ajustes":
+            for w in self.main_content.winfo_children():
+                w.destroy()
+            AjustesView(
+                self.main_content,
+                self.custom_font,  
+                self.custom_font,   
+                self.custom_font   
+            ).pack(fill="both", expand=True)
+        elif option == "Ayuda":
+            for w in self.main_content.winfo_children():
+                w.destroy()
+            AyudaView(
+                self.main_content,
+                self.custom_font,  
+                self.custom_font   
+            ).pack(fill="both", expand=True)
         else:
             print(f"{option} clicked")
 
