@@ -218,8 +218,6 @@ class CuentasAdminView(ctk.CTkFrame):
         # Crea e instala la vista de edición pasándole el usuario a editar
         editar_vista = EditarCuentaView(
             parent=self,
-            cursor=self.cursor,
-            conn=self.conn,
             fuente_titulo=self.fuente_titulo,
             fuente_button=self.fuente_button,
             fuente_card=self.fuente_small,
