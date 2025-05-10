@@ -20,7 +20,7 @@ class Proyeccion(Base):
     fecha_eliminado = Column(Date, nullable=True)
 
     ## Relationship with Recetas and ProyeccionRecetas.
-    proyeccion_recetas = relationship("ProyeccionReceta", back_populates="proyeccion")
+    proyeccion_recetas = relationship("ProyeccionReceta", back_populates="proyeccion", cascade="all, delete-orphan", passive_deletes=True)
 
     ## Constructor of the class.
     def __init__(self, numero_usuario: int, nombre: str, periodo: str, comensales: int, fecha, estatus: bool = True, fecha_eliminado: Date | None = None) -> None:
@@ -76,7 +76,11 @@ class ProyeccionReceta(Base):
     id_receta = Column(Integer, ForeignKey("recetas.id_receta", ondelete="CASCADE"), primary_key=True)
     porcentaje = Column(Integer, nullable=False)
     proyeccion = relationship("Proyeccion", back_populates="proyeccion_recetas")
-    receta = relationship("Receta")  
+    receta = relationship("Receta")
+
+    __mapper_args__ = {
+        "confirm_deleted_rows": False
+    }
 
     def __init__(self, id_proyeccion: int, id_receta: int, porcentaje: int) -> None:
         self.id_proyeccion = id_proyeccion

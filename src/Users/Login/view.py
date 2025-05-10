@@ -18,9 +18,19 @@ from tkinter import messagebox
 ## and handling user authentication. If authentication is successful, the window closes and the corresponding
 ## dashboard (admin or guest) is opened.
 class LoginApp(ctk.CTk):
-    ## @brief Initializes the login window.
-    ## @details Sets title, window size, generates the gradient background, and creates UI widgets.
-    def __init__(self):
+
+    """
+    @brief Clase que representa la ventana de inicio de sesión.
+    @details Esta clase utiliza CustomTkinter para generar la interfaz de login con un fondo con gradiente,
+    un formulario de usuario y contraseña, y un botón de inicio. La función login() realiza la autenticación
+    y redirige al dashboard según el rol.
+    """
+    def __init__(self, master=None):
+        """
+        @brief Inicializa la ventana de inicio de sesión.
+        @details Configura el título, tamaño de la ventana y genera el fondo con gradiente, además de crear
+        los widgets de la interfaz.
+        """
         super().__init__()
         self.title("Login")
         self.geometry("1920x1080")
@@ -32,6 +42,8 @@ class LoginApp(ctk.CTk):
         self.background_label.place(relwidth=1, relheight=1)
 
         self.create_widgets()
+        self.protocol("WM_DELETE_WINDOW", self.on_close)
+
 
     ## @brief Creates a radial gradient image.
     ## @param width Image width.
@@ -126,6 +138,7 @@ class LoginApp(ctk.CTk):
                                           command=self.login, 
                                           font=("Arial", 13))
         self.login_button.pack(pady=20)
+        self.bind("<Return>", lambda event: self.login())
 
     ## @brief Toggles password visibility.
     ## @details Switches between masked and plain text, and updates the button icon accordingly.
@@ -146,24 +159,22 @@ class LoginApp(ctk.CTk):
         contrasena = self.password_entry.get()
         print(f"Usuario: {usuario}, Contraseña: {contrasena}")
 
+        #idealmente mover import al inicio y el connector y session al init
         from src.database.connector import Connector
-        from src.utils.constants import env
-
-        connection_string = f"mariadb://{env['DB_USER']}:{env['DB_PASSWORD']}@{env['DB_HOST']}:{env['DB_PORT']}/{env['DB_DATABASE']}"
-        connector = Connector(connection_string)
+        connector = Connector()
 
         query = f"SELECT rol, contrasenia FROM Usuarios WHERE nombre_usuario = '{usuario}'"
         result = connector.execute_query(query)
 
         if not result:
-            messagebox.showerror("Error", "Usuario no encontrado")
+            messagebox.showerror("Error", "Usuario no encontrado", parent=self)
             self.login_button.configure(state="normal")  
             return
 
         stored_role, stored_password = result[0]
 
         if stored_password != contrasena:
-            messagebox.showerror("Error", "Contraseña incorrecta")
+            messagebox.showerror("Error", "Contraseña incorrecta", parent=self)
             self.login_button.configure(state="normal")
             return
 
@@ -172,11 +183,9 @@ class LoginApp(ctk.CTk):
         elif stored_role.lower() == 'invitado':
             self.user_role = 'invitado'
         else:
-            messagebox.showerror("Error", f"El rol '{stored_role}' no está reconocido.")
+            messagebox.showerror("Error", f"El rol '{stored_role}' no está reconocido.",  parent=self)
             self.login_button.configure(state="normal")
             return
-
-        messagebox.showinfo("Éxito", f"Bienvenido {usuario}. Rol asignado: {self.user_role}")
 
         self.destroy()
 
@@ -188,6 +197,14 @@ class LoginApp(ctk.CTk):
             from src.Users.Dashboard.invitado_dashboard import InvitadoDashboard
             invitado_app = InvitadoDashboard()
             invitado_app.mainloop()
+            
+    ## @brief Handles window close event from the window manager (X button).
+    ## @details Safely destroys the window and exits the application completely to prevent lingering processes or after() errors.       
+    def on_close(self):
+        self.destroy()
+        import sys
+        sys.exit()
+
 
 ## @brief Runs the login application.
 ## @details Creates an instance of LoginApp and starts its main event loop.
