@@ -13,7 +13,7 @@ from src.utils.constants import env as env  ## Import environment constants
 ROOT_PATH = os.path.dirname(os.path.abspath(__file__))  ## Define ROOT_PATH
 constants.init(ROOT_PATH)  ## Initialize constants and resource paths
 
-from src.Users.Login.view import LoginApp
+from src.Providers.view import ProveedorScreen
 from src.Users.Dashboard.admin_dashboard import AdminDashboard
 from src.Users.Dashboard.invitado_dashboard import InvitadoDashboard
 
@@ -22,7 +22,7 @@ from src.Users.Dashboard.invitado_dashboard import InvitadoDashboard
 if __name__ == '__main__':
     print("database initialized")
 
-    login_view = LoginApp()
+    login_view = ProveedorScreen()
     login_view.mainloop()
 
     if hasattr(login_view, 'user_role') and login_view.user_role is not None:

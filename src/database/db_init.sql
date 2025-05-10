@@ -3,7 +3,7 @@ CREATE DATABASE COME;
 USE COME;
 
 CREATE TABLE Usuarios (
-    numero_usuario INT PRIMARY KEY,
+    numero_usuario INT AUTO_INCREMENT PRIMARY KEY,
     nombre_completo VARCHAR(100) NOT NULL,
     nombre_usuario VARCHAR(50) NOT NULL,
     contrasenia VARCHAR(50),
@@ -11,7 +11,7 @@ CREATE TABLE Usuarios (
 );
 
 CREATE TABLE Proveedores (
-    id_proveedor INT PRIMARY KEY,
+    id_proveedor INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL,
     categoria VARCHAR(50)
 );
@@ -45,7 +45,9 @@ CREATE TABLE Receta_Ingredientes(
 );
 
 CREATE TABLE Costos (
+    id_costo INT AUTO_INCREMENT PRIMARY KEY,
     id_proveedor INT NOT NULL,
+    nombre_ingrediente VARCHAR(100) NOT NULL,
     precio DECIMAL(10,2) NOT NULL,
     FOREIGN KEY (id_proveedor) REFERENCES Proveedores(id_proveedor)
 );
