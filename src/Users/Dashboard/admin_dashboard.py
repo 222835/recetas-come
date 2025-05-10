@@ -44,9 +44,10 @@ def add_rounded_corners(im, radius):
 ## @class AdminDashboard
 ## @brief Admin dashboard interface with navbar, sidebar, and content area..
 class AdminDashboard(ctk.CTk):
-    def __init__(self):
+    def __init__(self, usuario):
         ## @brief Constructor for AdminDashboard.
         super().__init__()
+        self.usuario = usuario
         self.title("Dashboard Administrador")
         self.geometry("1920x1080")
         self.configure(fg_color="#1a1a22")
@@ -218,7 +219,9 @@ class AdminDashboard(ctk.CTk):
                 self.main_content,
                 self.custom_font,  
                 self.custom_font,   
-                self.custom_font   
+                self.custom_font,
+                usuario=self.usuario,
+                dashboard=self  
             ).pack(fill="both", expand=True)
         elif option == "Ayuda":
             for w in self.main_content.winfo_children():

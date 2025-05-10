@@ -2,12 +2,13 @@ import customtkinter as ctk
 import tkinter as tk
 import os, ctypes
 from pathlib import Path
+from src.Users.model import Usuario
+from src.database.connector import Connector
 
 ## @class AjustesView
 ## @brief View for editing account settings in the admin dashboard.
 ## @details Mirrors the AgregarCuentaView design but for updating existing account info.
 class AjustesView(ctk.CTkFrame):
-
     ## @brief Constructor.
     ## @param parent Parent widget/frame.
     ## @param fuente_titulo Font for the title label.
@@ -16,9 +17,14 @@ class AjustesView(ctk.CTkFrame):
     ## @param nombre_completo Initial full name to display.
     ## @param nombre_usuario Initial username to populate.
     ## @param rol Initial role to display.
-    def __init__(self, parent,
-                 fuente_titulo, fuente_button, fuente_card,
-                 nombre_completo="", nombre_usuario="", rol=""):
+    def __init__(self, parent, fuente_titulo, fuente_button, fuente_card, usuario, dashboard):
+        self.connector = Connector()
+        self.session = self.connector.get_session()
+        self.usuario = usuario
+        self.dashboard = dashboard
+
+        self.original_nombre_usuario = self.usuario.nombre_usuario
+
         super().__init__(parent)
         self.configure(fg_color="transparent")
 
@@ -74,13 +80,14 @@ class AjustesView(ctk.CTkFrame):
             justify="left"
         ).pack(anchor="w", padx=40, pady=(0,5))
 
+        #cambiar para que solo muestre la info, no deberia ser un entry
         self.entry_nombre_completo = ctk.CTkEntry(
             left,
             font=self.fuente_card,
             fg_color="#f5f5f5",
             border_color="#E1222A",
             border_width=1,
-            placeholder_text="Ejemplo de Nombre Completo",
+            placeholder_text=usuario.nombre_completo,
             state="disabled"
         )
         self.entry_nombre_completo.pack(fill="x", anchor="w", padx=40, pady=(0,10))
@@ -93,13 +100,14 @@ class AjustesView(ctk.CTkFrame):
             justify="left"
         ).pack(anchor="w", padx=40, pady=(0,5))
 
+        #igual, solo debe mostrar el rol, asi que no deberia de ser un entry
         self.entry_rol = ctk.CTkEntry(
             left,
             font=self.fuente_card,
             fg_color="#f5f5f5",
             border_color="#E1222A",
             border_width=1,
-            placeholder_text="Administrador/Invitado",
+            placeholder_text=usuario.rol,
             state="disabled"
         )
         self.entry_rol.pack(fill="x", anchor="w", padx=40)
@@ -122,7 +130,7 @@ class AjustesView(ctk.CTkFrame):
             fg_color="#F4F4F4",
             border_color="#E1222A",
             border_width=1,
-            placeholder_text=nombre_usuario
+            placeholder_text=usuario.nombre_usuario
         )
         self.entry_usuario.pack(anchor="w", padx=(50,0))
 
@@ -174,7 +182,42 @@ class AjustesView(ctk.CTkFrame):
         )
         save_btn.pack(pady=(10,20), anchor="center")
 
+        self.entry_usuario.insert(0, usuario.nombre_usuario)
+
     ## @brief Handler for saving changes (stub).
     def guardar(self):
-        pass
+        nuevo_usuario = self.entry_usuario.get().strip()
+        nueva_contra = self.entry_contra.get().strip()
+        confirmar_contra = self.entry_confirm.get().strip()
 
+        cambios = {}
+
+        if nuevo_usuario != self.original_nombre_usuario:
+            cambios["nombre_usuario"] = nuevo_usuario
+        if nueva_contra:
+            if nueva_contra != confirmar_contra:
+                tk.messagebox.showerror("Error", "Las contraseñas no coinciden.")
+                return
+            cambios["contrasenia"] = nueva_contra
+
+        if not cambios:
+            tk.messagebox.showinfo("Sin cambios", "No se realizaron modificaciones.")
+            return
+
+        try:
+            user = self.session.query(Usuario).filter_by(nombre_usuario=self.original_nombre_usuario).first()
+            if not user:
+                tk.messagebox.showerror("Error", "Usuario no encontrado.")
+                return
+
+            user.update(self.session, **cambios)
+            self.session.refresh(user)
+            self.usuario = user
+            self.dashboard.usuario = self.usuario
+            self.session.close()
+
+            self.original_nombre_usuario = nuevo_usuario
+
+            tk.messagebox.showinfo("Éxito", "Información actualizada correctamente.")
+        except Exception as e:
+            tk.messagebox.showerror("Error", f"No se pudo actualizar la cuenta.\n{e}")
