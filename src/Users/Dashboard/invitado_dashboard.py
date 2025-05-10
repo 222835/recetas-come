@@ -34,6 +34,7 @@ class InvitadoDashboard(ctk.CTk):
     ## @brief Initializes the guest dashboard interface.
     def __init__(self):
         super().__init__()
+        self.main_buttons = []
         self.title("Dashboard Invitado")
         self.geometry("1920x1080")
         self.configure(fg_color="#1a1a22")
@@ -55,10 +56,6 @@ class InvitadoDashboard(ctk.CTk):
             self.logo_image = None
 
         ctk.CTkLabel(self.navbar, image=self.logo_image, text="", fg_color="transparent").place(x=25, y=7)
-
-        ctk.CTkEntry(self.navbar, placeholder_text="🔍 Buscar funcionalidad", width=400, height=35,
-                     fg_color="transparent", border_color="white", border_width=1,
-                     text_color="white", placeholder_text_color="white", font=("Arial", 16)).place(x=250, y=18)
 
         try:
             profile_img = Image.open(IMAGE_PATH / "perfil.jpg").resize((40, 40))
@@ -120,12 +117,13 @@ class InvitadoDashboard(ctk.CTk):
         self.main_container = ctk.CTkFrame(self, fg_color="#1a1a22")
         self.main_container.pack(side="top", fill="both", expand=True)
 
+        self.mouse_in_sidebar = False
         self.sidebar_expanded = False
         self.sidebar_frame = ctk.CTkFrame(self.main_container, width=430, fg_color="#1a1a22", corner_radius=0)
         ctk.CTkLabel(self.sidebar_frame, text="", height=30).pack()
         self.sidebar_frame.pack(side="left", fill="y")
-        self.sidebar_frame.bind("<Enter>", self.expand_sidebar)
-        self.sidebar_frame.bind("<Leave>", self.collapse_sidebar)
+        self.sidebar_frame.bind("<Enter>", self.on_sidebar_enter)
+        self.sidebar_frame.bind("<Leave>", self.on_sidebar_leave)
 
         self.sections = {
             "Home icon.png": ("Inicio", lambda: self.create_custom_buttons()),
@@ -151,7 +149,8 @@ class InvitadoDashboard(ctk.CTk):
 
             icon_label = ctk.CTkLabel(frame, image=icon_img, text="", width=40, height=60, corner_radius=15, fg_color="transparent")
             icon_label.pack(side="left", padx=20, pady=5)
-            icon_label.bind("<Enter>", self.expand_sidebar)
+            icon_label.bind("<Enter>", self.on_sidebar_enter)
+            icon_label.bind("<Leave>", self.on_sidebar_leave)
             icon_label.bind("<Button-1>", lambda e, cmd=command, lbl=icon_label: [self.set_active_sidebar(lbl), cmd()])
 
             text_label = ctk.CTkLabel(frame, text=name, text_color="white", font=self.custom_font)
@@ -166,6 +165,10 @@ class InvitadoDashboard(ctk.CTk):
         self.main_content.pack(side="left", fill="both", expand=True, padx=0, pady=(20, 0))
 
         self.create_custom_buttons()
+        self.set_active_sidebar(self.sidebar_labels["Inicio"])
+        self.main_buttons = [] 
+        self.protocol("WM_DELETE_WINDOW", self.on_close)
+        self.monitor_sidebar_cursor()
 
 
     ## @brief Sets the selected sidebar item visually.
@@ -211,20 +214,56 @@ class InvitadoDashboard(ctk.CTk):
             self.dropdown_visible = True
 
     ## @brief Expands the sidebar to show section names.
+    ## @param event Optional tkinter event.
     def expand_sidebar(self, event=None):
         if not self.sidebar_expanded:
-            self.sidebar_frame.configure(width=250)
-            for icon_label, text_label in self.sidebar_buttons:
-                text_label.pack(side="left", padx=5)
             self.sidebar_expanded = True
+            self.sidebar_frame.configure(width=250)
+            for _, label in self.sidebar_buttons:
+                label.pack(side="left", padx=5)
 
     ## @brief Collapses the sidebar to hide section names.
+    ## @param event Optional tkinter event.
     def collapse_sidebar(self, event=None):
         if self.sidebar_expanded:
-            self.sidebar_frame.configure(width=150)
-            for icon_label, text_label in self.sidebar_buttons:
-                text_label.pack_forget()
             self.sidebar_expanded = False
+            self.sidebar_frame.configure(width=150)
+            for _, label in self.sidebar_buttons:
+                label.pack_forget()
+
+    ## @brief Triggered when the cursor enters the sidebar.
+    ## @param event Optional tkinter event.
+    def on_sidebar_enter(self, event=None):
+        self.expand_sidebar()
+
+    ## @brief Triggered when the cursor leaves the sidebar.
+    ## @param event Optional tkinter event.
+    def on_sidebar_leave(self, event=None):
+        self.after(150, self.check_cursor_position)
+
+    ### @brief Continuously checks the cursor's position.
+    ## @details Determines whether the cursor is within the absolute bounds of the sidebar.
+    ## If the cursor is outside, it automatically collapses the sidebar.
+    def check_cursor_position(self):
+        
+        x, y = self.winfo_pointerxy()
+        
+        x1 = self.sidebar_frame.winfo_rootx()
+        y1 = self.sidebar_frame.winfo_rooty()
+        x2 = x1 + self.sidebar_frame.winfo_width()
+        y2 = y1 + self.sidebar_frame.winfo_height()
+        
+        if x1 <= x <= x2 and y1 <= y <= y2:
+            return
+            
+        self.collapse_sidebar()
+        
+    ## @brief Periodically monitors the cursor position.
+    ## @details Triggers check_cursor_position() every 100 milliseconds to ensure the sidebar
+    ## collapses automatically when the cursor leaves its area.
+    def monitor_sidebar_cursor(self):
+        self.check_cursor_position()
+        self.after(100, self.monitor_sidebar_cursor) 
 
     ## @brief Creates image-based buttons in the main content area.
     def create_custom_buttons(self):
@@ -242,8 +281,8 @@ class InvitadoDashboard(ctk.CTk):
                 image = add_rounded_corners(image, radius=20)
                 normal = ctk.CTkImage(light_image=image, size=(w, h))
 
-                zoom_img = ImageOps.fit(image, (int(w * 1.03), int(h * 1.03)), Image.Resampling.LANCZOS)
-                zoom = ctk.CTkImage(light_image=zoom_img, size=(int(w * 1.03), int(h * 1.03)))
+                zoom_img = ImageOps.fit(image, (int(w * 1.005), int(h * 1.005)), Image.Resampling.LANCZOS)
+                zoom = ctk.CTkImage(light_image=zoom_img, size=(int(w * 1.005), int(h * 1.005)))
             except FileNotFoundError:
                 print(f"Image '{img_file}' not found.")
                 return
@@ -265,13 +304,16 @@ class InvitadoDashboard(ctk.CTk):
             btn.image_normal = normal
             btn.image_zoom = zoom
             btn.grid(row=row, column=col, columnspan=colspan, rowspan=rowspan, padx=3, pady=5, sticky="nsew")
+            self.main_buttons.append(btn)  
             btn.bind("<Enter>", lambda e, b=btn: b.configure(image=b.image_zoom))
             btn.bind("<Leave>", lambda e, b=btn: b.configure(image=b.image_normal))
+            self.main_buttons.append(btn)
 
-        create_image_button("recetas2.jpg", "", 0, 0, 2, 2, 480, 520, lambda: self.load_view(RecetasAdminView), section_name="Inicio")
+        create_image_button("recetas2.jpg", "", 0, 0, 2, 2, 480, 520, lambda: self.load_view(RecetasAdminView), section_name="Recetas")
         create_image_button("proyecciones.jpg", "", 0, 2, 2, 1, 650, 240, lambda: self.load_view(ProyeccionesAdminView), section_name="Proyecciones")
         create_image_button("costos2.jpg", "", 1, 2, 1, 1, 300, 240, lambda: self.load_view(CostosAdminView), section_name="Costos")
         create_image_button("historial2.jpg", "", 1, 3, 1, 1, 300, 240, lambda: self.load_view(HistorialAdminView), section_name="Historial")
+
 
     ## @brief Highlights sidebar on dashboard button click.
     ## @param command Function to execute.
@@ -320,6 +362,13 @@ class InvitadoDashboard(ctk.CTk):
         from src.Users.Login.view import LoginApp
         login = LoginApp()
         login.mainloop()
+
+    ## @brief Handles window close event from the window manager (X button).
+    ## @details Safely destroys the window and exits the application completely to prevent lingering processes or after() errors. 
+    def on_close(self):
+        self.destroy()
+        import sys
+        sys.exit()
 
 ## @brief Draws a rounded rectangle on a canvas.
 ## @param canvas The canvas where the shape will be drawn.

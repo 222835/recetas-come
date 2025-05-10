@@ -42,6 +42,8 @@ class LoginApp(ctk.CTk):
         self.background_label.place(relwidth=1, relheight=1)
 
         self.create_widgets()
+        self.protocol("WM_DELETE_WINDOW", self.on_close)
+
 
     ## @brief Creates a radial gradient image.
     ## @param width Image width.
@@ -136,6 +138,7 @@ class LoginApp(ctk.CTk):
                                           command=self.login, 
                                           font=("Arial", 13))
         self.login_button.pack(pady=20)
+        self.bind("<Return>", lambda event: self.login())
 
     ## @brief Toggles password visibility.
     ## @details Switches between masked and plain text, and updates the button icon accordingly.
@@ -159,7 +162,7 @@ class LoginApp(ctk.CTk):
         from src.database.connector import Connector
         from src.utils.constants import env
 
-        connection_string = f"mariadb://{env['DB_USER']}:{env['DB_PASSWORD']}@{env['DB_HOST']}:3307/{env['DB_DATABASE']}"
+        connection_string = f"mariadb://{env['DB_USER']}:{env['DB_PASSWORD']}@{env['DB_HOST']}:{env['DB_PORT']}/{env['DB_DATABASE']}"
         connector = Connector(connection_string)
 
         query = f"SELECT rol, contrasenia FROM Usuarios WHERE nombre_usuario = '{usuario}'"
@@ -186,8 +189,6 @@ class LoginApp(ctk.CTk):
             self.login_button.configure(state="normal")
             return
 
-        messagebox.showinfo("Éxito", f"Bienvenido {usuario}. Rol asignado: {self.user_role}",  parent=self)
-
         self.destroy()
 
         if self.user_role == 'admin':
@@ -198,6 +199,14 @@ class LoginApp(ctk.CTk):
             from src.Users.Dashboard.invitado_dashboard import InvitadoDashboard
             invitado_app = InvitadoDashboard()
             invitado_app.mainloop()
+            
+    ## @brief Handles window close event from the window manager (X button).
+    ## @details Safely destroys the window and exits the application completely to prevent lingering processes or after() errors.       
+    def on_close(self):
+        self.destroy()
+        import sys
+        sys.exit()
+
 
 ## @brief Runs the login application.
 ## @details Creates an instance of LoginApp and starts its main event loop.

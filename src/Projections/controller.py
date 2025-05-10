@@ -3,133 +3,201 @@ import sys
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
-from src.Projections.model import Proyeccion
-from src.Recipes.model import Receta
+from src.Projections.model import Proyeccion, ProyeccionReceta
+from src.Recipes.model import Receta, Receta_Ingredientes
+from src.Ingredients.model import Ingrediente
+from datetime import date
 
-## @brief Class to handle projection-related operations.
+## Class for managing projections in the database.
 class ProyeccionController:
     
-    ## @brief Create a new projection in the database.
+    ## Create a new projection in the database.
     @staticmethod
     def create_projection(session, nombre, periodo, comensales, recetas):
-        
-        ## Validate minimum number of recipes
+        ##Validate that the projection includes at least 2 recipes.
         if len(recetas) < 2:
             raise ValueError("La proyeccion debe incluir al menos 2 recetas")
         
-        ## Validate percentage sum
+        ##Validate that the sum of the percentages is 100.
         total_porcentaje = sum(r["porcentaje"] for r in recetas)
         if total_porcentaje != 100:
             raise ValueError(f"La suma de porcentajes debe ser 100% (actual: {total_porcentaje}%)")
         
-        ##Extract recipe IDs and percentages
-        recetas_ids = ",".join(str(r["id_receta"]) for r in recetas)
-        porcentajes = ",".join(str(r["porcentaje"]) for r in recetas)
-        
-        ##Create the projection
+        ##Create the projection with the current date
         proyeccion = Proyeccion(
+            numero_usuario=1,  
             nombre=nombre,
             periodo=periodo,
             comensales=comensales,
-            recetas_ids=recetas_ids,
-            porcentajes=porcentajes
+            fecha=date.today(),
+            estatus=True
         )
         
         session.add(proyeccion)
         session.commit()
         
+        ##Create ProyeccionReceta associations
+        for receta_info in recetas:
+            proyeccion_receta = ProyeccionReceta(
+                id_proyeccion=proyeccion.id_proyeccion,
+                id_receta=receta_info["id_receta"],
+                porcentaje=receta_info["porcentaje"]
+            )
+            session.add(proyeccion_receta)
+        
+        session.commit()
+        
         return proyeccion
+    ## Read a projection from the database.
+    @staticmethod
+    def read_projection(session, id_proyeccion):
+        ##Retrieve projection from the database
+        projection = session.query(Proyeccion).filter(Proyeccion.id_proyeccion == id_proyeccion).first()
+        if not projection:
+            raise ValueError(f"No se encontro la proyeccion con ID {id_proyeccion}")
+        return projection
     
-    ## @brief Update a projection by its ID.
+    ## Update an existing projection in the database.
     @staticmethod
     def update_projection(session, id_proyeccion, nombre, comensales, recetas):
-       
-        ## Validate minimum number of recipes
+        proyeccion = session.query(Proyeccion).filter(Proyeccion.id_proyeccion == id_proyeccion).first()
+        ##Validate that the projection includes at least 2 recipes.
         if len(recetas) < 2:
             raise ValueError("La proyeccion debe incluir al menos 2 recetas")
         
-        ## Validate percentage sum
+        ##Validate that the sum of the percentages is 100.
         total_porcentaje = sum(r["porcentaje"] for r in recetas)
         if total_porcentaje != 100:
             raise ValueError(f"La suma de porcentajes debe ser 100% (actual: {total_porcentaje}%)")
         
-        ##Extract recipe IDs and percentages
-        recetas_ids = ",".join(str(r["id_receta"]) for r in recetas)
-        porcentajes = ",".join(str(r["porcentaje"]) for r in recetas)
+        ##Get the projection
+        proyeccion = session.get(Proyeccion, id_proyeccion)
+        if not proyeccion:
+            raise ValueError(f"No se encontro la proyeccion con ID {id_proyeccion}")
         
         ##Update the projection
-        proyeccion = session.get(Proyeccion, id_proyeccion)
         proyeccion.nombre = nombre
         proyeccion.comensales = comensales
-        proyeccion.recetas_ids = recetas_ids
-        proyeccion.porcentajes = porcentajes
+        
+        ##Delete existing recipe associations
+        session.query(ProyeccionReceta).filter_by(id_proyeccion=id_proyeccion).delete()
+        
+        ##Create new recipe associations
+        for receta_info in recetas:
+            proyeccion_receta = ProyeccionReceta(
+                id_proyeccion=id_proyeccion,
+                id_receta=receta_info["id_receta"],
+                porcentaje=receta_info["porcentaje"]
+            )
+            session.add(proyeccion_receta)
         
         session.commit()
         
         return proyeccion
     
-    ## @brief Calculate the total ingredients needed per recipe acording to projection percentages.
+    ## Calculate the total ingredients needed for a projection.
     @staticmethod
     def calculate_total_ingredients(session, id_proyeccion):
-
-        ## Get the projection
+        ##Validate that the projection exists.
         proyeccion = session.get(Proyeccion, id_proyeccion)
         if not proyeccion:
-            raise ValueError(f"No se encontró la proyección con ID {id_proyeccion}")
-            
-        ## Get the recipes and percentages
-        recetas_ids = proyeccion.recetas_ids.split(',')
-        porcentajes = proyeccion.porcentajes.split(',')
+            raise ValueError(f"No se encontro la proyeccion con ID {id_proyeccion}")
         
-        ##Initialize the ingredients dictionary
+        ##Get the associated recipes
+        proyeccion_recetas = session.query(ProyeccionReceta).filter_by(id_proyeccion=id_proyeccion).all()
+        recetas_count = len(proyeccion_recetas)
+        
+        ##If no recipes are associated, return empty dictionary
+        if recetas_count == 0:
+            return {}
+        
+        porcentaje_por_receta = 100 / recetas_count
+        
+        ##Initialize a dictionary to store the total ingredients
         total_ingredientes = {}
         
-        ##Calculate the ingredients for each recipe
-        for i in range(len(recetas_ids)):
-            receta_id = int(recetas_ids[i])
-            porcentaje = float(porcentajes[i]) / 100
-            
-            ## Get the recipe
-            receta = session.get(Receta, receta_id)
+        ##Iterate through the recipes and calculate the total ingredients needed
+        for pr in proyeccion_recetas:
+            receta = session.get(Receta, pr.id_receta)
             if not receta:
                 continue
                 
-            ## Calculate the factor based on the percentage and number of people
-            factor = (proyeccion.comensales / receta.comensales_base) * porcentaje
+            factor = (proyeccion.comensales / receta.comensales_base) * (porcentaje_por_receta / 100)
             
-            ##Process ingredients
-            ##Check if ingredientes is a list (new format) or stored as comma-separated strings (old format)
-            if isinstance(receta.ingredientes, list):
-                ## New format: list of dictionaries
-                for ing_data in receta.get_ingredientes():
-                    nombre = ing_data["nombre"]
-                    cantidad = float(ing_data["cantidad"]) * factor
-                    unidad = ing_data["unidad"]
-                    
-                    if nombre in total_ingredientes:
-                        ## Extract the existing quantity
-                        existing_qty_str = total_ingredientes[nombre].split()[0]
-                        existing_qty = float(existing_qty_str)
-                        total_ingredientes[nombre] = f"{existing_qty + cantidad} {unidad}"
-                    else:
-                        total_ingredientes[nombre] = f"{cantidad} {unidad}"
-            else:
-                ## Old format with comma-separated strings
-                ingredientes_lista = receta.nombre_ingrediente.split(',')
-                cantidades_lista = receta.cantidad.split(',')
-                unidades_lista = receta.unidad_medida.split(',')
+            ##Get recipe ingredients using proper query
+            receta_ingredientes = session.query(Receta_Ingredientes).filter_by(id_receta=receta.id_receta).all()
+            
+            for ri in receta_ingredientes:
+                ingrediente = session.get(Ingrediente, ri.id_ingrediente)
+                if not ingrediente:
+                    continue
                 
-                for j in range(len(ingredientes_lista)):
-                    nombre = ingredientes_lista[j].strip()
-                    cantidad = float(cantidades_lista[j].strip()) * factor
-                    unidad = unidades_lista[j].strip()
-                    
-                    if nombre in total_ingredientes:
-                        ## Extract the existing quantity
-                        existing_qty_str = total_ingredientes[nombre].split()[0]
-                        existing_qty = float(existing_qty_str)
-                        total_ingredientes[nombre] = f"{existing_qty + cantidad} {unidad}"
-                    else:
-                        total_ingredientes[nombre] = f"{cantidad} {unidad}"
+                nombre = ingrediente.nombre
+                cantidad = ri.cantidad * factor
+                unidad = ingrediente.unidad_medida
+                
+                if nombre in total_ingredientes:
+                    existing_qty_str = total_ingredientes[nombre].split()[0]
+                    existing_qty = float(existing_qty_str)
+                    total_ingredientes[nombre] = f"{existing_qty + cantidad} {unidad}"
+                else:
+                    total_ingredientes[nombre] = f"{cantidad} {unidad}"
         
         return total_ingredientes
+    
+    ## @brief Deactivate a projection (send it to the trash can).
+    @staticmethod
+    def deactivate_projection(session, id_proyeccion: int) -> bool:
+            
+        proyeccion = session.get(Proyeccion, id_proyeccion)
+        if proyeccion:
+            proyeccion.estatus = False
+            proyeccion.fecha_eliminado = date.today()
+            session.commit()
+        else:
+            raise ValueError(f"No se encontro la proyeccion con ID {id_proyeccion}")
+    
+    ## Delete a projection from the database.
+    @staticmethod
+    def delete_projection(session, id_proyeccion):
+        ##Delete related records in ProyeccionReceta first
+        session.query(ProyeccionReceta).filter_by(id_proyeccion=id_proyeccion).delete()
+        
+        ##Then delete the Proyeccion record
+        proyeccion = session.get(Proyeccion, id_proyeccion)
+        if proyeccion:
+            session.delete(proyeccion)
+            session.commit()
+        else:
+            raise ValueError(f"No se encontro la proyeccion con ID {id_proyeccion}")
+    
+    ## List all active projections including related recipes.
+    @staticmethod
+    def list_all_projections(session) -> list[dict]:
+        proyecciones = session.query(Proyeccion).filter(Proyeccion.estatus == True).all()
+        listado = []
+
+        for proyeccion in proyecciones:
+            recetas = []
+            for pr in proyeccion.proyeccion_recetas:
+                receta = session.query(Receta).filter(Receta.id_receta == pr.id_receta).first()
+                recetas.append({
+                    "id_receta": receta.id_receta,
+                    "nombre_receta": receta.nombre_receta,
+                    "clasificacion": receta.clasificacion,
+                    "periodo": receta.periodo,
+                    "comensales_base": receta.comensales_base,
+                    "porcentaje": pr.porcentaje
+                })
+            
+            proyeccion_data = {
+            "id_proyeccion": proyeccion.id_proyeccion,
+            "nombre": proyeccion.nombre,
+            "periodo": proyeccion.periodo,
+            "comensales": proyeccion.comensales,
+            "fecha": proyeccion.fecha,
+            "recetas": recetas
+            }
+            listado.append(proyeccion_data)
+
+        return listado
