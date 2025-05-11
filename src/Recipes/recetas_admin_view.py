@@ -24,11 +24,15 @@ class RecetasAdminView(ctk.CTkFrame):
         self.buscar_entry = ctk.CTkEntry(self.search_frame, placeholder_text="🔍 Buscar receta", width=300)
         self.buscar_entry.grid(row=0, column=0, padx=5, pady=5)
 
-        self.filtro_tiempo = ctk.CTkComboBox(self.search_frame, values=["Todos", "Desayuno", "Comida"], width=150)
+        self.filtro_tiempo = ctk.CTkComboBox(self.search_frame, values=["Todos", "Desayuno", "Comida"], width=150, command=lambda choice: self.cargar_recetas())
         self.filtro_tiempo.grid(row=0, column=1, padx=5)
 
-        self.filtro_categoria = ctk.CTkComboBox(self.search_frame, values=["Todos", "Guarnicion", "Guisados", "Antojos"], width=150)
+        self.filtro_categoria = ctk.CTkComboBox(self.search_frame, values=["Todos", "Guarnicion", "Guisado", "Antojo"], width=150, command=lambda choice: self.cargar_recetas())
         self.filtro_categoria.grid(row=0, column=2, padx=5)
+
+        self.buscar_entry.bind("<KeyRelease>", lambda e: self.cargar_recetas())
+        self.filtro_tiempo.set("Todos")
+        self.filtro_categoria.set("Todos")
 
         # Tabla con columna de acciones
         columnas = ("Nombre", "Ingredientes", "Cantidad", "Unidad", "Comensales", "Tiempo", "Categoría", "Acciones")
@@ -45,14 +49,22 @@ class RecetasAdminView(ctk.CTkFrame):
         self.cargar_recetas()
 
     def cargar_recetas(self):
-        recetas = RecetasController.list_all_recipes_with_ingredients(self.session)
+        nombre = self.buscar_entry.get().strip()
+        periodo = self.filtro_tiempo.get()
+        clasificacion = self.filtro_categoria.get()
+
+        recetas = RecetasController.search_recipes(
+            self.session,
+            nombre=nombre if nombre else None,
+            periodo=periodo if periodo != "Todos" else None,
+            clasificacion=clasificacion if clasificacion != "Todos" else None
+        )
 
         for row in self.tree.get_children():
             self.tree.delete(row)
 
         if not recetas:
-            self.tree.insert("", "end", values=("No hay recetas guardadas", "", "", "", "", "", "", ""))
-            self.session.close()
+            self.tree.insert("", "end", values=("No hay recetas coincidentes", "", "", "", "", "", "", ""))
             return
 
         for receta in recetas:
