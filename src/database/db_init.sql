@@ -6,7 +6,7 @@ CREATE TABLE Usuarios (
     numero_usuario INT AUTO_INCREMENT PRIMARY KEY,
     nombre_completo VARCHAR(100) NOT NULL,
     nombre_usuario VARCHAR(50) NOT NULL,
-    contrasenia VARCHAR(50),
+    contrasenia VARCHAR(150),
     rol VARCHAR(20)  
 );
 
