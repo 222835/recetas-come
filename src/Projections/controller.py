@@ -2,6 +2,7 @@ import os
 import sys
 from pdf_reports import pug_to_html, write_report
 from plotly import graph_objects as go
+from sqlalchemy import func
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
@@ -203,7 +204,45 @@ class ProyeccionController:
             listado.append(proyeccion_data)
 
         return listado
+    
+    ## Return list of projections according to search filters
+    @staticmethod
+    def search_projections(session, nombre=None, fecha:date=None) -> list[dict]:
+        query = session.query(Proyeccion).filter(Proyeccion.estatus == True)
+        if nombre:
+            nombre = f"%{nombre.lower()}%"
+            query = query.filter(func.lower(Proyeccion.nombre).like(nombre))
+        if fecha:
+            query = query.filter(Proyeccion.fecha == fecha)
 
+        proyecciones = query.all()
+        
+        listado = []
+
+        for proyeccion in proyecciones:
+            recetas = []
+            for pr in proyeccion.proyeccion_recetas:
+                receta = session.query(Receta).filter(Receta.id_receta == pr.id_receta).first()
+                recetas.append({
+                    "id_receta": receta.id_receta,
+                    "nombre_receta": receta.nombre_receta,
+                    "clasificacion": receta.clasificacion,
+                    "periodo": receta.periodo,
+                    "comensales_base": receta.comensales_base,
+                    "porcentaje": pr.porcentaje
+                })
+            
+            proyeccion_data = {
+            "id_proyeccion": proyeccion.id_proyeccion,
+            "nombre": proyeccion.nombre,
+            "periodo": proyeccion.periodo,
+            "comensales": proyeccion.comensales,
+            "fecha": proyeccion.fecha,
+            "recetas": recetas
+            }
+            listado.append(proyeccion_data)
+
+        return listado
         
     ## Generate a report of the projection.
     @staticmethod

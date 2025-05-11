@@ -165,8 +165,9 @@ class RecetasController:
         
         return listado
 
+    ## Return list of recipes according to search filters
     @staticmethod
-    def search_recipes(session, nombre=None, periodo=None, clasificacion=None):
+    def search_recipes(session, nombre=None, periodo=None, clasificacion=None) -> list[dict]:
         query = session.query(Receta).filter(Receta.estatus == True)
 
         if nombre:
