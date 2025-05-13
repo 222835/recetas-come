@@ -15,6 +15,7 @@ from src.Costs.costos import CostosAdminView
 from src.Projections.historial import HistorialAdminView
 from src.components.ajustes import AjustesView
 from src.components.ayuda import AyudaView
+from src.Trashcan.basurero_admin import AdminTrashcanView
 import tkinter.font as tkfont
 import os
 import ctypes
@@ -228,6 +229,10 @@ class AdminDashboard(ctk.CTk):
                 self.custom_font,  
                 self.custom_font   
             ).pack(fill="both", expand=True)
+        elif option == "Basurero":
+            for w in self.main_content.winfo_children():
+                w.destroy()
+            AdminTrashcanView(self.main_content).pack(fill="both", expand=True)
         else:
             print(f"{option} clicked")
 
