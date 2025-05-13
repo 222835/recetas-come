@@ -61,23 +61,19 @@ class RecetasAdminView(ctk.CTkFrame):
                                         height=35, fg_color="#dcd1cd", text_color="black", 
                                         border_color="#C82333", border_width=1)
         self.input_busqueda.pack(side="left", padx=(0, 10), fill="x", expand=True)
+        self.input_busqueda.bind("<KeyRelease>", lambda e: self.cargar_recetas())
 
-        self.filtro_tiempo = ctk.CTkComboBox(busqueda_frame, values=["TODOS", "DESAYUNO", "COMIDA"],
-                                     height=35, fg_color="#dcd1cd", text_color="black", 
-                                     border_color="#C82333", border_width=1)
+        self.filtro_tiempo = ctk.CTkComboBox(busqueda_frame, values=["Todos", "Desayuno", "Comida"],
+                                     height=35, width=180,fg_color="#dcd1cd", text_color="black", 
+                                     border_color="#C82333", border_width=1, command=lambda choice: self.cargar_recetas())
         self.filtro_tiempo.set("Tiempo") 
         self.filtro_tiempo.pack(side="left", padx=(0, 10))
 
-        self.filtro_categoria = ctk.CTkComboBox(busqueda_frame, values=["TODOS", "GUARNICION", "GUISADO", "ANTOJOS"],
-                                                height=35, fg_color="#dcd1cd", text_color="black", 
-                                                border_color="#C82333", border_width=1)
+        self.filtro_categoria = ctk.CTkComboBox(busqueda_frame, values=["Todos", "Guarnicion", "Guisado", "Antojos"],
+                                                height=35, width=180,fg_color="#dcd1cd", text_color="black", 
+                                                border_color="#C82333", border_width=1, command=lambda choice: self.cargar_recetas())
         self.filtro_categoria.set("Categoría")
         self.filtro_categoria.pack(side="left", padx=(0, 10))
-
-        btn_buscar = ctk.CTkButton(busqueda_frame, text="Buscar", font=self.fuente_card,
-                                fg_color="#b8191a", hover_color="#991416", corner_radius=8,
-                                command=self.filtrar_recetas)
-        btn_buscar.pack(side="left")
 
         encabezado = ctk.CTkFrame(self.contenedor, fg_color="#dcd1cd")
         encabezado.pack(fill="x", padx=10, pady=4)
@@ -100,44 +96,6 @@ class RecetasAdminView(ctk.CTkFrame):
 
         self.cargar_recetas()
 
-    ## @brief Filters recipes by name, time, and category
-    def filtrar_recetas(self):
-        texto = self.input_busqueda.get().lower()
-        tiempo = self.filtro_tiempo.get().upper()
-        categoria = self.filtro_categoria.get().upper()
-
-        recetas = RecetasController.list_all_recipes_with_ingredients(self.session)
-
-        if tiempo != "TODOS":
-            recetas = [r for r in recetas if r["periodo"].upper() == tiempo]
-
-        if categoria != "TODOS":
-            recetas = [r for r in recetas if r["clasificacion_receta"].upper() == categoria]
-
-        recetas_filtradas = [r for r in recetas if texto in r["nombre_receta"].lower()]
-
-        for widget in self.recetas_scroll_frame.winfo_children():
-            widget.destroy()
-
-        if not recetas_filtradas:
-            ctk.CTkLabel(self.recetas_scroll_frame, text="No se encontraron coincidencias.", font=self.fuente_card).pack(pady=20)
-            return
-
-        for receta in recetas_filtradas:
-            nombres = [i["nombre_ingrediente"] for i in receta["ingredientes"]]
-            cantidades = [i["Cantidad"] for i in receta["ingredientes"]]
-            unidades = [i["Unidad"] for i in receta["ingredientes"]]
-
-            self.crear_card_receta(
-                receta["nombre_receta"],
-                nombres,
-                cantidades,
-                unidades,
-                receta["comensales_base"],
-                receta["periodo"],
-                receta["clasificacion_receta"]
-            )
-
     ## @brief Opens the add new recipe view
     def abrir_vista_nueva_receta(self):
         self.session.close()
@@ -157,7 +115,16 @@ class RecetasAdminView(ctk.CTkFrame):
         for widget in self.recetas_scroll_frame.winfo_children():
             widget.destroy()
 
-        recetas = RecetasController.list_all_recipes_with_ingredients(self.session)
+        nombre = self.input_busqueda.get().strip()
+        periodo = self.filtro_tiempo.get()
+        clasificacion = self.filtro_categoria.get()
+
+        recetas = RecetasController.search_recipes(
+            self.session,
+            nombre=nombre if nombre else None,
+            periodo=periodo if periodo != "Todos" and periodo != "Tiempo" else None,
+            clasificacion=clasificacion if clasificacion != "Todos" and clasificacion != "Categoría" else None
+        )
 
         if not recetas:
             ctk.CTkLabel(self.recetas_scroll_frame, text="No hay recetas guardadas.", font=self.fuente_card).pack(pady=20)
