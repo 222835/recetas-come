@@ -91,8 +91,7 @@ class NuevaRecetaView(ctk.CTkFrame):
         nombre_req = ctk.CTkLabel(nombre_frame, text="*campo obligatorio", font=self.fuente_small, text_color="#C82333")
         nombre_req.pack(anchor="w")
         
-        self.input_nombre = ctk.CTkEntry(form_container, fg_color="white", 
-                                        border_color="#C82333", border_width=1, height=35)
+        self.input_nombre = ctk.CTkEntry(form_container, fg_color="white", text_color="black", border_color="#C82333", border_width=1, height=35)
         self.input_nombre.grid(row=1, column=0, padx=15, pady=(5, 15), sticky="ew")
         
         comensales_frame = ctk.CTkFrame(form_container, fg_color="transparent")
@@ -102,7 +101,7 @@ class NuevaRecetaView(ctk.CTkFrame):
         comensales_req = ctk.CTkLabel(comensales_frame, text="*campo obligatorio", font=self.fuente_small, text_color="#C82333")
         comensales_req.pack(anchor="w")
         
-        self.input_comensales = ctk.CTkEntry(form_container, fg_color="white", 
+        self.input_comensales = ctk.CTkEntry(form_container, fg_color="white", text_color="black", 
                                            border_color="#C82333", border_width=1, height=35)
         self.input_comensales.grid(row=1, column=1, padx=15, pady=(5, 15), sticky="ew")
 
@@ -121,7 +120,7 @@ class NuevaRecetaView(ctk.CTkFrame):
         form_container.rowconfigure(3, minsize=40) 
         
         nombre_ing_frame = ctk.CTkFrame(headers_frame, fg_color="transparent")
-        nombre_ing_frame.grid(row=0, column=0, sticky="ew", padx=(0, 10))
+        nombre_ing_frame.grid(row=0, column=0, sticky="ew", padx=(10, 10))
         nombre_ing_label = ctk.CTkLabel(nombre_ing_frame, text="Nombre de ingrediente", font=self.fuente_small, text_color="black")
         nombre_ing_label.pack(anchor="w")
         nombre_ing_req = ctk.CTkLabel(nombre_ing_frame, text="*campo obligatorio", font=self.fuente_small, text_color="#C82333")
@@ -172,11 +171,11 @@ class NuevaRecetaView(ctk.CTkFrame):
         categoria_req = ctk.CTkLabel(categoria_frame, text="*campo obligatorio", font=self.fuente_small, text_color="#C82333")
         categoria_req.pack(anchor="w")
         
-        self.input_tiempo = ctk.CTkComboBox(form_container, values=["DESAYUNO", "COMIDA"], 
+        self.input_tiempo = ctk.CTkComboBox(form_container, values=["DESAYUNO", "COMIDA"], text_color="black",
                                            height=35, fg_color="white", border_color="#C82333", border_width=1)
         self.input_tiempo.grid(row=7, column=0, padx=15, pady=(5, 20), sticky="ew")
         
-        self.input_categoria = ctk.CTkComboBox(form_container, values=["GUARNICION", "GUISADO", "ANTOJOS"], 
+        self.input_categoria = ctk.CTkComboBox(form_container, values=["GUARNICION", "GUISADO", "ANTOJOS"], text_color="black",
                                               height=35, fg_color="white", border_color="#C82333", border_width=1)
         self.input_categoria.grid(row=7, column=1, padx=15, pady=(5, 20), sticky="ew")
 
@@ -185,21 +184,21 @@ class NuevaRecetaView(ctk.CTkFrame):
         fila = len(self.filas_ingredientes)
         fila_frame = ctk.CTkFrame(self.ingredientes_frame, fg_color="transparent")
         fila_frame.grid(row=fila, column=0, sticky="ew", pady=5)
-        fila_frame.columnconfigure(0, weight=3) 
-        fila_frame.columnconfigure(1, weight=1)  
-        fila_frame.columnconfigure(2, weight=1)  
-        fila_frame.columnconfigure(3, weight=0)  
+        fila_frame.columnconfigure(0, weight=7) 
+        fila_frame.columnconfigure(1, weight=1)
+        fila_frame.columnconfigure(2, weight=1)
+        fila_frame.columnconfigure(3, weight=0) 
         
-        nombre = ctk.CTkEntry(fila_frame, height=35, fg_color="white", 
-                             border_color="#C82333", border_width=1)
+        nombre = ctk.CTkEntry(fila_frame, height=35, fg_color="white", text_color="black",
+                            border_color="#C82333", border_width=1)
         nombre.grid(row=0, column=0, sticky="ew", padx=(0, 10))
-        
-        cantidad = ctk.CTkEntry(fila_frame, height=35, fg_color="white", 
-                               border_color="#C82333", border_width=1)
+
+        cantidad = ctk.CTkEntry(fila_frame, height=35, fg_color="white", text_color="black",
+                                border_color="#C82333", border_width=1)
         cantidad.grid(row=0, column=1, sticky="ew", padx=(0, 10))
-        
+
         unidad = ctk.CTkComboBox(fila_frame, values=["KG", "G", "LT", "ML", "PZA", "CAJAS", "POT", "BOLSAS", "HOJAS", "CDA", "CDTA", "GAL", "LB", "TALLOS", "LATAS", "DZ"],
-                                height=35, fg_color="white", 
+                                height=35, fg_color="white", text_color="black",
                                 border_color="#C82333", border_width=1)
         unidad.grid(row=0, column=2, sticky="ew", padx=(0, 10))
 
