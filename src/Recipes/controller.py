@@ -3,6 +3,7 @@ import os
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
+from sqlalchemy import or_, func
 from sqlalchemy.orm import Session
 from src.Recipes.model import Receta, Receta_Ingredientes
 from src.Ingredients.model import Ingrediente
@@ -140,6 +141,48 @@ class RecetasController:
         recetas = session.query(Receta).filter(Receta.estatus == True).all()
         listado = []
 
+        for receta in recetas:
+            ingredientes = []
+            for ri in receta.receta_ingredientes:
+                ingrediente = session.query(Ingrediente).filter(Ingrediente.id_ingrediente == ri.id_ingrediente).first()
+                ingredientes.append({
+                    "nombre_ingrediente": ingrediente.nombre,
+                    "clasificacion": ingrediente.clasificacion,
+                    "id_ingrediente": ingrediente.id_ingrediente,
+                    "Cantidad": ri.cantidad,
+                    "Unidad": ingrediente.unidad_medida 
+                })
+            
+            receta_data = {
+                "id_receta": receta.id_receta,
+                "nombre_receta": receta.nombre_receta,
+                "clasificacion_receta": receta.clasificacion,
+                "periodo": receta.periodo,
+                "comensales_base": receta.comensales_base,
+                "ingredientes": ingredientes
+            }
+            listado.append(receta_data)
+        
+        return listado
+
+    ## Return list of recipes according to search filters
+    @staticmethod
+    def search_recipes(session, nombre=None, periodo=None, clasificacion=None) -> list[dict]:
+        query = session.query(Receta).filter(Receta.estatus == True)
+
+        if nombre:
+            nombre = f"%{nombre.lower()}%"
+            query = query.filter(func.lower(Receta.nombre_receta).like(nombre))
+
+        if periodo:
+            query = query.filter(Receta.periodo == periodo)
+
+        if clasificacion:
+            query = query.filter(Receta.clasificacion == clasificacion)
+
+        recetas = query.all()
+
+        listado = []
         for receta in recetas:
             ingredientes = []
             for ri in receta.receta_ingredientes:

@@ -12,6 +12,9 @@ import pywinstyles
 import tkinter as tk
 from tkinter import messagebox
 
+from src.Users.Login.controller import LoginController
+from src.security.password_utils import Security
+
 ## @class LoginApp
 ## @brief Class that represents the login window.
 ## @details The LoginApp class is responsible for creating the login interface, generating a gradient background,
@@ -159,21 +162,25 @@ class LoginApp(ctk.CTk):
         contrasena = self.password_entry.get()
         print(f"Usuario: {usuario}, Contraseña: {contrasena}")
 
-        #idealmente mover import al inicio y el connector y session al init
-        from src.database.connector import Connector
-        connector = Connector()
+        if not usuario or not contrasena:
+            messagebox.showerror("Error", "Por favor, completa todos los campos", parent=self)
+            return
+        
+        can_login, result = LoginController.login(usuario, contrasena)
+        print('lol')
 
-        query = f"SELECT rol, contrasenia FROM Usuarios WHERE nombre_usuario = '{usuario}'"
-        result = connector.execute_query(query)
-
+        if not can_login:
+            messagebox.showerror("Error", "Usuario no encontrado", parent=self)
+            self.login_button.configure(state="normal")
+            return
         if not result:
             messagebox.showerror("Error", "Usuario no encontrado", parent=self)
-            self.login_button.configure(state="normal")  
+            self.login_button.configure(state="normal")
             return
 
-        stored_role, stored_password = result[0]
+        stored_role, stored_password = result.rol, result.contrasenia
 
-        if stored_password != contrasena:
+        if not Security.verify_password(contrasena, stored_password):
             messagebox.showerror("Error", "Contraseña incorrecta", parent=self)
             self.login_button.configure(state="normal")
             return

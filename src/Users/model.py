@@ -25,7 +25,7 @@ class Usuario(Base):
     rol = Column(String(20))
 
     ## @brief Constructor of the class
-    def __init__(self, nombre_completo: str, contrasenia: str, rol: str, nombre_usuario: str) -> None:
+    def __init__(self, nombre_usuario: str|None, contrasenia: str|None, nombre_completo: str|None = None, rol: str|None = None) -> None:
         """@brief Constructor
         @details Creates a new user object
         @param nombre_completo The full name of the user
