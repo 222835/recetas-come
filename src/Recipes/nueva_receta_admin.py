@@ -1,6 +1,7 @@
 import customtkinter as ctk
 from tkinter import messagebox
 from src.Recipes.controller import RecetasController
+from src.Ingredients.controller import IngredienteController
 from src.database.connector import Connector
 from pathlib import Path
 import os
@@ -261,7 +262,23 @@ class NuevaRecetaView(ctk.CTkFrame):
                 messagebox.showerror("Error", "Debe agregar al menos un ingrediente con todos sus campos")
                 return
 
-            RecetasController.create_recipe(self.session, nombre, clasificacion, periodo, comensales)
+            receta = RecetasController.create_recipe(self.session, nombre, clasificacion, periodo, comensales)
+            
+            for ing in ingredientes:
+                
+                ing_existente = IngredienteController.get_ingrediente_by_name_and_unit(self.session, ing["nombre"].strip(), ing["unidad_medida"].strip())
+                
+                if not ing_existente:
+                    nuevo_ing = IngredienteController.create_ingrediente(
+                        self.session, ing["nombre"], "", ing["unidad_medida"]
+                    )
+                    id_ingrediente = nuevo_ing.id_ingrediente
+                else:
+                    id_ingrediente = ing_existente.id_ingrediente
+
+                RecetasController.add_ingredient_to_recipe(self.session, receta.id_receta, id_ingrediente, ing["cantidad"])
+
+            self.session.commit()
             messagebox.showinfo("Éxito", "Receta guardada correctamente")
             self.volver_a_recetas()
         except Exception as e:
