@@ -75,22 +75,24 @@ class RecetasAdminView(ctk.CTkFrame):
         self.filtro_categoria.set("Categoría")
         self.filtro_categoria.pack(side="left", padx=(0, 10))
 
+        col_widths = [30, 320, 250, 120, 120, 120, 150, 150, 80]
+        
         encabezado = ctk.CTkFrame(self.contenedor, fg_color="#dcd1cd")
-        encabezado.pack(fill="x", padx=10, pady=4)
+        encabezado.pack(fill="x", padx=30)
 
         headers = ["", "Nombre", "Ingredientes", "Cantidad", "Unidad", "Comensales", "Tiempo", "Categoría", ""]
-        widths = [20, 150, 150, 90, 90, 90, 110, 110, 60]
-
-        for i, h in enumerate(headers):
-            lbl = ctk.CTkLabel(encabezado, text=h, text_color="#3A3A3A", font=self.fuente_small, anchor="w")
-
-            if i in [2, 3, 4, 5, 6, 7]:
-                lbl.grid(row=0, column=i, padx=(0, 0), sticky="w")
-            else:
-                lbl.grid(row=0, column=i, padx=10, sticky="w")
-
-            encabezado.grid_columnconfigure(i, weight=1, minsize=widths[i])
-
+        
+        for i, header in enumerate(headers):
+            col_frame = ctk.CTkFrame(encabezado, width=col_widths[i], fg_color="transparent")
+            col_frame.grid(row=0, column=i, sticky="ew")
+            col_frame.grid_propagate(False)  # Evita que el frame cambie de tamaño
+            
+            lbl = ctk.CTkLabel(col_frame, text=header, text_color="#3A3A3A", 
+                            font=self.fuente_small, anchor="w")
+            lbl.pack(side="left", fill="both", expand=True, padx=5)
+            
+            encabezado.grid_columnconfigure(i, weight=0, minsize=col_widths[i])
+                    
         self.recetas_scroll_frame = ctk.CTkScrollableFrame(self.contenedor, fg_color="#dcd1cd", corner_radius=0)
         self.recetas_scroll_frame.pack(fill="both", expand=True, padx=20, pady=10)
 
@@ -158,33 +160,81 @@ class RecetasAdminView(ctk.CTkFrame):
     def crear_card_receta(self, id_receta, nombre, ingredientes, cantidades, unidades, comensales, tiempo, categoria):
         card = ctk.CTkFrame(self.recetas_scroll_frame, fg_color="white", corner_radius=12)
         card.pack(fill="x", pady=8, padx=25)
+        
+        col_widths = [30, 250, 250, 120, 120, 120, 150, 150, 80]
 
-        widths = [20, 150, 150, 90, 90, 90, 110, 110, 60]
-
+        for i, width in enumerate(col_widths):
+            card.grid_columnconfigure(i, weight=0, minsize=width)
+        
+        nombre_frame = ctk.CTkFrame(card, width=col_widths[1], height=25, fg_color="white")
+        nombre_frame.grid(row=0, column=1, sticky="w")
+        nombre_frame.grid_propagate(False)  # Evita que el frame cambie de tamaño
+        
+        nombre_label = ctk.CTkLabel(nombre_frame, text=nombre, text_color="black", 
+                                    font=self.fuente_card, anchor="w", 
+                                    wraplength=col_widths[1]-10)
+        nombre_label.pack(side="left", fill="both", expand=True, padx=5)
+        
         for idx in range(len(ingredientes)):
-            if idx == 0:
-                ctk.CTkLabel(card, text=nombre, text_color="black", font=self.fuente_card, anchor="w").grid(row=0, column=1, padx=10, sticky="w")
-            else:
-                ctk.CTkLabel(card, text="", text_color="black", font=self.fuente_card).grid(row=idx, column=1, padx=10)
+            if idx > 0:
+                ctk.CTkFrame(card, width=col_widths[1], height=25, fg_color="white").grid(row=idx, column=1, sticky="w")
+            
+            
+            ing_frame = ctk.CTkFrame(card, width=col_widths[2], height=25, fg_color="white")
+            ing_frame.grid(row=idx, column=2, sticky="w")
+            ing_frame.grid_propagate(False)
+            
+            ing_label = ctk.CTkLabel(ing_frame, text=ingredientes[idx], text_color="black", 
+                                    font=self.fuente_card, anchor="w", 
+                                    wraplength=col_widths[2]-10)
+            ing_label.pack(side="left", fill="both", expand=True, padx=5)
+            
+            
+            cant_frame = ctk.CTkFrame(card, width=col_widths[3], height=25, fg_color="white")
+            cant_frame.grid(row=idx, column=3, sticky="w")
+            cant_frame.grid_propagate(False)
+            
+            cant_label = ctk.CTkLabel(cant_frame, text=cantidades[idx], text_color="black", font=self.fuente_card, anchor="w")
+            cant_label.pack(side="left", fill="both", expand=True, padx=5)
+            
+            unid_frame = ctk.CTkFrame(card, width=col_widths[4], height=25, fg_color="white")
+            unid_frame.grid(row=idx, column=4, sticky="w")
+            unid_frame.grid_propagate(False)
+            
+            unid_label = ctk.CTkLabel(unid_frame, text=unidades[idx], text_color="black", font=self.fuente_card, anchor="w")
+            unid_label.pack(side="left", fill="both", expand=True, padx=5)
+        
 
-            ctk.CTkLabel(card, text=ingredientes[idx], text_color="black", font=self.fuente_card, anchor="w").grid(row=idx, column=2, padx=10, sticky="w")
-            ctk.CTkLabel(card, text=cantidades[idx], text_color="black", font=self.fuente_card, anchor="w").grid(row=idx, column=3, padx=10, sticky="w")
-            ctk.CTkLabel(card, text=unidades[idx], text_color="black", font=self.fuente_card, anchor="w").grid(row=idx, column=4, padx=10, sticky="w")
-
-        ctk.CTkLabel(card, text=str(comensales), text_color="black", font=self.fuente_card, anchor="w").grid(row=0, column=5, padx=10, sticky="w")
-        ctk.CTkLabel(card, text=str(tiempo), text_color="black", font=self.fuente_card, anchor="w").grid(row=0, column=6, padx=10, sticky="w")
-        ctk.CTkLabel(card, text=str(categoria), text_color="black", font=self.fuente_card, anchor="w").grid(row=0, column=7, padx=10, sticky="w")
-
-        acciones_frame = ctk.CTkFrame(card, fg_color="white")
-        acciones_frame.grid(row=0, column=8, padx=10, sticky="w")
-
-
+        com_frame = ctk.CTkFrame(card, width=col_widths[5], height=25, fg_color="white")
+        com_frame.grid(row=0, column=5, sticky="w")
+        com_frame.grid_propagate(False)
+        
+        com_label = ctk.CTkLabel(com_frame, text=str(comensales), text_color="black", font=self.fuente_card, anchor="w")
+        com_label.pack(side="left", fill="both", expand=True, padx=5)
+        
+        tiempo_frame = ctk.CTkFrame(card, width=col_widths[6], height=25, fg_color="white")
+        tiempo_frame.grid(row=0, column=6, sticky="w")
+        tiempo_frame.grid_propagate(False)
+        
+        tiempo_label = ctk.CTkLabel(tiempo_frame, text=str(tiempo), text_color="black", font=self.fuente_card, anchor="w")
+        tiempo_label.pack(side="left", fill="both", expand=True, padx=5)
+        
+        cat_frame = ctk.CTkFrame(card, width=col_widths[7], height=25, fg_color="white")
+        cat_frame.grid(row=0, column=7, sticky="w")
+        cat_frame.grid_propagate(False)
+        
+        cat_label = ctk.CTkLabel(cat_frame, text=str(categoria), text_color="black", font=self.fuente_card, anchor="w")
+        cat_label.pack(side="left", fill="both", expand=True, padx=5)
+        
+        acciones_frame = ctk.CTkFrame(card, fg_color="white", width=col_widths[8], height=25)
+        acciones_frame.grid(row=0, column=8, sticky="e")
+        
         btn_editar = ctk.CTkButton(
             acciones_frame, image=self.img_pen, text="", width=30, height=30,
             fg_color="white", hover_color="#E8E8E8", corner_radius=5,
             command=lambda: self.abrir_editar_receta(id_receta)
         )
-        btn_editar.pack(side="left", padx=(0, 5))
+        btn_editar.pack(side="left", padx=(5, 2))
 
         btn_eliminar = ctk.CTkButton(
             acciones_frame,
@@ -193,17 +243,9 @@ class RecetasAdminView(ctk.CTkFrame):
             fg_color="white", hover_color="#E8E8E8", corner_radius=5,
             command=lambda rid=id_receta, card=card: self.confirmar_eliminacion(rid, card)
         )
-        btn_eliminar.pack(side="left")
-
-
-        for i, width in enumerate(widths):
-            card.grid_columnconfigure(i, weight=1, minsize=width)
+        btn_eliminar.pack(side="left", padx=2)
 
     ## @brief Handles recipe edit action
-    ## @param nombre_receta Recipe name
-    def editar_receta(self, nombre_receta):
-        print(f"Editar receta: {nombre_receta}")
-
     def abrir_editar_receta(self, id_receta):
         self.session.close()
         for widget in self.winfo_children():
@@ -211,9 +253,8 @@ class RecetasAdminView(ctk.CTkFrame):
         editar_view = EditarRecetaView(self, id_receta, self.fuente_titulo, self.fuente_button, self.fuente_card)
         editar_view.pack(fill="both", expand=True)
 
-
     ## @brief Confirms and deletes a recipe
-    ## @param nombre_receta Recipe name
+    ## @param id_receta Recipe ID
     ## @param card_widget Widget to destroy
     def confirmar_eliminacion(self, id_receta, card_widget):
         ventana_confirmacion = ctk.CTkToplevel(self)
@@ -264,3 +305,8 @@ class RecetasAdminView(ctk.CTkFrame):
             corner_radius=10, command=cancelar
         )
         btn_no.pack(side="left", padx=10)
+        
+    ## @brief Shows an error message
+    ## @param mensaje Error message to display
+    def mostrar_error(self, mensaje):
+        messagebox.showerror("Error", mensaje)
