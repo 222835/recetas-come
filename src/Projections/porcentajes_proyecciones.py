@@ -76,11 +76,32 @@ class PorcentajesProyeccionesView(ctk.CTkFrame):
     #  This private method builds the UI layout including the scrollable container,
     #  title elements, recipe cards, and control elements for generating projections.
     def _crear_interfaz(self):
-        contenedor = ctk.CTkScrollableFrame(self, fg_color="#dcd1cd", corner_radius=0)
+        contenedor = ctk.CTkScrollableFrame(self, fg_color="#dcd1cd", corner_radius=20)
         contenedor.pack(padx=60, pady=40, fill="both", expand=True)
 
-        titulo = ctk.CTkLabel(contenedor, text="Proyecciones - Porcentajes", font=self.fuente_titulo, text_color="#b8191a")
-        titulo.pack(pady=(10, 0), anchor="w", padx=30)
+        top_frame = ctk.CTkFrame(contenedor, fg_color="transparent")
+        top_frame.pack(fill="x", padx=30, pady=(10, 0))
+
+        titulo = ctk.CTkLabel(
+            top_frame,
+            text="Proyecciones - Porcentajes",
+            font=self.fuente_titulo,
+            text_color="#b8191a"
+        )
+        titulo.pack(side="left")
+
+        self.btn_volver = ctk.CTkButton(
+            top_frame,
+            text="← Volver",
+            font=self.fuente_button,
+            fg_color="transparent",
+            text_color="#C82333",
+            hover_color="#e6e6e6",
+            command=self.volver_a_proyecciones
+        )
+        self.btn_volver.pack(side="right")
+
+
 
         linea = ctk.CTkLabel(contenedor, text="─" * 200, text_color="#b8191a")
         linea.pack(fill="x", padx=30, pady=(0, 10))
@@ -188,6 +209,14 @@ class PorcentajesProyeccionesView(ctk.CTkFrame):
     #  @note This method is currently a placeholder and needs implementation
     def actualizar_ingredientes(self):
         pass
+
+    def volver_a_proyecciones(self):
+        from src.Projections.proyecciones_seleccion import ProyeccionesSeleccionView
+        self.destroy()
+        nueva_vista = ProyeccionesSeleccionView(self.master, tipo_comida=self.tipo_comida)
+        nueva_vista.pack(fill="both", expand=True)
+
+
 
     ## @brief Saves the current projection to the database
     #
