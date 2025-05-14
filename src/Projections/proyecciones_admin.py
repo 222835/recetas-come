@@ -42,11 +42,12 @@ class ProyeccionesAdminView(ctk.CTkFrame):
 
         desayuno_img = ctk.CTkImage(Image.open(IMAGE_PATH / "desayuno.png"), size=(120, 120))
         comida_img = ctk.CTkImage(Image.open(IMAGE_PATH / "comida.png"), size=(120, 120))
+        linea_img = ctk.CTkImage(Image.open(IMAGE_PATH / "Line.png"), size=(2, 250))
 
         frame_desayuno = ctk.CTkFrame(opciones_frame, fg_color="transparent")
-        frame_desayuno.grid(row=0, column=0, padx=(40, 20))
+        frame_desayuno.grid(row=0, column=0, padx=(40, 60))
 
-        ctk.CTkLabel(frame_desayuno, image=desayuno_img, text="").pack()
+        ctk.CTkLabel(frame_desayuno, image=desayuno_img, text="").pack(pady=(0, 20))
         ctk.CTkButton(
             frame_desayuno,
             text="Desayuno",
@@ -57,18 +58,17 @@ class ProyeccionesAdminView(ctk.CTkFrame):
             command=lambda: self.cambiar_a_seleccion("Desayuno")
         ).pack(pady=10)
 
+        # Reemplazar la línea vertical con la imagen
         ctk.CTkLabel(
             opciones_frame,
-            text="",
-            width=1,        
-            height=300,     
-            fg_color="#b8191a"
-        ).grid(row=0, column=1, padx=30, sticky="ns")
+            image=linea_img,
+            text=""
+        ).grid(row=0, column=1, padx=40, sticky="ns")
 
         frame_comida = ctk.CTkFrame(opciones_frame, fg_color="transparent")
-        frame_comida.grid(row=0, column=2, padx=(20, 40))
+        frame_comida.grid(row=0, column=2, padx=(60, 40))
 
-        ctk.CTkLabel(frame_comida, image=comida_img, text="").pack()
+        ctk.CTkLabel(frame_comida, image=comida_img, text="").pack(pady=(0, 20))
         ctk.CTkButton(
             frame_comida,
             text="Comida",
@@ -94,4 +94,3 @@ class ProyeccionesAdminView(ctk.CTkFrame):
     ## @brief Handles "Comida" button click.
     def accion_comida(self):
         self.cambiar_a_seleccion("Comida")
-
