@@ -107,11 +107,7 @@ class RecetasController:
 
     ## @brief Deactivate a recipe (send it to the trash can).
     @staticmethod
-    def deactivate_recipe(session: Session, numero_receta: int, numero_usuario: int) -> bool:
-        user = session.get(Usuario, numero_usuario)
-        if not user or user.rol != 'admin':
-            raise PermissionError("Solo los administradores pueden desactivar recetas.")
-            
+    def deactivate_recipe(session: Session, numero_receta: int) -> bool:
         receta = session.query(Receta).filter(Receta.id_receta == numero_receta).first()
 
         if receta:

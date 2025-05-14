@@ -53,11 +53,11 @@ class TrashcanController:
         return False
 
     ## Delete recipe from trashcan (permanently).
-    def delete_recipe_from_trashcan(session, id_receta: int, user_role: str) -> bool:
+    def delete_recipe_from_trashcan(session, id_receta: int) -> bool:
         receta = session.query(RecetasController.Receta).filter_by(id_receta=id_receta).first()
         
         if receta and not receta.estatus:
-            return RecetasController.delete_recipe(session, id_receta, user_role)
+            return RecetasController.delete_recipe(session, id_receta)
         return False
 
     ## Delete projection from trashcan (permanently).
