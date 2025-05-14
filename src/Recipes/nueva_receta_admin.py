@@ -171,11 +171,11 @@ class NuevaRecetaView(ctk.CTkFrame):
         categoria_req = ctk.CTkLabel(categoria_frame, text="*campo obligatorio", font=self.fuente_small, text_color="#C82333")
         categoria_req.pack(anchor="w")
         
-        self.input_tiempo = ctk.CTkComboBox(form_container, values=["DESAYUNO", "COMIDA"], text_color="black",
+        self.input_tiempo = ctk.CTkComboBox(form_container, values=["Desayuno", "Comida"], text_color="black",
                                            height=35, fg_color="white", border_color="#C82333", border_width=1)
         self.input_tiempo.grid(row=7, column=0, padx=15, pady=(5, 20), sticky="ew")
         
-        self.input_categoria = ctk.CTkComboBox(form_container, values=["GUARNICION", "GUISADO", "ANTOJOS"], text_color="black",
+        self.input_categoria = ctk.CTkComboBox(form_container, values=["Guarnicion", "Guisado", "Antojos"], text_color="black",
                                               height=35, fg_color="white", border_color="#C82333", border_width=1)
         self.input_categoria.grid(row=7, column=1, padx=15, pady=(5, 20), sticky="ew")
 

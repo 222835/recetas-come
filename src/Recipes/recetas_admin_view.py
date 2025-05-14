@@ -79,7 +79,7 @@ class RecetasAdminView(ctk.CTkFrame):
         encabezado.pack(fill="x", padx=10, pady=4)
 
         headers = ["", "Nombre", "Ingredientes", "Cantidad", "Unidad", "Comensales", "Tiempo", "Categoría", ""]
-        widths = [20, 80, 60, 50, 95, 80, 70, 85, 60]
+        widths = [20, 150, 150, 90, 90, 90, 110, 110, 60]
 
         for i, h in enumerate(headers):
             lbl = ctk.CTkLabel(encabezado, text=h, text_color="#3A3A3A", font=self.fuente_small, anchor="w")
@@ -159,11 +159,11 @@ class RecetasAdminView(ctk.CTkFrame):
         card = ctk.CTkFrame(self.recetas_scroll_frame, fg_color="white", corner_radius=12)
         card.pack(fill="x", pady=8, padx=25)
 
-        widths = [20, 120, 90, 90, 150, 90, 90, 100, 60]
+        widths = [20, 150, 150, 90, 90, 90, 110, 110, 60]
 
         for idx in range(len(ingredientes)):
             if idx == 0:
-                ctk.CTkLabel(card, text=nombre.upper(), text_color="black", font=self.fuente_card, anchor="w").grid(row=0, column=1, padx=10, sticky="w")
+                ctk.CTkLabel(card, text=nombre, text_color="black", font=self.fuente_card, anchor="w").grid(row=0, column=1, padx=10, sticky="w")
             else:
                 ctk.CTkLabel(card, text="", text_color="black", font=self.fuente_card).grid(row=idx, column=1, padx=10)
 
@@ -236,7 +236,7 @@ class RecetasAdminView(ctk.CTkFrame):
 
         def confirmar():
             try:
-                success = RecetasController.delete_recipe(self.session, id_receta)
+                success = RecetasController.deactivate_recipe(self.session, id_receta)
                 if success:
                     card_widget.destroy()
                     print(f"Receta eliminada con ID: {id_receta}")
