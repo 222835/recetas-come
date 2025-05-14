@@ -1,19 +1,22 @@
 ## @class CuentasAdminView
 ## @brief Manages the administrator account interface and user control panel.
 import customtkinter as ctk
-from dotenv import load_dotenv
-import mysql.connector
 import os
 import ctypes
 from pathlib import Path
 from PIL import Image 
 import tkinter.messagebox as msgbox
 from .agregar_cuentas import AgregarCuentaView
+from src.database.connector import Connector
+from src.Users.model import Usuario
 
 
 class CuentasAdminView(ctk.CTkFrame):
     ## @brief Initializes the account management view.
     def __init__(self, parent):
+        self.connector = Connector()
+        self.session = self.connector.get_session()
+
         super().__init__(parent)
         self.configure(fg_color="#1a1a22")
                 
@@ -36,17 +39,6 @@ class CuentasAdminView(ctk.CTkFrame):
 
         icono_add_path = BASE_DIR.parents[2] / "res" / "images" / "add_circle.png"
         self.img_add = ctk.CTkImage(Image.open(icono_add_path), size=(20, 20))
-
-        load_dotenv()
-
-        self.conn = mysql.connector.connect(
-            host=os.getenv("DB_HOST"),
-            user=os.getenv("DB_USER"),
-            password=os.getenv("DB_PASSWORD"),
-            database=os.getenv("DB_DATABASE"),
-            port=int(os.getenv("DB_PORT"))
-        )
-        self.cursor = self.conn.cursor()
 
         self.contenedor = ctk.CTkFrame(self, fg_color="#dcd1cd", corner_radius=20)
         self.contenedor.pack(padx=60, pady=40, fill="both", expand=True)
@@ -79,11 +71,10 @@ class CuentasAdminView(ctk.CTkFrame):
     
     def mostrar_agregar_cuentas(self):
         for widget in self.winfo_children():
+            self.session.close()
             widget.destroy()
         nueva_vista = AgregarCuentaView(
             parent=self,
-            cursor=self.cursor,
-            conn=self.conn,
             fuente_titulo=self.fuente_titulo,
             fuente_button=self.fuente_button,
             fuente_card=self.fuente_small 
@@ -96,10 +87,16 @@ class CuentasAdminView(ctk.CTkFrame):
     def cargar_usuarios(self):
         for widget in self.usuarios_scroll_frame.winfo_children():
             widget.destroy()
-        self.cursor.execute("SELECT nombre_usuario, nombre_completo, contrasenia, rol FROM Usuarios")
-        usuarios = self.cursor.fetchall()
+        
+        usuarios = self.session.query(Usuario).all()
+
         for usuario in usuarios:
-            self.crear_card_usuario(*usuario)
+            self.crear_card_usuario(
+                usuario.nombre_usuario,
+                usuario.nombre_completo,
+                usuario.contrasenia,
+                usuario.rol
+            )
 
     ## @brief Creates a user card with edit and delete buttons.
     def crear_card_usuario(self, nombre_usuario, nombre_completo, contrasenia, rol):
@@ -159,8 +156,9 @@ class CuentasAdminView(ctk.CTkFrame):
     def eliminar_usuario_confirmado(self, nombre_usuario, card_widget, ventana):
         ventana.destroy()
         try:
-            self.cursor.execute("DELETE FROM Usuarios WHERE nombre_usuario = %s", (nombre_usuario,))
-            self.conn.commit()
+            usuario = self.session.query(Usuario).filter_by(nombre_usuario=nombre_usuario).first()
+            if usuario:
+                usuario.delete(self.session)
             card_widget.destroy()
             self.mostrar_mensaje_personalizado("Eliminado", f"El usuario '{nombre_usuario}' ha sido eliminado correctamente.", "#b8191a")
         except Exception as e:
