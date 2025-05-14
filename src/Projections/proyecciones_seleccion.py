@@ -8,6 +8,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '.
 
 from src.Recipes.controller import RecetasController
 from src.database.connector import Connector
+from src.Projections.porcentajes_proyecciones import PorcentajesProyeccionesView
 
 ## @class ProyeccionesSeleccionView
 ## @brief Interface for selecting 2-3 recipes for projections with DB connection.
@@ -155,7 +156,7 @@ class ProyeccionesSeleccionView(ctk.CTkFrame):
             offvalue="0",
             command=lambda r=receta: self.seleccionar_receta(r)
         )
-        checkbox.pack(pady=(5, 5), anchor="center", padx=(60, 0)) 
+        checkbox.pack(pady=(5, 5), anchor="center", padx=(75, 0)) 
         
         ctk.CTkLabel(
             interior,
@@ -214,8 +215,14 @@ class ProyeccionesSeleccionView(ctk.CTkFrame):
     def siguiente(self):
         if self.seleccionadas < self.min_seleccionadas:
             return
-            
-        pass
+        
+        recetas_ids = [receta["id_receta"] for receta in self.recetas_seleccionadas]
+
+        self.destroy()
+        
+        nueva_vista = PorcentajesProyeccionesView(self.parent, recetas_ids=recetas_ids, tipo_comida=self.tipo_comida)
+        nueva_vista.pack(fill="both", expand=True)
+
         
     def volver(self):
         self.destroy()  

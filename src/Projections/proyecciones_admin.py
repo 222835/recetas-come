@@ -58,7 +58,6 @@ class ProyeccionesAdminView(ctk.CTkFrame):
             command=lambda: self.cambiar_a_seleccion("Desayuno")
         ).pack(pady=10)
 
-        # Reemplazar la línea vertical con la imagen
         ctk.CTkLabel(
             opciones_frame,
             image=linea_img,
