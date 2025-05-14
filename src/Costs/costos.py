@@ -7,7 +7,6 @@ import os
 import ctypes
 from pathlib import Path
 from PIL import Image
-from dotenv import load_dotenv
 import tkinter.messagebox as msgbox
 from .agregar_proveedor import AgregarProveedorView
 from .actualizar_proveedores import ActualizarProveedoresView
@@ -41,15 +40,6 @@ class CostosAdminView(ctk.CTkFrame):
         icono_add_path = BASE_DIR.parents[2] / "res" / "images" / "add_circle.png"
         self.img_add = ctk.CTkImage(Image.open(icono_add_path), size=(20, 20))
 
-        load_dotenv()
-
-        self.conn = mysql.connector.connect(
-            host=os.getenv("DB_HOST"),
-            user=os.getenv("DB_USER"),
-            password=os.getenv("DB_PASSWORD"),
-            database=os.getenv("DB_DATABASE"),
-            port=int(os.getenv("DB_PORT"))
-        )
         self.cursor = self.conn.cursor()
 
         self.contenedor = ctk.CTkFrame(self, fg_color="#dcd1cd", corner_radius=20)

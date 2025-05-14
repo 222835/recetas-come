@@ -1,12 +1,18 @@
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import declarative_base
 from sqlalchemy.engine.base import Connection
+from src.utils.enviroment_load import load_enviroment
+from src.utils.constants import env
 
 Base = declarative_base()
 
 class Connector:
-    def __init__(self, db_url="mysql+mariadb://root:password@localhost/test"):
+    def __init__(self, db_url=None):
+        load_enviroment()
+        if not db_url:
+            db_url = f"mariadb://{env['DB_USER']}:{env['DB_PASSWORD']}@{env['DB_HOST']}:{env['DB_PORT']}/{env['DB_DATABASE']}"
+        
         print(db_url)  
         self.engine = create_engine(db_url)
         Base.metadata.create_all(self.engine)
