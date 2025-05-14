@@ -30,6 +30,11 @@ class IngredienteController:
     @staticmethod
     def get_ingrediente_by_id(session: Session, id_ingrediente: int) -> Ingrediente:
         return session.query(Ingrediente).filter(Ingrediente.id_ingrediente == id_ingrediente).first()
+
+    ## @brief Get an ingredient by name and unit type (to avoid repetition)
+    @staticmethod
+    def get_ingrediente_by_name_and_unit(session: Session, nombre_ingrediente: str, unidad: str) -> Ingrediente:
+        return session.query(Ingrediente).filter(Ingrediente.nombre == nombre_ingrediente, Ingrediente.unidad_medida == unidad).first()
     
     ## @brief Update an ingredient in the database.
     @staticmethod
