@@ -9,6 +9,7 @@ from src.database.connector import Connector
 from src.Recipes.model import Receta, Receta_Ingredientes
 from src.Ingredients.model import Ingrediente
 from src.Projections.controller import ProyeccionController
+from src.Projections.proyecciones_resultados import ProyeccionesResultadosView
 
 ## @class PorcentajesProyeccionesView
 #  @brief A view class for managing recipe percentages for projections
@@ -208,7 +209,40 @@ class PorcentajesProyeccionesView(ctk.CTkFrame):
     #
     #  @note This method is currently a placeholder and needs implementation
     def actualizar_ingredientes(self):
-        pass
+        try:
+            comensales = int(self.comensales_entry.get())
+            porcentajes = {}
+
+            for receta_id, entry in self.entries_porcentajes.items():
+                valor = entry.get()
+                if not valor.isdigit():
+                    raise ValueError("Todos los porcentajes deben ser números enteros.")
+                porcentajes[receta_id] = int(valor)
+
+            if sum(porcentajes.values()) != 100:
+                raise ValueError("La suma de los porcentajes debe ser exactamente 100.")
+
+            self.destroy()
+            resultados_view = ProyeccionesResultadosView(
+                self.master,
+                recetas_ids=self.recetas_ids,
+                porcentajes=porcentajes,
+                comensales=comensales,
+                tipo_comida=self.tipo_comida
+            )
+            resultados_view.pack(fill="both", expand=True)
+
+        except ValueError as e:
+            error_label = ctk.CTkLabel(
+                self,
+                text=f"Error: {str(e)}",
+                text_color="red",
+                fg_color="#fff3f3",
+                corner_radius=5
+            )
+            error_label.place(relx=0.5, rely=0.9, anchor="center")
+            self.after(3000, error_label.destroy)
+
 
     def volver_a_proyecciones(self):
         from src.Projections.proyecciones_seleccion import ProyeccionesSeleccionView
