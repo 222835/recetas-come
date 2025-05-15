@@ -46,8 +46,8 @@ class AgregarCuentaView(ctk.CTkFrame):
         self.contenedor.pack(padx=40, pady=40, fill="both", expand=True)
         self.contenedor.pack_propagate(False)
 
-        top_frame = ctk.CTkFrame(self.contenedor, fg_color="transparent")
-        top_frame.pack(fill="x", padx=30, pady=(10, 5))
+        top_frame = ctk.CTkFrame(contenedor, fg_color="transparent")
+        top_frame.pack(fill="x", padx=30, pady=(30, 5))
 
         titulo = ctk.CTkLabel(top_frame, text="Agregar nueva cuenta", font=self.fuente_titulo, text_color="#b8191a")
         titulo.pack(side="left", pady=(10, 0))
