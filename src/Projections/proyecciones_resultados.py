@@ -4,6 +4,7 @@ import os, sys
 from typing import Dict, List
 from CTkMessagebox import CTkMessagebox
 import tkinter as tk
+import subprocess
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 from src.database.connector import Connector
@@ -188,7 +189,7 @@ class ProyeccionesResultadosView(ctk.CTkFrame):
             popup.grab_set()
 
             tk.Label(popup, text="Proyección guardada", font=("Arial", 16, "bold"),
-                    fg="#388E3C", bg="white").pack(pady=(15, 0))
+                    fg="#b8191a", bg="white").pack(pady=(15, 0))  
 
             tk.Label(popup, text="La proyección fue guardada exitosamente.",
                     font=("Arial", 10), bg="white", fg="#666").pack(pady=10)
@@ -199,7 +200,7 @@ class ProyeccionesResultadosView(ctk.CTkFrame):
             style = {"font": ("Arial", 10, "bold"), "width": 10, "height": 1}
 
             ok_btn = tk.Button(
-                btn_frame, text="OK", bg="#388E3C", fg="white", bd=0,
+                btn_frame, text="OK", bg="#b8191a", fg="white", bd=0,  
                 highlightthickness=0, command=popup.destroy, **style
             )
             ok_btn.pack(padx=10)
@@ -219,7 +220,7 @@ class ProyeccionesResultadosView(ctk.CTkFrame):
             popup.grab_set()
 
             tk.Label(popup, text="Error al guardar", font=("Arial", 16, "bold"),
-                    fg="#D32F2F", bg="white").pack(pady=(15, 0))
+                    fg="#b8191a", bg="white").pack(pady=(15, 0)) 
 
             tk.Label(popup, text=str(e), font=("Arial", 10), bg="white", fg="#666").pack(pady=10)
 
@@ -229,7 +230,7 @@ class ProyeccionesResultadosView(ctk.CTkFrame):
             style = {"font": ("Arial", 10, "bold"), "width": 10, "height": 1}
 
             ok_btn = tk.Button(
-                btn_frame, text="Cerrar", bg="#D32F2F", fg="white", bd=0,
+                btn_frame, text="Cerrar", bg="#b8191a", fg="white", bd=0, 
                 highlightthickness=0, command=popup.destroy, **style
             )
             ok_btn.pack(padx=10)
@@ -254,8 +255,8 @@ class ProyeccionesResultadosView(ctk.CTkFrame):
                 recetas=recetas_data
             )
 
-            ProyeccionController.generate_projection_report(self.session, proyeccion.id_proyeccion)
-
+            report_filename = ProyeccionController.generate_projection_report(self.session, proyeccion.id_proyeccion)
+            
             popup = tk.Toplevel(self)
             popup.title("Reporte generado")
             popup.configure(bg="white")
@@ -270,7 +271,7 @@ class ProyeccionesResultadosView(ctk.CTkFrame):
             popup.grab_set()
 
             tk.Label(popup, text="Reporte generado", font=("Arial", 16, "bold"),
-                    fg="#388E3C", bg="white").pack(pady=(15, 0))
+                    fg="#b8191a", bg="white").pack(pady=(15, 0))  
 
             tk.Label(popup, text="El reporte se generó correctamente en formato PDF.",
                     font=("Arial", 10), bg="white", fg="#666").pack(pady=10)
@@ -280,9 +281,25 @@ class ProyeccionesResultadosView(ctk.CTkFrame):
 
             style = {"font": ("Arial", 10, "bold"), "width": 10, "height": 1}
 
+            def cerrar_y_abrir_pdf():
+                popup.destroy()
+                try:
+                    pdf_path = os.path.join(os.getcwd(), f'proyeccion_report_{proyeccion.fecha}.pdf')
+                    if os.path.exists(pdf_path):
+                        if sys.platform == 'win32':
+                            os.startfile(pdf_path)
+                        elif sys.platform == 'darwin': 
+                            subprocess.run(['open', pdf_path])
+                        else:  
+                            subprocess.run(['xdg-open', pdf_path])
+                except Exception as e:
+                    print(f"Error al abrir el PDF: {e}")
+
+            self.after(500, cerrar_y_abrir_pdf)
+
             ok_btn = tk.Button(
-                btn_frame, text="OK", bg="#388E3C", fg="white", bd=0,
-                highlightthickness=0, command=popup.destroy, **style
+                btn_frame, text="OK", bg="#b8191a", fg="white", bd=0, 
+                highlightthickness=0, command=cerrar_y_abrir_pdf, **style
             )
             ok_btn.pack(padx=10)
 
@@ -301,7 +318,7 @@ class ProyeccionesResultadosView(ctk.CTkFrame):
             popup.grab_set()
 
             tk.Label(popup, text="Error al generar", font=("Arial", 16, "bold"),
-                    fg="#D32F2F", bg="white").pack(pady=(15, 0))
+                    fg="#b8191a", bg="white").pack(pady=(15, 0)) 
 
             tk.Label(popup, text=str(e), font=("Arial", 10), bg="white", fg="#666").pack(pady=10)
 
@@ -309,7 +326,7 @@ class ProyeccionesResultadosView(ctk.CTkFrame):
             btn_frame.pack(pady=10)
 
             ok_btn = tk.Button(
-                btn_frame, text="Cerrar", bg="#D32F2F", fg="white", bd=0,
+                btn_frame, text="Cerrar", bg="#b8191a", fg="white", bd=0,  
                 highlightthickness=0, command=popup.destroy,
                 font=("Arial", 10, "bold"), width=10, height=1
             )
