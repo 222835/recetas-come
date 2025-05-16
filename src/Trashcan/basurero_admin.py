@@ -213,16 +213,7 @@ class AdminTrashcanView(ctk.CTkFrame):
         btn_container = ctk.CTkFrame(main_container, fg_color="transparent")
         btn_container.grid(row=0, column=1, sticky="ns", padx=(10, 0))
         
-        btn_ver = ctk.CTkButton(
-            btn_container,
-            text="",
-            image=self.img_ver,
-            fg_color="transparent", 
-            hover_color="#dfdfdf",
-            width=30, height=30,
-            command=lambda r_id=receta.id_receta: self.ver_receta(r_id)
-        )
-        btn_ver.pack(side="left", padx=3, pady=(5, 0))
+        
         
         btn_restaurar = ctk.CTkButton(
             btn_container,
