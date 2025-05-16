@@ -80,16 +80,16 @@ class AjustesView(ctk.CTkFrame):
             justify="left"
         ).pack(anchor="w", padx=40, pady=(0,5))
 
-        #cambiar para que solo muestre la info, no deberia ser un entry
         self.entry_nombre_completo = ctk.CTkEntry(
             left,
             font=self.fuente_card,
-            fg_color="#f5f5f5",
+            fg_color="#EBEBEB",
             border_color="#E1222A",
             border_width=1,
-            placeholder_text=usuario.nombre_completo,
-            state="disabled"
+            text_color="#333333"
         )
+        self.entry_nombre_completo.insert(0, usuario.nombre_completo)
+        self.entry_nombre_completo.configure(state="disabled")
         self.entry_nombre_completo.pack(fill="x", anchor="w", padx=40, pady=(0,10))
 
         ctk.CTkLabel(
@@ -100,16 +100,16 @@ class AjustesView(ctk.CTkFrame):
             justify="left"
         ).pack(anchor="w", padx=40, pady=(0,5))
 
-        #igual, solo debe mostrar el rol, asi que no deberia de ser un entry
         self.entry_rol = ctk.CTkEntry(
             left,
             font=self.fuente_card,
-            fg_color="#f5f5f5",
+            fg_color="#EBEBEB",
             border_color="#E1222A",
             border_width=1,
-            placeholder_text=usuario.rol,
-            state="disabled"
+            text_color="#333333"
         )
+        self.entry_rol.insert(0, usuario.rol)
+        self.entry_rol.configure(state="disabled")
         self.entry_rol.pack(fill="x", anchor="w", padx=40)
 
 
@@ -130,6 +130,7 @@ class AjustesView(ctk.CTkFrame):
             fg_color="#F4F4F4",
             border_color="#E1222A",
             border_width=1,
+            text_color="#333333",
             placeholder_text=usuario.nombre_usuario
         )
         self.entry_usuario.pack(anchor="w", padx=(50,0))
@@ -148,6 +149,7 @@ class AjustesView(ctk.CTkFrame):
             fg_color="#F4F4F4",
             border_color="#E1222A",
             border_width=1,
+            text_color="#333333",
             placeholder_text="********"
         )
         self.entry_contra.pack(anchor="w", padx=(50,0))
@@ -166,6 +168,7 @@ class AjustesView(ctk.CTkFrame):
             fg_color="#F4F4F4",
             border_color="#E1222A",
             border_width=1,
+            text_color="#333333",
             placeholder_text="********"
         )
         self.entry_confirm.pack(anchor="w", padx=(50,0))
