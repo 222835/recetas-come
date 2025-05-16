@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from src.Recipes.model import Receta
 from src.Recipes.controller import RecetasController
 from src.Projections.model import Proyeccion
-from src.Projections.controller import ProyeccionController
+from src.Projections.controller import ProyeccionController, ProyeccionReceta
 
 ## Class used to manage the trashcan in the database
 class TrashcanController:
@@ -92,3 +92,10 @@ class TrashcanController:
             session.delete(projection)
         
         session.commit()
+
+    @staticmethod
+    def get_recipes_by_projection(session, projection_id):
+        return session.query(Receta)\
+            .join(ProyeccionReceta)\
+            .filter(ProyeccionReceta.id_proyeccion == projection_id)\
+            .all()

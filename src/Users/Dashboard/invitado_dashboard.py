@@ -7,6 +7,7 @@ from src.Projections.proyecciones_admin import ProyeccionesAdminView
 from src.Users.cuentas import CuentasAdminView
 from src.Costs.costos import CostosAdminView
 from src.Projections.historial import HistorialAdminView
+from src.Trashcan.basurero_invitado import InvitTrashcanView
 import os
 import ctypes
 
@@ -215,6 +216,10 @@ class InvitadoDashboard(ctk.CTk):
                 self.custom_font,  
                 self.custom_font   
             ).pack(fill="both", expand=True)
+        elif option == "Basurero":
+            for w in self.main_content.winfo_children():
+                w.destroy()
+            InvitTrashcanView(self.main_content).pack(fill="both", expand=True)
         else:
             print(f"{option} clicked")
 
