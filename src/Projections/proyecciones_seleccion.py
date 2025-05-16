@@ -30,7 +30,7 @@ class ProyeccionesSeleccionView(ctk.CTkFrame):
         self.fuente_button = ctk.CTkFont(family="Port Lligat Slab", size=16, weight="bold")
 
         self.seleccionadas = 0 
-        self.min_seleccionadas = 1
+        self.min_seleccionadas = 2
         self.max_seleccionadas = 3
         self.recetas_seleccionadas = []
         
