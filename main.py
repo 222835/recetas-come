@@ -13,6 +13,7 @@ from src.utils.constants import env as env  ## Import environment constants
 ROOT_PATH = os.path.dirname(os.path.abspath(__file__))  ## Define ROOT_PATH
 constants.init(ROOT_PATH)  ## Initialize constants and resource paths
 
+from src.Trashcan.controller import TrashcanController
 from src.Users.Login.view import LoginApp
 from src.Users.Dashboard.admin_dashboard import AdminDashboard
 from src.Users.Dashboard.invitado_dashboard import InvitadoDashboard
@@ -21,9 +22,12 @@ from src.Users.Dashboard.invitado_dashboard import InvitadoDashboard
 ## @details Initializes the database, launches the login window, and opens the dashboard based on the authenticated user's role.
 if __name__ == '__main__':
     print("database initialized")
+    connector = Connector()
+    session = connector.get_session()
 
     login_view = LoginApp()
     login_view.mainloop()
+    TrashcanController.clear_trashcan(session)
 
     if hasattr(login_view, 'user_role') and login_view.user_role is not None:
         if login_view.user_role == 'admin':

@@ -13,6 +13,8 @@ import tkinter as tk
 from tkinter import messagebox
 from src.database.connector import Connector
 from src.Users.model import Usuario
+from src.Users.Login.controller import LoginController
+from src.security.password_utils import Security
 
 ## @class LoginApp
 ## @brief Class that represents the login window.
@@ -163,17 +165,25 @@ class LoginApp(ctk.CTk):
         contrasena = self.password_entry.get()
         print(f"Usuario: {usuario}, Contraseña: {contrasena}")
 
-        query = f"SELECT rol, contrasenia FROM Usuarios WHERE nombre_usuario = '{usuario}'"
-        result = self.connector.execute_query(query)
+        if not usuario or not contrasena:
+            messagebox.showerror("Error", "Por favor, completa todos los campos", parent=self)
+            return
+        
+        can_login, result = LoginController.login(usuario, contrasena)
+        print('lol')
 
+        if not can_login:
+            messagebox.showerror("Error", "Usuario no encontrado", parent=self)
+            self.login_button.configure(state="normal")
+            return
         if not result:
             messagebox.showerror("Error", "Usuario no encontrado", parent=self)
-            self.login_button.configure(state="normal")  
+            self.login_button.configure(state="normal")
             return
 
-        stored_role, stored_password = result[0]
+        stored_role, stored_password = result.rol, result.contrasenia
 
-        if stored_password != contrasena:
+        if not Security.verify_password(contrasena, stored_password):
             messagebox.showerror("Error", "Contraseña incorrecta", parent=self)
             self.login_button.configure(state="normal")
             return

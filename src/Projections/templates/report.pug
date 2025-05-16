@@ -1,0 +1,60 @@
+doctype html
+html(lang="es")
+  head
+    meta(charset="UTF-8")
+    meta(name="viewport", content="width=device-width, initial-scale=1.0")
+    title {{title}}
+    style.
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      th, td {
+        border: 1px solid black;
+        padding: 8px;
+        text-align: left;
+      }
+      th {
+        background-color: #f2f2f2;
+      }
+
+  body
+    h1 {{title}}
+
+    each item in report_data
+      if item.receta
+        h2 Receta: #{item.receta}
+        p Comensales: #{item.comensales} | Fecha: #{item.fecha} | Porcentaje: #{item.porcentaje}
+
+        table
+          thead
+            tr
+              th Ingrediente
+              th Cantidad
+              th Unidad
+          tbody
+            each ingrediente in item.ingredientes
+              tr
+                td #{ingrediente.nombre}
+                td #{ingrediente.cantidad}
+                td #{ingrediente.unidad}
+      else if item.total_ingredientes
+        h2 Total de Ingredientes Necesarios:
+        table
+          thead
+            tr
+              th Ingrediente
+              th Cantidad Total
+              th Unidad
+          tbody
+            each ingrediente, nombre in item.total_ingredientes
+              tr
+                td #{nombre}
+                td #{ingrediente.cantidad}
+                td #{ingrediente.unidad}
+
+    // Mostrar una grafica de pastel con los porcentajes de cada receta
+    if report_data.length > 0
+      h2 Porcentaje de Ingredientes por Receta
+      img(src="pie_chart.png", alt="")
+     

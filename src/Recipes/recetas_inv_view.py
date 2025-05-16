@@ -1,18 +1,15 @@
 import customtkinter as ctk
-from tkinter import messagebox
 from pathlib import Path
 from PIL import Image
 from src.Recipes.controller import RecetasController
 from src.database.connector import Connector
-from src.Recipes.nueva_receta_admin import NuevaRecetaView
-from src.Recipes.editar_receta_admin import EditarRecetaView
 import os
 import ctypes
 
-## @class RecetasAdminView
-## @brief Admin interface for managing recipes
-class RecetasAdminView(ctk.CTkFrame):
-    ## @brief Initializes the admin recipe view
+## @class RecetasInvView
+## @brief Guest interface for viewing recipes (read-only)
+class RecetasInvView(ctk.CTkFrame):
+    ## @brief Initializes the guest recipe view
     ## @param parent Parent container
     def __init__(self, parent):
         self.connector = Connector()
@@ -30,14 +27,6 @@ class RecetasAdminView(ctk.CTkFrame):
         self.fuente_card = ctk.CTkFont(family="Port Lligat Slab", size=15)
         self.fuente_small = ctk.CTkFont(family="Port Lligat Slab", size=14)
 
-        icono_pen_path = BASE_DIR.parents[2] / "res" / "images" / "pen 1.png"
-        icono_bote_path = BASE_DIR.parents[2] / "res" / "images" / "bote.png"
-        icono_add_path = BASE_DIR.parents[2] / "res" / "images" / "add_circle.png"
-
-        self.img_pen = ctk.CTkImage(Image.open(icono_pen_path), size=(20, 20))
-        self.img_bote = ctk.CTkImage(Image.open(icono_bote_path), size=(20, 20))
-        self.img_add = ctk.CTkImage(Image.open(icono_add_path), size=(20, 20))
-
         self.contenedor = ctk.CTkFrame(self, fg_color="#dcd1cd", corner_radius=20)
         self.contenedor.pack(padx=60, pady=40, fill="both", expand=True)
 
@@ -46,10 +35,6 @@ class RecetasAdminView(ctk.CTkFrame):
 
         titulo = ctk.CTkLabel(top_frame, text="Recetas", font=self.fuente_titulo, text_color="#b8191a")
         titulo.pack(side="left")
-
-        btn_agregar = ctk.CTkButton(top_frame, image=self.img_add, text="Agregar nueva receta", font=self.fuente_button,
-                                     fg_color="#b8191a", hover_color="#991416", corner_radius=50, compound="left", command=self.abrir_vista_nueva_receta)
-        btn_agregar.pack(side="right")
 
         linea = ctk.CTkLabel(self.contenedor, text="─" * 200, text_color="#b8191a")
         linea.pack(fill="x", padx=30, pady=(10, 5))
@@ -64,53 +49,38 @@ class RecetasAdminView(ctk.CTkFrame):
         self.input_busqueda.bind("<KeyRelease>", lambda e: self.cargar_recetas())
 
         self.filtro_tiempo = ctk.CTkComboBox(busqueda_frame, values=["Todos", "Desayuno", "Comida"],
-                                     height=35, width=180,fg_color="#dcd1cd", text_color="black", 
+                                     height=35, width=180, fg_color="#dcd1cd", text_color="black", 
                                      border_color="#C82333", border_width=1, command=lambda choice: self.cargar_recetas())
         self.filtro_tiempo.set("Tiempo") 
         self.filtro_tiempo.pack(side="left", padx=(0, 10))
 
         self.filtro_categoria = ctk.CTkComboBox(busqueda_frame, values=["Todos", "Guarnicion", "Guisado", "Antojos"],
-                                                height=35, width=180,fg_color="#dcd1cd", text_color="black", 
+                                                height=35, width=180, fg_color="#dcd1cd", text_color="black", 
                                                 border_color="#C82333", border_width=1, command=lambda choice: self.cargar_recetas())
         self.filtro_categoria.set("Categoría")
         self.filtro_categoria.pack(side="left", padx=(0, 10))
 
-        col_widths = [30, 320, 250, 120, 120, 120, 150, 150, 80]
-        
         encabezado = ctk.CTkFrame(self.contenedor, fg_color="#dcd1cd")
-        encabezado.pack(fill="x", padx=30)
+        encabezado.pack(fill="x", padx=30, pady=4)
 
-        headers = ["", "Nombre", "Ingredientes", "Cantidad", "Unidad", "Comensales", "Tiempo", "Categoría", ""]
-        
+        headers = ["", "Nombre", "Ingredientes", "Cantidad", "Unidad", "Comensales", "Tiempo", "Categoría"]
+        col_widths = [30, 390, 280, 120, 120, 120, 150, 150]
+
         for i, header in enumerate(headers):
             col_frame = ctk.CTkFrame(encabezado, width=col_widths[i], fg_color="transparent")
             col_frame.grid(row=0, column=i, sticky="ew")
-            col_frame.grid_propagate(False)  # Evita que el frame cambie de tamaño
+            col_frame.grid_propagate(False)
             
             lbl = ctk.CTkLabel(col_frame, text=header, text_color="#3A3A3A", 
                             font=self.fuente_small, anchor="w")
             lbl.pack(side="left", fill="both", expand=True, padx=5)
             
             encabezado.grid_columnconfigure(i, weight=0, minsize=col_widths[i])
-                    
+
         self.recetas_scroll_frame = ctk.CTkScrollableFrame(self.contenedor, fg_color="#dcd1cd", corner_radius=0)
         self.recetas_scroll_frame.pack(fill="both", expand=True, padx=20, pady=10)
 
         self.cargar_recetas()
-
-    ## @brief Opens the add new recipe view
-    def abrir_vista_nueva_receta(self):
-        self.session.close()
-        for widget in self.winfo_children():
-            widget.destroy()
-
-        nueva_vista = NuevaRecetaView(
-            master=self,
-            fuente_titulo=self.fuente_titulo,
-            fuente_button=self.fuente_button,
-            fuente_card=self.fuente_card
-        )
-        nueva_vista.pack(fill="both", expand=True)
 
     ## @brief Loads all recipes into the scrollable frame
     def cargar_recetas(self):
@@ -138,7 +108,6 @@ class RecetasAdminView(ctk.CTkFrame):
             unidades = [i["Unidad"] for i in receta["ingredientes"]]
 
             self.crear_card_receta(
-                receta["id_receta"],
                 receta["nombre_receta"],
                 nombres,
                 cantidades,
@@ -148,7 +117,6 @@ class RecetasAdminView(ctk.CTkFrame):
                 receta["clasificacion_receta"]
             )
 
-
     ## @brief Creates a recipe card
     ## @param nombre Recipe name
     ## @param ingredientes List of ingredients
@@ -157,18 +125,18 @@ class RecetasAdminView(ctk.CTkFrame):
     ## @param comensales Number of servings
     ## @param tiempo Meal time
     ## @param categoria Recipe category
-    def crear_card_receta(self, id_receta, nombre, ingredientes, cantidades, unidades, comensales, tiempo, categoria):
+    def crear_card_receta(self, nombre, ingredientes, cantidades, unidades, comensales, tiempo, categoria):
         card = ctk.CTkFrame(self.recetas_scroll_frame, fg_color="white", corner_radius=12)
         card.pack(fill="x", pady=8, padx=25)
-        
-        col_widths = [30, 250, 250, 120, 120, 120, 150, 150, 80]
+
+        col_widths = [30, 300, 280, 120, 120, 120, 150, 150]
 
         for i, width in enumerate(col_widths):
             card.grid_columnconfigure(i, weight=0, minsize=width)
         
         nombre_frame = ctk.CTkFrame(card, width=col_widths[1], height=25, fg_color="white")
         nombre_frame.grid(row=0, column=1, sticky="w")
-        nombre_frame.grid_propagate(False)  # Evita que el frame cambie de tamaño
+        nombre_frame.grid_propagate(False)
         
         nombre_label = ctk.CTkLabel(nombre_frame, text=nombre, text_color="black", 
                                     font=self.fuente_card, anchor="w", 
@@ -225,88 +193,3 @@ class RecetasAdminView(ctk.CTkFrame):
         
         cat_label = ctk.CTkLabel(cat_frame, text=str(categoria), text_color="black", font=self.fuente_card, anchor="w")
         cat_label.pack(side="left", fill="both", expand=True, padx=5)
-        
-        acciones_frame = ctk.CTkFrame(card, fg_color="white", width=col_widths[8], height=25)
-        acciones_frame.grid(row=0, column=8, sticky="e")
-        
-        btn_editar = ctk.CTkButton(
-            acciones_frame, image=self.img_pen, text="", width=30, height=30,
-            fg_color="white", hover_color="#E8E8E8", corner_radius=5,
-            command=lambda: self.abrir_editar_receta(id_receta)
-        )
-        btn_editar.pack(side="left", padx=(5, 2))
-
-        btn_eliminar = ctk.CTkButton(
-            acciones_frame,
-            image=self.img_bote,
-            text="", width=30, height=30,
-            fg_color="white", hover_color="#E8E8E8", corner_radius=5,
-            command=lambda rid=id_receta, card=card: self.confirmar_eliminacion(rid, card)
-        )
-        btn_eliminar.pack(side="left", padx=2)
-
-    ## @brief Handles recipe edit action
-    def abrir_editar_receta(self, id_receta):
-        self.session.close()
-        for widget in self.winfo_children():
-            widget.destroy()
-        editar_view = EditarRecetaView(self, id_receta, self.fuente_titulo, self.fuente_button, self.fuente_card)
-        editar_view.pack(fill="both", expand=True)
-
-    ## @brief Confirms and deletes a recipe
-    ## @param id_receta Recipe ID
-    ## @param card_widget Widget to destroy
-    def confirmar_eliminacion(self, id_receta, card_widget):
-        ventana_confirmacion = ctk.CTkToplevel(self)
-        ventana_confirmacion.title("Confirmar eliminación")
-        ventana_confirmacion.geometry("400x180")
-        ventana_confirmacion.configure(fg_color="#dcd1cd")
-        ventana_confirmacion.resizable(False, False)
-        ventana_confirmacion.grab_set()  
-
-        label = ctk.CTkLabel(
-            ventana_confirmacion,
-            text="¿Deseas eliminar esta receta?",
-            font=self.fuente_card,
-            text_color="#1a1a22"
-        )
-        label.pack(pady=(30, 10))
-
-        frame_botones = ctk.CTkFrame(ventana_confirmacion, fg_color="transparent")
-        frame_botones.pack(pady=10)
-
-        def confirmar():
-            try:
-                success = RecetasController.deactivate_recipe(self.session, id_receta)
-                if success:
-                    card_widget.destroy()
-                    print(f"Receta eliminada con ID: {id_receta}")
-                else:
-                    self.mostrar_error("No se encontró la receta para eliminar.")
-            except Exception as e:
-                self.mostrar_error(f"No se pudo eliminar la receta.\n{e}")
-            ventana_confirmacion.destroy()
-
-        def cancelar():
-            ventana_confirmacion.destroy()
-
-        btn_si = ctk.CTkButton(
-            frame_botones, text="Sí", width=80,
-            font=self.fuente_button,
-            fg_color="#b8191a", hover_color="#991416",
-            corner_radius=10, command=confirmar
-        )
-        btn_si.pack(side="left", padx=10)
-
-        btn_no = ctk.CTkButton(
-            frame_botones, text="No", width=80,
-            font=self.fuente_button,
-            fg_color="#6c757d", hover_color="#5a6268",
-            corner_radius=10, command=cancelar
-        )
-        btn_no.pack(side="left", padx=10)
-        
-    ## @brief Shows an error message
-    ## @param mensaje Error message to display
-    def mostrar_error(self, mensaje):
-        messagebox.showerror("Error", mensaje)

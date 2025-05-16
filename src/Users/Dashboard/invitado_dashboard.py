@@ -2,7 +2,7 @@ import customtkinter as ctk
 from PIL import Image, ImageTk, ImageOps, ImageDraw
 import tkinter as tk
 from pathlib import Path
-from src.Recipes.recetas_admin_view import RecetasAdminView
+from src.Recipes.recetas_inv_view import RecetasInvView
 from src.Projections.proyecciones_admin import ProyeccionesAdminView
 from src.Users.cuentas import CuentasAdminView
 from src.Costs.costos import CostosAdminView
@@ -130,7 +130,7 @@ class InvitadoDashboard(ctk.CTk):
 
         self.sections = {
             "Home icon.png": ("Inicio", lambda: self.create_custom_buttons()),
-            "recetas.png": ("Recetas", lambda: self.load_view(RecetasAdminView)),
+            "recetas.png": ("Recetas", lambda: self.load_view(RecetasInvView)),
             "proyecciones.png": ("Proyecciones", lambda: self.load_view(ProyeccionesAdminView)),
             "costos.png": ("Costos", lambda: self.load_view(CostosAdminView)),
             "historial.png": ("Historial", lambda: self.load_view(HistorialAdminView))
@@ -331,7 +331,7 @@ class InvitadoDashboard(ctk.CTk):
             btn.bind("<Leave>", lambda e, b=btn: b.configure(image=b.image_normal))
             self.main_buttons.append(btn)
 
-        create_image_button("recetas2.jpg", "", 0, 0, 2, 2, 480, 520, lambda: self.load_view(RecetasAdminView), section_name="Recetas")
+        create_image_button("recetas2.jpg", "", 0, 0, 2, 2, 480, 520, lambda: self.load_view(RecetasInvView), section_name="Recetas")
         create_image_button("proyecciones.jpg", "", 0, 2, 2, 1, 650, 240, lambda: self.load_view(ProyeccionesAdminView), section_name="Proyecciones")
         create_image_button("costos2.jpg", "", 1, 2, 1, 1, 300, 240, lambda: self.load_view(CostosAdminView), section_name="Costos")
         create_image_button("historial2.jpg", "", 1, 3, 1, 1, 300, 240, lambda: self.load_view(HistorialAdminView), section_name="Historial")
