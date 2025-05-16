@@ -1,26 +1,31 @@
-## @file agregar_proveedor.py
-## @brief Provides the view for adding a new provider and its products.
-
 import customtkinter as ctk
-from tkcalendar import DateEntry
-from tkinter import ttk
+from tkinter import ttk, messagebox
+import sys
+import os
+import re
 
-## @class AgregarProveedorView
-## @brief Displays the interface to add a new provider and their products.
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+
+from src.Costs.controller import CostController
+from src.database.connector import Connector
+
 class AgregarProveedorView(ctk.CTkFrame):
-    ## @brief Initializes the provider addition view.
-    def __init__(self, parent, conn, cursor, fuente_titulo, fuente_card, fuente_button):
+    def __init__(self, parent, fuente_titulo, fuente_card, fuente_button):
         super().__init__(parent)
         self.configure(fg_color="transparent")
-        self.conn = conn
-        self.cursor = cursor
+        
+        self.connector = Connector()
+        self.session = self.connector.get_session()
+        
         self.fuente_titulo = fuente_titulo
         self.fuente_card = fuente_card
         self.fuente_button = fuente_button
+        
+        self.cost_controller = CostController()
+        self.productos = []
 
         self.build_interface()
 
-    ## @brief Builds the UI components.
     def build_interface(self):
         contenedor = ctk.CTkFrame(self, fg_color="#E8E3E3", corner_radius=25, width=880, height=580)
         contenedor.pack(padx=40, pady=40, fill="both", expand=True)
@@ -29,10 +34,9 @@ class AgregarProveedorView(ctk.CTkFrame):
         top_frame = ctk.CTkFrame(contenedor, fg_color="transparent")
         top_frame.pack(fill="x", padx=30, pady=(10, 5))
 
-        titulo = ctk.CTkLabel(top_frame, text="Nuevo proveedor", font=self.fuente_titulo, text_color="#b8191a")
-        titulo.pack(side="left")
+        ctk.CTkLabel(top_frame, text="Nuevo proveedor", font=self.fuente_titulo, text_color="#b8191a").pack(side="left")
 
-        btn_volver = ctk.CTkButton(
+        ctk.CTkButton(
             top_frame,
             text="← Volver",
             font=self.fuente_button,
@@ -41,11 +45,9 @@ class AgregarProveedorView(ctk.CTkFrame):
             corner_radius=50,
             width=130,
             command=self.volver_a_costos
-        )
-        btn_volver.pack(side="right")
+        ).pack(side="right")
 
-        linea = ctk.CTkLabel(contenedor, text="─" * 200, text_color="#b8191a")
-        linea.pack(fill="x", padx=30, pady=(0, 10))
+        ctk.CTkLabel(contenedor, text="─" * 200, text_color="#b8191a").pack(fill="x", padx=30, pady=(0, 10))
 
         scroll = ctk.CTkScrollableFrame(contenedor, fg_color="white", corner_radius=25)
         scroll.pack(padx=30, pady=10, fill="both", expand=True)
@@ -69,66 +71,134 @@ class AgregarProveedorView(ctk.CTkFrame):
         self.entry_contacto = ctk.CTkEntry(contacto_frame, width=300, fg_color="#F4F4F4", text_color="black", border_color="#E1222A", border_width=1)
         self.entry_contacto.pack(pady=(5, 0), padx=(30, 0), anchor="w")
 
-        fechas_frame = ctk.CTkFrame(scroll, fg_color="transparent")
-        fechas_frame.pack(padx=20, pady=(10, 0), fill="x")
-
-        expedicion_frame = ctk.CTkFrame(fechas_frame, fg_color="transparent")
-        expedicion_frame.pack(side="left", padx=(0, 40))
-
-        ctk.CTkLabel(expedicion_frame, text="Fecha de expedición", font=self.fuente_card, text_color="#3A3A3A").pack(anchor="w", padx=(80, 0))
-        ctk.CTkLabel(expedicion_frame, text="* campo obligatorio", font=ctk.CTkFont(size=10), text_color="#E1222A").pack(anchor="w", padx=(80, 0))
-        self.fecha_expedicion = DateEntry(expedicion_frame, width=18, background='#b8191a', foreground='white', borderwidth=2, date_pattern='yyyy-mm-dd')
-        self.fecha_expedicion.pack(pady=(5, 0), padx=(30, 0), anchor="w")
-
-        vigencia_frame = ctk.CTkFrame(fechas_frame, fg_color="transparent")
-        vigencia_frame.pack(side="left")
-
-        ctk.CTkLabel(vigencia_frame, text="Fecha de vigencia", font=self.fuente_card, text_color="#3A3A3A").pack(anchor="w")
-        ctk.CTkLabel(vigencia_frame, text="* campo obligatorio", font=ctk.CTkFont(size=10), text_color="#E1222A").pack(anchor="w")
-        self.fecha_vigencia = DateEntry(vigencia_frame, width=18, background='#b8191a', foreground='white', borderwidth=2, date_pattern='yyyy-mm-dd')
-        self.fecha_vigencia.pack(pady=(5, 0), padx=(30, 0), anchor="w")
+        info_label = ctk.CTkLabel(
+            scroll, 
+            text="Para pegar datos desde Excel: Selecciona la tabla y presiona Ctrl+V",
+            font=ctk.CTkFont(size=12, weight="bold"),
+            text_color="#b8191a"
+        )
+        info_label.pack(pady=(10, 0))
 
         self.tabla_frame = ctk.CTkFrame(scroll, fg_color="white", corner_radius=25)
         self.tabla_frame.pack(padx=20, pady=20, fill="both", expand=True)
 
-        self.tree = ttk.Treeview(self.tabla_frame, columns=("Descripcion", "Unidad", "Precio", "Moneda"), show="headings", height=8)
+        tabla_con_scroll = ctk.CTkFrame(self.tabla_frame, fg_color="white")
+        tabla_con_scroll.pack(fill="both", expand=True)
+
+        self.tree = ttk.Treeview(tabla_con_scroll, columns=("Descripcion", "Unidad", "Precio"), show="headings", height=8)
         self.tree.heading("Descripcion", text="Descripción del producto")
         self.tree.heading("Unidad", text="Unidad")
         self.tree.heading("Precio", text="Precio")
-        self.tree.heading("Moneda", text="Moneda")
-
         self.tree.column("Descripcion", anchor="w", width=250)
         self.tree.column("Unidad", anchor="center", width=100)
         self.tree.column("Precio", anchor="center", width=100)
-        self.tree.column("Moneda", anchor="center", width=100)
+        self.tree.pack(side="left", fill="both", expand=True)
 
-        self.tree.pack(padx=20, pady=10, fill="both", expand=True)
+        scrollbar = ttk.Scrollbar(tabla_con_scroll, orient="vertical", command=self.tree.yview)
+        self.tree.configure(yscrollcommand=scrollbar.set)
+        scrollbar.pack(side="right", fill="y")
+
+        self.tree.bind("<Control-v>", self.pegar_desde_excel)
+        self.tree.bind("<Control-V>", self.pegar_desde_excel)
+        
+        self.tree.bind("<Button-1>", lambda event: self.tree.focus_set())
+        
+        self.bind("<Control-v>", self.pegar_desde_excel)
+        self.bind("<Control-V>", self.pegar_desde_excel)
+        self.tabla_frame.bind("<Control-v>", self.pegar_desde_excel)
+        self.tabla_frame.bind("<Control-V>", self.pegar_desde_excel)
+
 
         btn_guardar = ctk.CTkButton(scroll, text="Guardar proveedor", font=self.fuente_button, width=500, corner_radius=50, fg_color="#b8191a", hover_color="#991416", command=self.guardar_proveedor)
         btn_guardar.pack(pady=(10, 20))
 
-    ## @brief Saves the new provider to the database.
+    def pegar_desde_excel(self, event=None):
+        import tkinter as tk
+        import re
+
+        try:
+            root = tk.Tk()
+            root.withdraw()
+            raw = root.clipboard_get()
+            root.destroy()
+
+            if not raw.strip():
+                messagebox.showwarning("Portapapeles vacío", "No hay datos para pegar.")
+                return
+
+            rows = raw.strip().split("\n")
+            self.tree.delete(*self.tree.get_children())
+            self.productos.clear()
+            count = 0
+
+            for row in rows:
+                parts = [p.strip() for p in row.split("\t")]
+                if len(parts) < 3:
+                    continue
+
+                descripcion = parts[0]
+                unidad = parts[1]
+                precio_str = re.sub(r"[^\d.,]", "", parts[2]).replace(",", ".")
+
+                try:
+                    precio = float(precio_str)
+                except ValueError:
+                    continue
+
+                self.tree.insert("", "end", values=(descripcion, unidad, f"{precio:.2f}"))
+                self.productos.append({
+                    "descripcion": descripcion,
+                    "unidad": unidad,
+                    "precio": precio
+                })
+                count += 1
+
+            if count == 0:
+                messagebox.showwarning("Sin datos", "No se encontraron datos válidos para pegar.")
+            else:
+                messagebox.showinfo("Pegado exitoso", f"Se pegaron {count} productos.")
+        except Exception as e:
+            messagebox.showerror("Error", f"No se pudo pegar: {str(e)}")
+    
     def guardar_proveedor(self):
         nombre = self.entry_nombre.get().strip()
         contacto = self.entry_contacto.get().strip()
-        fecha_expedicion = self.fecha_expedicion.get_date()
-        fecha_vigencia = self.fecha_vigencia.get_date()
 
-        if not nombre or not contacto or not fecha_expedicion or not fecha_vigencia:
-            from tkinter import messagebox
+        if not nombre or not contacto:
             messagebox.showerror("Campos incompletos", "Por favor llena todos los campos obligatorios.")
             return
+            
+        if not self.productos:
+            respuesta = messagebox.askyesno("Advertencia", "No hay productos en la lista. ¿Desea continuar sin productos?")
+            if not respuesta:
+                return
 
         try:
-            self.cursor.execute("INSERT INTO Proveedores (nombre, categoria) VALUES (%s, %s)", (nombre, "General"))
-            self.conn.commit()
-            self.master.mostrar_mensaje_personalizado("Agregado", f"Proveedor '{nombre}' agregado correctamente.", "#b8191a")
+            query = "INSERT INTO Proveedores (nombre, categoria, contacto) VALUES (%s, %s, %s)"
+            self.connector.execute_query(query, (nombre, "General", contacto))
+            proveedor_id = self.connector.get_last_insert_id()
+            
+            for producto in self.productos:
+                self.cost_controller.create_cost(
+                    self.session, 
+                    nombre=producto["descripcion"], 
+                    precio=producto["precio"], 
+                    id_proveedor=proveedor_id
+                )
+            
+            self.session.commit()
+            self.mostrar_mensaje_personalizado("Agregado", f"Proveedor '{nombre}' agregado correctamente.", "#b8191a")
             self.volver_a_costos()
         except Exception as e:
-            self.master.mostrar_mensaje_personalizado("Error", f"No se pudo agregar el proveedor.\n\n{e}", "#d9534f")
+            self.session.rollback()
+            self.mostrar_mensaje_personalizado("Error", f"No se pudo agregar el proveedor.\n\n{str(e)}", "#d9534f")
 
-    ## @brief Returns to the cost management view.
+    def mostrar_mensaje_personalizado(self, titulo, mensaje, color):
+        messagebox.showinfo(titulo, mensaje)
+
     def volver_a_costos(self):
+        self.session.close()
+        self.connector.close_connection()
         from .costos import CostosAdminView
         for widget in self.master.winfo_children():
             widget.destroy()

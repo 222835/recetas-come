@@ -195,8 +195,6 @@ class CostosAdminView(ctk.CTkFrame):
 
         nueva_vista = AgregarProveedorView(
             parent=self,
-            conn=self.conn,
-            cursor=self.cursor,
             fuente_titulo=self.fuente_titulo,
             fuente_card=self.fuente_card,
             fuente_button=self.fuente_button
