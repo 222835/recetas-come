@@ -80,17 +80,6 @@ class ProyeccionesResultadosView(ctk.CTkFrame):
         bottom_frame = ctk.CTkFrame(contenedor, fg_color="transparent")
         bottom_frame.pack(fill="x", pady=(20, 10))
         
-        self.btn_generar_reporte = ctk.CTkButton(
-            bottom_frame,
-            text="Generar reporte",
-            font=self.fuente_button,
-            fg_color="#3A3A3A",
-            hover_color="#2A2A2A",
-            corner_radius=8,
-            command=self.generar_reporte
-        )
-        self.btn_generar_reporte.pack(side="right", padx=10)
-        
         self.btn_guardar = ctk.CTkButton(
             bottom_frame,
             text="Guardar",
