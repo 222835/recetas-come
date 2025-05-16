@@ -14,7 +14,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '.
 from src.Projections.controller import ProyeccionController
 from src.database.connector import Connector
 
-class HistorialAdminView(ctk.CTkFrame):
+class HistorialInvView(ctk.CTkFrame):
     """
     @brief History administration view class for projections
     
@@ -263,21 +263,6 @@ class HistorialAdminView(ctk.CTkFrame):
         
         actions_frame = ctk.CTkFrame(card, fg_color="transparent")
         actions_frame.pack(fill="x", padx=15, pady=(5, 10))
-        
-        edit_btn = ctk.CTkButton(
-            actions_frame, image=self.img_pen, text="", width=30, height=30,
-            fg_color="white", hover_color="#E8E8E8", corner_radius=5,
-            command=lambda id=proyeccion.get('id_proyeccion'): self.editar_proyeccion(id)
-        )
-        edit_btn.pack(side="left", padx=5)
-
-        delete_btn = ctk.CTkButton(
-            actions_frame, image=self.img_bote, text="", width=30, height=30,
-            fg_color="white", hover_color="#E8E8E8", corner_radius=5,
-            command=lambda id=proyeccion.get('id_proyeccion'), name=fecha_str:
-                self.confirmar_eliminacion(id, name, card)
-        )
-        delete_btn.pack(side="left", padx=5)
 
         report_btn = ctk.CTkButton(
             actions_frame, text="Generar reporte", width=140, height=30,
@@ -400,7 +385,7 @@ if __name__ == "__main__":
     app.geometry("1000x700")
     app.title("COME - Historial de Proyecciones")
     
-    historial_view = HistorialAdminView(app)
+    historial_view = HistorialInvView(app)
     historial_view.pack(fill="both", expand=True)
     
     app.mainloop()
