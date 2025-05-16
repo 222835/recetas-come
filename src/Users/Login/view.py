@@ -11,7 +11,8 @@ from src.utils.constants import IMAGE_PATH
 import pywinstyles
 import tkinter as tk
 from tkinter import messagebox
-
+from src.database.connector import Connector
+from src.Users.model import Usuario
 from src.Users.Login.controller import LoginController
 from src.security.password_utils import Security
 
@@ -35,6 +36,8 @@ class LoginApp(ctk.CTk):
         los widgets de la interfaz.
         """
         super().__init__()
+        self.connector = Connector()
+        self.session = self.connector.get_session()
         self.title("Login")
         self.geometry("1920x1080")
 
@@ -195,14 +198,15 @@ class LoginApp(ctk.CTk):
             return
 
         self.destroy()
-
+        self.user_data = self.session.query(Usuario).filter_by(nombre_usuario=usuario).first()
+        
         if self.user_role == 'admin':
             from src.Users.Dashboard.admin_dashboard import AdminDashboard
-            admin_app = AdminDashboard()
+            admin_app = AdminDashboard(usuario=self.user_data)
             admin_app.mainloop()
         else:
             from src.Users.Dashboard.invitado_dashboard import InvitadoDashboard
-            invitado_app = InvitadoDashboard()
+            invitado_app = InvitadoDashboard(usuario=self.user_data)
             invitado_app.mainloop()
             
     ## @brief Handles window close event from the window manager (X button).

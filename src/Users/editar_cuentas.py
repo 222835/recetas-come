@@ -1,12 +1,11 @@
 import customtkinter as ctk
-from dotenv import load_dotenv
-import mysql.connector
 import os
 import ctypes
 from pathlib import Path
 import re
 import tkinter as tk
-
+from src.database.connector import Connector
+from src.Users.model import Usuario
 
 ## @class EditarCuentaView
 ## @brief View for editing an existing user account in the admin dashboard.
@@ -22,11 +21,11 @@ class EditarCuentaView(ctk.CTkFrame):
     ## @param fuente_button Font for buttons.
     ## @param fuente_card Font for input labels.
     ## @param nombre_usuario Username of the account to edit.
-    def __init__(self, parent, cursor, conn, fuente_titulo, fuente_button, fuente_card, nombre_usuario):
+    def __init__(self, parent, fuente_titulo, fuente_button, fuente_card, nombre_usuario):
         super().__init__(parent)
+        self.connector = Connector()
+        self.session = self.connector.get_session()
         self.configure(fg_color="transparent")
-        self.cursor = cursor
-        self.conn = conn
         self.fuente_titulo = fuente_titulo
         self.fuente_button = fuente_button
         self.fuente_card = fuente_card
@@ -36,8 +35,6 @@ class EditarCuentaView(ctk.CTkFrame):
         font_path = BASE_DIR.parents[2] / "res" / "fonts" / "PortLligatSlab-Regular.ttf"
         if os.name == "nt":
             ctypes.windll.gdi32.AddFontResourceW(str(font_path))
-
-        load_dotenv()
 
         self.contenedor = ctk.CTkFrame(self, fg_color="#dcd1cd", corner_radius=25, width=880, height=500)
         self.contenedor.pack(padx=40, pady=40, fill="both", expand=True)
@@ -200,16 +197,11 @@ class EditarCuentaView(ctk.CTkFrame):
 
     ## @brief Load current user data into the form fields.
     def _load_data(self):
-        self.cursor.execute(
-            "SELECT nombre_completo, rol FROM Usuarios WHERE nombre_usuario = %s",
-            (self.usuario_actual,)
-        )
-        row = self.cursor.fetchone()
-        if row:
-            nombre, rol = row
-            self.nombre_completo.insert(0, nombre)
-            self.rol_var.set(rol)
-            self.usuario.insert(0, self.usuario_actual)
+        user = self.session.query(Usuario).filter_by(nombre_usuario=self.usuario_actual).first()
+        if user:
+            self.nombre_completo.insert(0, user.nombre_completo)
+            self.rol_var.set(user.rol)
+            self.usuario.insert(0, user.nombre_usuario)
 
     ## @brief Validate inputs and save changes to the database.
     def guardar_cambios(self):
@@ -237,13 +229,14 @@ class EditarCuentaView(ctk.CTkFrame):
             return
 
         try:
-            self.cursor.execute(
-                "UPDATE Usuarios SET nombre_completo = %s, contrasenia = %s WHERE nombre_usuario = %s",
-                (nombre, contra, self.usuario_actual)
-            )
-            self.conn.commit()
-            self.mostrar_mensaje("Éxito", "Cuenta actualizada correctamente.", "#b8191a")
-            self.volver_a_cuentas()
+            user = self.session.query(Usuario).filter_by(nombre_usuario=self.usuario_actual).first()
+            if user:
+                user.update(self.session, nombre_completo=nombre, contrasenia=contra)
+                self.session.refresh(user)
+                self.mostrar_mensaje("Éxito", "Cuenta actualizada correctamente.", "#b8191a")
+                self.volver_a_cuentas()
+            else:
+                self.mostrar_mensaje("Error", "Usuario no encontrado.", "#e03d3d")
         except Exception as e:
             self.mostrar_mensaje("Error", f"Error al actualizar la cuenta.\n\n{e}", "#e03d3d")
 

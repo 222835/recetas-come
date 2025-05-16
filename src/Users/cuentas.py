@@ -7,6 +7,9 @@ from pathlib import Path
 from PIL import Image 
 import tkinter.messagebox as msgbox
 from .agregar_cuentas import AgregarCuentaView
+from src.database.connector import Connector
+from src.Users.model import Usuario
+from .editar_cuentas import EditarCuentaView
 
 
 class CuentasAdminView(ctk.CTkFrame):
@@ -215,8 +218,6 @@ class CuentasAdminView(ctk.CTkFrame):
         # Crea e instala la vista de edición pasándole el usuario a editar
         editar_vista = EditarCuentaView(
             parent=self,
-            cursor=self.cursor,
-            conn=self.conn,
             fuente_titulo=self.fuente_titulo,
             fuente_button=self.fuente_button,
             fuente_card=self.fuente_small,

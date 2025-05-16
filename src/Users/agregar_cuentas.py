@@ -3,6 +3,10 @@ import os
 import ctypes
 from pathlib import Path
 import tkinter.messagebox as msgbox
+from src.database.connector import Connector
+from src.Users.model import Usuario
+import tkinter as tk
+
 
 
 ## @class AgregarCuentaView
@@ -38,9 +42,7 @@ class AgregarCuentaView(ctk.CTkFrame):
         if os.name == "nt":
             ctypes.windll.gdi32.AddFontResourceW(str(font_path))
 
-        load_dotenv()
-
-        self.contenedor = ctk.CTkFrame(self, fg_color="#E8E3E3", corner_radius=25, width=880, height=500)
+        self.contenedor = ctk.CTkFrame(self, fg_color="#dcd1cd", corner_radius=25, width=880, height=500)
         self.contenedor.pack(padx=40, pady=40, fill="both", expand=True)
         self.contenedor.pack_propagate(False)
 

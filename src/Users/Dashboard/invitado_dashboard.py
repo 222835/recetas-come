@@ -7,6 +7,8 @@ from src.Projections.proyecciones_admin import ProyeccionesAdminView
 from src.Users.cuentas import CuentasAdminView
 from src.Costs.costos import CostosAdminView
 from src.Projections.historial import HistorialAdminView
+from src.components.ajustes import AjustesView
+from src.components.ayuda import AyudaView
 from src.Trashcan.basurero_invitado import InvitTrashcanView
 import os
 import ctypes
@@ -33,8 +35,9 @@ def add_rounded_corners(im, radius):
 ## @details This class builds a responsive dashboard layout for guest users using CustomTkinter.
 class InvitadoDashboard(ctk.CTk):
     ## @brief Initializes the guest dashboard interface.
-    def __init__(self):
+    def __init__(self, usuario):
         super().__init__()
+        self.usuario = usuario
         self.main_buttons = []
         self.title("Dashboard Invitado")
         self.geometry("1920x1080")
@@ -214,7 +217,9 @@ class InvitadoDashboard(ctk.CTk):
             AyudaView(
                 self.main_content,
                 self.custom_font,  
-                self.custom_font   
+                self.custom_font,
+                usuario=self.usuario,
+                dashboard=self  
             ).pack(fill="both", expand=True)
         elif option == "Basurero":
             for w in self.main_content.winfo_children():
