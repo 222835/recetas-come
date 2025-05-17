@@ -184,7 +184,7 @@ class HistorialAdminView(ctk.CTkFrame):
             try:
                 ProyeccionController.deactivate_projection(self.session, id_proyeccion)
                 messagebox.showinfo("Enviado a papelera", "La proyección ha sido enviada a la papelera.")
-                self.on_filter_change() # Refrescar la lista con los filtros actuales
+                self.on_filter_change()
             except Exception as e:
                 messagebox.showerror("Error", f"Error al eliminar proyección: {str(e)}")
 
