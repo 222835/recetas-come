@@ -7,7 +7,11 @@ from src.Projections.proyecciones_admin import ProyeccionesAdminView
 from src.Users.cuentas import CuentasAdminView
 from src.Costs.costos_inv import CostosInvView
 from src.Projections.historial_inv import HistorialInvView
-
+from src.Costs.costos import CostosAdminView
+from src.Projections.historial import HistorialAdminView
+from src.components.ajustes import AjustesView
+from src.components.ayuda import AyudaView
+from src.Trashcan.basurero_invitado import InvitTrashcanView
 
 import os
 import ctypes
@@ -34,8 +38,9 @@ def add_rounded_corners(im, radius):
 ## @details This class builds a responsive dashboard layout for guest users using CustomTkinter.
 class InvitadoDashboard(ctk.CTk):
     ## @brief Initializes the guest dashboard interface.
-    def __init__(self):
+    def __init__(self, usuario):
         super().__init__()
+        self.usuario = usuario
         self.main_buttons = []
         self.title("Dashboard Invitado")
         self.geometry("1920x1080")
@@ -200,6 +205,31 @@ class InvitadoDashboard(ctk.CTk):
     def handle_option(self, option):
         if option == "Cerrar sesión":
             self.show_logout_popup()
+        elif option == "Ajustes":
+            for w in self.main_content.winfo_children():
+                w.destroy()
+            AjustesView(
+                self.main_content,
+                self.custom_font,  
+                self.custom_font,   
+                self.custom_font,
+                usuario=self.usuario,
+                dashboard=self
+            ).pack(fill="both", expand=True)
+        elif option == "Ayuda":
+            for w in self.main_content.winfo_children():
+                w.destroy()
+            AyudaView(
+                self.main_content,
+                self.custom_font,  
+                self.custom_font,
+                usuario=self.usuario,
+                dashboard=self  
+            ).pack(fill="both", expand=True)
+        elif option == "Basurero":
+            for w in self.main_content.winfo_children():
+                w.destroy()
+            InvitTrashcanView(self.main_content).pack(fill="both", expand=True)
         else:
             print(f"{option} clicked")
 

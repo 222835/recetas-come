@@ -13,6 +13,9 @@ from src.Projections.proyecciones_admin import ProyeccionesAdminView
 from src.Users.cuentas import CuentasAdminView
 from src.Costs.costos import CostosAdminView
 from src.Projections.historial import HistorialAdminView
+from src.components.ajustes import AjustesView
+from src.components.ayuda import AyudaView
+from src.Trashcan.basurero_admin import AdminTrashcanView
 import tkinter.font as tkfont
 import os
 import ctypes
@@ -42,9 +45,10 @@ def add_rounded_corners(im, radius):
 ## @class AdminDashboard
 ## @brief Admin dashboard interface with navbar, sidebar, and content area..
 class AdminDashboard(ctk.CTk):
-    def __init__(self):
+    def __init__(self, usuario):
         ## @brief Constructor for AdminDashboard.
         super().__init__()
+        self.usuario = usuario
         self.title("Dashboard Administrador")
         self.geometry("1920x1080")
         self.configure(fg_color="#1a1a22")
@@ -203,11 +207,37 @@ class AdminDashboard(ctk.CTk):
             y = self.profile_container.winfo_rooty() + self.profile_container.winfo_height()
             self.dropdown_menu.geometry(f"+{x}+{y}")
 
+
     ## @brief Handles profile menu option clicks.
     ## @param option Selected option.
     def handle_option(self, option):
         if option == "Cerrar sesión":
             self.show_logout_popup()
+        elif option == "Ajustes":
+            for w in self.main_content.winfo_children():
+                w.destroy()
+            AjustesView(
+                self.main_content,
+                self.custom_font,  
+                self.custom_font,   
+                self.custom_font,
+                usuario=self.usuario,
+                dashboard=self  
+            ).pack(fill="both", expand=True)
+        elif option == "Ayuda":
+            for w in self.main_content.winfo_children():
+                w.destroy()
+            AyudaView(
+                self.main_content,
+                self.custom_font,  
+                self.custom_font,
+                usuario=self.usuario,
+                dashboard=self 
+            ).pack(fill="both", expand=True)
+        elif option == "Basurero":
+            for w in self.main_content.winfo_children():
+                w.destroy()
+            AdminTrashcanView(self.main_content).pack(fill="both", expand=True)
         else:
             print(f"{option} clicked")
 

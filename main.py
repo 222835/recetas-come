@@ -31,10 +31,10 @@ if __name__ == '__main__':
 
     if hasattr(login_view, 'user_role') and login_view.user_role is not None:
         if login_view.user_role == 'admin':
-            admin_app = AdminDashboard()
+            admin_app = AdminDashboard(usuario=login_view.user_data)
             admin_app.mainloop()
         elif login_view.user_role == 'invitado':
-            invitado_app = InvitadoDashboard()
+            invitado_app = InvitadoDashboard(usuario=login_view.user_data)
             invitado_app.mainloop()
         else:
             print("Unknown role or login was not completed successfully.")
