@@ -282,6 +282,7 @@ class HistorialAdminView(ctk.CTkFrame):
 
 
     def editar_proyeccion(self, id_proyeccion):
+<<<<<<< HEAD
         """Abrir ventana de edición de proyección"""
         try:
             self.editar_proyeccion_view = EditarProyeccionView(self, id_proyeccion)
@@ -295,6 +296,12 @@ class HistorialAdminView(ctk.CTkFrame):
         
     def imprimir_proyeccion(self, id_proyeccion):
         """Generar e imprimir reporte de proyección"""
+=======
+        """Abrir la vista de edición de proyección"""
+        print(f"Editar proyección {id_proyeccion}")
+    
+    def generar_reporte(self, id_proyeccion):
+>>>>>>> 459c2def50fdfe0e3fc1e31f0d3e531111e912a8
         try:
             report_path = ProyeccionController.generate_projection_report(self.session, id_proyeccion)
             self.mostrar_mensaje_personalizado(
@@ -308,15 +315,6 @@ class HistorialAdminView(ctk.CTkFrame):
                 f"No se pudo generar el reporte.\n\n{str(e)}", 
                 "#d9534f"
             )
-    
-    def generar_reporte(self, id_proyeccion):
-        """Generar reporte de proyección"""
-        print(f"Generar reporte para proyección {id_proyeccion}")
-        self.mostrar_mensaje_personalizado(
-            "Función en desarrollo", 
-            "La funcionalidad de generar reporte será implementada próximamente.", 
-            "#b8191a"
-        )
     
     def confirmar_eliminacion(self, id_proyeccion, nombre_proyeccion, card_widget):
         """Mostrar diálogo de confirmación para eliminar una proyección"""
