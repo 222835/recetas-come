@@ -41,19 +41,21 @@ class HistorialAdminView(ctk.CTkFrame):
         top_search_frame = ctk.CTkFrame(self.contenedor, fg_color="transparent")
         top_search_frame.pack(padx=60, pady=(10, 10), anchor="center")
 
-        self.search_entry = ctk.CTkEntry(top_search_frame, placeholder_text="Buscar", width=400, height=30,
+        self.search_entry = ctk.CTkEntry(top_search_frame, placeholder_text="Buscar por nombre", width=350, height=30,
                                          fg_color="#dcd1cd", border_color="#b8191a", border_width=1,
                                          text_color="#3A3A3A", placeholder_text_color="#3A3A3A",
                                          font=self.fuente_small)
         self.search_entry.pack(side="left", padx=(0, 20))
-        self.search_entry.bind("<KeyRelease>", self.on_search)
+        self.search_entry.bind("<KeyRelease>", self.on_filter_change)
 
-        self.sort_option = ctk.CTkOptionMenu(top_search_frame, values=["Reporte", "Proyección"],
+        self.sort_option = ctk.CTkOptionMenu(top_search_frame,
+                                             values=["Todos", "Reporte", "Proyección"], # Valores actualizados
+                                             command=self.on_filter_change, # Usar el mismo handler
                                              fg_color="#dcd1cd", button_color="#b8191a",
                                              button_hover_color="#991416", text_color="#3A3A3A",
                                              dropdown_fg_color="#dcd1cd", dropdown_text_color="#3A3A3A",
                                              font=self.fuente_small, dropdown_font=self.fuente_small)
-        self.sort_option.set("Reporte/Proyección")
+        self.sort_option.set("Todos") # Valor inicial
         self.sort_option.pack(side="left", padx=(0, 20))
 
         self.fecha_frame = ctk.CTkFrame(top_search_frame, fg_color="transparent")
@@ -68,7 +70,7 @@ class HistorialAdminView(ctk.CTkFrame):
                                      date_pattern="yyyy-mm-dd", width=12)
         self.date_picker.set_date(date.today())
         self.date_picker.pack(side="left")
-        self.date_picker.bind("<<DateEntrySelected>>", self.on_date_selected)
+        self.date_picker.bind("<<DateEntrySelected>>", self.on_filter_change)
 
         BASE_DIR = Path(__file__).resolve().parent
         icons_dir = BASE_DIR.parent.parent / "res" / "images"
@@ -79,33 +81,38 @@ class HistorialAdminView(ctk.CTkFrame):
         self.historial_scroll = ctk.CTkScrollableFrame(self.contenedor, fg_color="#dcd1cd")
         self.historial_scroll.pack(fill="both", expand=True, padx=20, pady=10)
 
-        self.mostrar_proyecciones()
+        self.mostrar_proyecciones() 
 
-    ## @brief Search input handler
-    def on_search(self, event=None):
+    ## @brief Handles changes in any filter (search, date, or sort option)
+    def on_filter_change(self, event_or_value=None):
         search_text = self.search_entry.get()
         selected_date = self.date_picker.get_date()
-        self.mostrar_proyecciones(nombre=search_text, fecha=selected_date)
+        selected_type = self.sort_option.get()
 
-    ## @brief Date filter handler
-    def on_date_selected(self, event=None):
-        selected_date = self.date_picker.get_date()
-        search_text = self.search_entry.get()
-        self.mostrar_proyecciones(nombre=search_text, fecha=selected_date)
+       
+        tipo_filtro_para_controller = selected_type if selected_type != "Todos" else None
+
+        self.mostrar_proyecciones(nombre=search_text, fecha=selected_date, tipo_filtro=tipo_filtro_para_controller)
 
     ## @brief Load and display projections
-    def mostrar_proyecciones(self, nombre=None, fecha=None):
+    def mostrar_proyecciones(self, nombre=None, fecha=None, tipo_filtro=None): # Parámetro añadido
         for widget in self.historial_scroll.winfo_children():
             widget.destroy()
         try:
             
-            if nombre or fecha: 
-                proyecciones = ProyeccionController.search_projections(self.session, nombre=nombre, fecha=fecha)
+            if nombre or fecha or tipo_filtro:
+                proyecciones = ProyeccionController.search_projections(
+                    self.session,
+                    nombre=nombre,
+                    fecha=fecha,
+                    tipo_filtro=tipo_filtro
+                )
             else:
-                proyecciones = ProyeccionController.list_all_projections(self.session)
-            
+                proyecciones = ProyeccionController.list_all_projections(self.session) # Sin filtros
+
             for proyeccion in proyecciones:
                 self.crear_card_proyeccion(proyeccion)
+
             if not proyecciones:
                 ctk.CTkLabel(self.historial_scroll, text="No se encontraron proyecciones",
                              font=self.fuente_card, text_color="gray").pack(pady=20)
@@ -122,7 +129,9 @@ class HistorialAdminView(ctk.CTkFrame):
         header_frame = ctk.CTkFrame(card, fg_color="transparent")
         header_frame.pack(fill="x", padx=20, pady=(10, 0))
 
-        ctk.CTkLabel(header_frame, text=f"Proyección {proyeccion['nombre']}", font=self.fuente_card,
+        
+        label_text = f"Proyección {proyeccion['nombre']}"
+        ctk.CTkLabel(header_frame, text=label_text, font=self.fuente_card,
                      text_color="#b8191a", anchor="w").pack(side="left")
 
         actions_frame = ctk.CTkFrame(header_frame, fg_color="transparent")
@@ -157,8 +166,9 @@ class HistorialAdminView(ctk.CTkFrame):
 
     ## @brief Edit projection (placeholder)
     def editar_proyeccion(self, id_proyeccion):
-        
+       
         print(f"Editar proyección {id_proyeccion}")
+
 
     ## @brief Generate PDF report
     def generar_reporte(self, id_proyeccion):
@@ -174,14 +184,14 @@ class HistorialAdminView(ctk.CTkFrame):
             try:
                 ProyeccionController.deactivate_projection(self.session, id_proyeccion)
                 messagebox.showinfo("Enviado a papelera", "La proyección ha sido enviada a la papelera.")
-                self.mostrar_proyecciones()
+                self.on_filter_change() # Refrescar la lista con los filtros actuales
             except Exception as e:
                 messagebox.showerror("Error", f"Error al eliminar proyección: {str(e)}")
 
 
 if __name__ == "__main__":
     root = ctk.CTk()
-    root.geometry("800x600")
+    root.geometry("1000x700") 
     app = HistorialAdminView(root)
     app.pack(fill="both", expand=True)
     root.mainloop()
