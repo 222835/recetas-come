@@ -140,11 +140,12 @@ class ProyeccionController:
                 unidad = ingrediente.unidad_medida
                 
                 if nombre in total_ingredientes:
-                    existing_qty_str = total_ingredientes[nombre].split()[0]
-                    existing_qty = float(existing_qty_str)
-                    total_ingredientes[nombre] = f"{existing_qty + cantidad} {unidad}"
+                    total_ingredientes[nombre]["cantidad"] += cantidad
                 else:
-                    total_ingredientes[nombre] = f"{cantidad} {unidad}"
+                    total_ingredientes[nombre] = {
+                        "cantidad": cantidad,
+                        "unidad": unidad
+                    }
         
         return total_ingredientes
     
@@ -276,7 +277,7 @@ class ProyeccionController:
                 })
             
             report_data.append({
-                "receta": receta.nombre,
+                "receta": receta.nombre_receta,
                 "ingredientes": ingredientes_list,
                 "porcentaje": pr.porcentaje,
                 "comensales": proyeccion.comensales,
@@ -299,7 +300,7 @@ class ProyeccionController:
                 continue
             
             pie_chart_data.append({
-                "receta": receta.nombre,
+                "receta": receta.nombre_receta,
                 "porcentaje": pr.porcentaje
             })
         
@@ -313,6 +314,6 @@ class ProyeccionController:
         # Generate the report in pdf format
         template_path = os.path.join(os.path.dirname(__file__), 'templates', 'report.pug')
 
-        pug_to_html(template_path, report_data, 'report.html')
-        write_report('report.html', f'proyeccion_report_{proyeccion.fecha}.pdf')
-        return 'proyeccion_report.pdf'
+        html = pug_to_html(path=template_path, report_data=report_data, title="Reporte de Proyeccion")
+        write_report(html, f'proyeccion_report_{proyeccion.fecha}.pdf')
+        return f'proyeccion_report_{proyeccion.fecha}.pdf'
