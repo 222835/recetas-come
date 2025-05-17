@@ -257,6 +257,10 @@ class RecetasAdminView(ctk.CTkFrame):
     ## @param id_receta Recipe ID
     ## @param card_widget Widget to destroy
     def confirmar_eliminacion(self, id_receta, card_widget):
+        if RecetasController.recipe_in_projection(self.session, id_receta):
+            self.mostrar_error("No se puede eliminar \nLa receta está siendo utilizada en una proyección activa.")
+            return
+        
         ventana_confirmacion = ctk.CTkToplevel(self)
         ventana_confirmacion.title("Confirmar eliminación")
         ventana_confirmacion.geometry("400x180")
