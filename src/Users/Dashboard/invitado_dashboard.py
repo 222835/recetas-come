@@ -9,6 +9,7 @@ from src.Costs.costos import CostosAdminView
 from src.Projections.historial import HistorialAdminView
 from src.components.ajustes import AjustesView
 from src.components.ayuda import AyudaView
+from src.Trashcan.basurero_invitado import InvitTrashcanView
 import os
 import ctypes
 
@@ -208,7 +209,9 @@ class InvitadoDashboard(ctk.CTk):
                 self.main_content,
                 self.custom_font,  
                 self.custom_font,   
-                self.custom_font   
+                self.custom_font,
+                usuario=self.usuario,
+                dahsboard=self
             ).pack(fill="both", expand=True)
         elif option == "Ayuda":
             for w in self.main_content.winfo_children():
@@ -220,6 +223,10 @@ class InvitadoDashboard(ctk.CTk):
                 usuario=self.usuario,
                 dashboard=self  
             ).pack(fill="both", expand=True)
+        elif option == "Basurero":
+            for w in self.main_content.winfo_children():
+                w.destroy()
+            InvitTrashcanView(self.main_content).pack(fill="both", expand=True)
         else:
             print(f"{option} clicked")
 
