@@ -7,6 +7,7 @@ import re
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
 from src.Costs.controller import CostController
+from src.Providers.controller import ProveedorController
 from src.database.connector import Connector
 
 class AgregarProveedorView(ctk.CTkFrame):
@@ -174,16 +175,20 @@ class AgregarProveedorView(ctk.CTkFrame):
                 return
 
         try:
-            query = "INSERT INTO Proveedores (nombre, categoria, contacto) VALUES (%s, %s, %s)"
-            self.connector.execute_query(query, (nombre, "General", contacto))
-            proveedor_id = self.connector.get_last_insert_id()
+            proveedor_existente = ProveedorController.get_provider_by_name(self.session, nombre)
+            if proveedor_existente:
+                messagebox.showerror("Error", f"Ya existe un proveedor con el nombre '{nombre}'.")
+                return
+            
+            nuevo = ProveedorController.create_proveedor(self.session, nombre, "General")
+            self.session.refresh(nuevo)
             
             for producto in self.productos:
                 self.cost_controller.create_cost(
-                    self.session, 
-                    nombre=producto["descripcion"], 
-                    precio=producto["precio"], 
-                    id_proveedor=proveedor_id
+                    self.session,
+                    nombre=producto["descripcion"],
+                    precio=producto["precio"],
+                    id_proveedor=nuevo.id_proveedor
                 )
             
             self.session.commit()

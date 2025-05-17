@@ -1,6 +1,7 @@
 from typing import Self
 from sqlalchemy import Column, Integer, String, DECIMAL, ForeignKey
 from sqlalchemy.orm import declarative_base
+from src.Providers.model import Proveedor
 
 Base = declarative_base()
 
@@ -18,9 +19,8 @@ class Costos(Base):
     """@brief Constructor for the cost class
     @param nombre The name of the cost
     @param categoria The category of the cost (optional)"""
-    def __init__(self, nombre: str | None = None, categoria: str | None = None, precio:int | None = None, id_proveedor :int| None = None) -> None:
-        self.nombre = nombre
-        self.categoria = categoria
+    def __init__(self, nombre_ingrediente: str | None = None, precio:int | None = None, id_proveedor :int| None = None) -> None:
+        self.nombre_ingrediente = nombre_ingrediente
         self.precio = precio
         self.id_proveedor = id_proveedor
 
