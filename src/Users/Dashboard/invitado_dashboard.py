@@ -211,7 +211,7 @@ class InvitadoDashboard(ctk.CTk):
                 self.custom_font,   
                 self.custom_font,
                 usuario=self.usuario,
-                dahsboard=self
+                dashboard=self
             ).pack(fill="both", expand=True)
         elif option == "Ayuda":
             for w in self.main_content.winfo_children():
