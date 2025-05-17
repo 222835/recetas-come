@@ -205,34 +205,54 @@ class EditarCuentaView(ctk.CTkFrame):
 
     ## @brief Validate inputs and save changes to the database.
     def guardar_cambios(self):
+        usuario = self.usuario.get().strip()
         nombre = self.nombre_completo.get().strip()
         contra = self.contra.get().strip()
         confirmar = self.confirmar_contra.get().strip()
 
-        if not nombre or not contra or not confirmar:
-            self.mostrar_mensaje("Error", "Por favor, completa todos los campos.", "#e03d3d")
+        if not usuario and not nombre and not contra and not confirmar:
+            self.mostrar_mensaje("Error", "No se realizaron cambios.", "#e03d3d")
             return
 
-        if contra != confirmar:
-            self.mostrar_mensaje("Error", "Las contraseñas no coinciden.", "#e03d3d")
-            return
+        if contra or confirmar:
+            if contra != confirmar:
+                self.mostrar_mensaje("Error", "Las contraseñas no coinciden.", "#e03d3d")
+                return
 
-        if (len(contra) < 8 or
-            not re.search(r"[A-Z]", contra) or
-            not re.search(r"[a-z]", contra) or
-            not re.search(r"\d", contra)):
-            self.mostrar_mensaje(
-                "Error",
-                "La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula y un número.",
-                "#e03d3d"
-            )
-            return
+            if (len(contra) < 8 or
+                not re.search(r"[A-Z]", contra) or
+                not re.search(r"[a-z]", contra) or
+                not re.search(r"\d", contra)):
+                self.mostrar_mensaje(
+                    "Error",
+                    "La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula y un número.",
+                    "#e03d3d"
+                )
+                return
 
         try:
             user = self.session.query(Usuario).filter_by(nombre_usuario=self.usuario_actual).first()
             if user:
-                user.update(self.session, nombre_completo=nombre, contrasenia=contra)
+                cambios = {}
+
+                if nombre and nombre != user.nombre_completo:
+                    cambios["nombre_completo"] = nombre
+                if usuario and usuario != user.nombre_usuario:
+                    existente = self.session.query(Usuario).filter_by(nombre_usuario=usuario).first()
+                    if existente:
+                        self.mostrar_mensaje("Error", "Ese nombre de usuario ya está en uso.", "#e03d3d")
+                        return
+                    cambios["nombre_usuario"] = usuario
+                if contra:
+                    cambios["contrasenia"] = contra
+
+                if not cambios:
+                    self.mostrar_mensaje("Info", "No se realizaron cambios.", "#e03d3d")
+                    return
+
+                user.update(self.session, **cambios)
                 self.session.refresh(user)
+                self.usuario_actual = cambios.get("nombre_usuario", self.usuario_actual)
                 self.mostrar_mensaje("Éxito", "Cuenta actualizada correctamente.", "#b8191a")
                 self.volver_a_cuentas()
             else:
