@@ -84,22 +84,26 @@ class HistorialAdminView(ctk.CTkFrame):
     ## @brief Search input handler
     def on_search(self, event=None):
         search_text = self.search_entry.get()
-        self.mostrar_proyecciones(nombre=search_text)
+        selected_date = self.date_picker.get_date()
+        self.mostrar_proyecciones(nombre=search_text, fecha=selected_date)
 
     ## @brief Date filter handler
     def on_date_selected(self, event=None):
         selected_date = self.date_picker.get_date()
-        self.mostrar_proyecciones(fecha=selected_date)
+        search_text = self.search_entry.get()
+        self.mostrar_proyecciones(nombre=search_text, fecha=selected_date)
 
     ## @brief Load and display projections
     def mostrar_proyecciones(self, nombre=None, fecha=None):
         for widget in self.historial_scroll.winfo_children():
             widget.destroy()
         try:
-            if nombre or fecha:
+            
+            if nombre or fecha: 
                 proyecciones = ProyeccionController.search_projections(self.session, nombre=nombre, fecha=fecha)
             else:
                 proyecciones = ProyeccionController.list_all_projections(self.session)
+            
             for proyeccion in proyecciones:
                 self.crear_card_proyeccion(proyeccion)
             if not proyecciones:
@@ -153,6 +157,7 @@ class HistorialAdminView(ctk.CTkFrame):
 
     ## @brief Edit projection (placeholder)
     def editar_proyeccion(self, id_proyeccion):
+        
         print(f"Editar proyección {id_proyeccion}")
 
     ## @brief Generate PDF report
@@ -172,3 +177,11 @@ class HistorialAdminView(ctk.CTkFrame):
                 self.mostrar_proyecciones()
             except Exception as e:
                 messagebox.showerror("Error", f"Error al eliminar proyección: {str(e)}")
+
+
+if __name__ == "__main__":
+    root = ctk.CTk()
+    root.geometry("800x600")
+    app = HistorialAdminView(root)
+    app.pack(fill="both", expand=True)
+    root.mainloop()

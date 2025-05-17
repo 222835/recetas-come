@@ -1,6 +1,6 @@
 import os
 import sys
-from pdf_reports import pug_to_html, write_report
+#from pdf_reports import pug_to_html, write_report
 from plotly import graph_objects as go
 from sqlalchemy import func
 
