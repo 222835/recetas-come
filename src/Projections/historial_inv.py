@@ -264,6 +264,14 @@ class HistorialInvView(ctk.CTkFrame):
         actions_frame = ctk.CTkFrame(card, fg_color="transparent")
         actions_frame.pack(fill="x", padx=15, pady=(5, 10))
 
+        delete_btn = ctk.CTkButton(
+            actions_frame, image=self.img_bote, text="", width=30, height=30,
+            fg_color="white", hover_color="#E8E8E8", corner_radius=5,
+            command=lambda id=proyeccion.get('id_proyeccion'), name=fecha_str:
+                self.confirmar_eliminacion(id, name, card)
+        )
+        delete_btn.pack(side="left", padx=5)
+
         report_btn = ctk.CTkButton(
             actions_frame, text="Generar reporte", width=140, height=30,
             font=self.fuente_button,  
@@ -272,11 +280,6 @@ class HistorialInvView(ctk.CTkFrame):
         )
         report_btn.pack(side="right", padx=10)
 
-
-    def editar_proyeccion(self, id_proyeccion):
-        """Abrir la vista de edición de proyección"""
-        print(f"Editar proyección {id_proyeccion}")
-    
     def imprimir_proyeccion(self, id_proyeccion):
         """Generar e imprimir reporte de proyección"""
         try:
@@ -341,7 +344,7 @@ class HistorialInvView(ctk.CTkFrame):
             card_widget.destroy()
             self.mostrar_mensaje_personalizado(
                 "Eliminado", 
-                f"Proyección '{nombre_proyeccion}' eliminada correctamente.", 
+                f"Proyección eliminada correctamente.", 
                 "#b8191a"
             )
         except Exception as e:

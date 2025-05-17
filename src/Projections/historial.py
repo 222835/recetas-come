@@ -263,13 +263,6 @@ class HistorialAdminView(ctk.CTkFrame):
         
         actions_frame = ctk.CTkFrame(card, fg_color="transparent")
         actions_frame.pack(fill="x", padx=15, pady=(5, 10))
-        
-        edit_btn = ctk.CTkButton(
-            actions_frame, image=self.img_pen, text="", width=30, height=30,
-            fg_color="white", hover_color="#E8E8E8", corner_radius=5,
-            command=lambda id=proyeccion.get('id_proyeccion'): self.editar_proyeccion(id)
-        )
-        edit_btn.pack(side="left", padx=5)
 
         delete_btn = ctk.CTkButton(
             actions_frame, image=self.img_bote, text="", width=30, height=30,
@@ -289,9 +282,17 @@ class HistorialAdminView(ctk.CTkFrame):
 
 
     def editar_proyeccion(self, id_proyeccion):
-        """Abrir la vista de edición de proyección"""
-        print(f"Editar proyección {id_proyeccion}")
-    
+        """Abrir ventana de edición de proyección"""
+        try:
+            self.editar_proyeccion_view = EditarProyeccionView(self, id_proyeccion)
+            self.editar_proyeccion_view.grab_set()
+        except Exception as e:
+            self.mostrar_mensaje_personalizado(
+                "Error", 
+                f"No se pudo abrir la ventana de edición.\n\n{str(e)}", 
+                "#d9534f"
+            )
+        
     def imprimir_proyeccion(self, id_proyeccion):
         """Generar e imprimir reporte de proyección"""
         try:
