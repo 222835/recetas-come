@@ -26,10 +26,11 @@ class CostController:
     @staticmethod
     def create_cost(session: Session, nombre: str, precio: int, id_proveedor: int) -> Costos:
         nuevo_cost = Costos(
-            nombre=nombre,
+            nombre_ingrediente=nombre,
             precio=precio,
             id_proveedor=id_proveedor
         )
+
         nuevo_cost.create(session)  # Use the model's create method
         return nuevo_cost
     
@@ -138,7 +139,7 @@ class CostController:
     @staticmethod
     def fetch_costs_by_name(session: Session, nombre: str) -> list[Costos]:
         """Fetch all costs by name."""
-        return session.query(Costos).filter(Costos.nombre == nombre).all()
+        return session.query(Costos).filter(Costos.nombre_ingrediente == nombre).all()
     
     ## @brief Search for costs by name in the database.
     ## @param session: The database session.
@@ -149,7 +150,7 @@ class CostController:
     @staticmethod
     def search_costs(session: Session, nombre: str) -> list[Costos]:
         """Search for costs by name."""
-        return session.query(Costos).filter(Costos.nombre.ilike(f"%{nombre}%")).all()
+        return session.query(Costos).filter(Costos.nombre_ingrediente.ilike(f"%{nombre}%")).all()
     
     ## @brief Compare multiple costs by their IDs and return them in order.
     ## @param session: The database session.
@@ -174,7 +175,7 @@ class CostController:
         # Read the Excel file
         df = pd.read_excel(file_location)
         
-        costos = [Costos(nombre=row['nombre'], precio=row['precio'], id_proveedor=id_proveedor, categoria=row['categoria']) for index, row in df.iterrows()]
+        costos = [Costos(nombre_ingrediente=row['nombre'], precio=row['precio'], id_proveedor=id_proveedor)]
         
         # Insert the costs into the database
         CostController.create_costs(session, costos)

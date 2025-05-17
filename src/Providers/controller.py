@@ -22,9 +22,7 @@ class ProveedorController:
     @staticmethod
     def get_provider_by_name(session: Session, name: str) -> Proveedor:
         """Get a provider by its name from the database."""
-        provider = Proveedor()
-        provider.nombre = name
-        return provider.read(session)
+        return session.query(Proveedor).filter_by(nombre=name).first()
     
     ## @brief Get a provider by its ID from the database.
     @staticmethod

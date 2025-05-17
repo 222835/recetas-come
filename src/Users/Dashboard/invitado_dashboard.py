@@ -5,11 +5,14 @@ from pathlib import Path
 from src.Recipes.recetas_inv_view import RecetasInvView
 from src.Projections.proyecciones_admin import ProyeccionesAdminView
 from src.Users.cuentas import CuentasAdminView
+from src.Costs.costos_inv import CostosInvView
+from src.Projections.historial_inv import HistorialInvView
 from src.Costs.costos import CostosAdminView
 from src.Projections.historial import HistorialAdminView
 from src.components.ajustes import AjustesView
 from src.components.ayuda import AyudaView
 from src.Trashcan.basurero_invitado import InvitTrashcanView
+
 import os
 import ctypes
 
@@ -133,8 +136,8 @@ class InvitadoDashboard(ctk.CTk):
             "Home icon.png": ("Inicio", lambda: self.create_custom_buttons()),
             "recetas.png": ("Recetas", lambda: self.load_view(RecetasInvView)),
             "proyecciones.png": ("Proyecciones", lambda: self.load_view(ProyeccionesAdminView)),
-            "costos.png": ("Costos", lambda: self.load_view(CostosAdminView)),
-            "historial.png": ("Historial", lambda: self.load_view(HistorialAdminView))
+            "costos.png": ("Costos", lambda: self.load_view(CostosInvView)),
+            "historial.png": ("Historial", lambda: self.load_view(HistorialInvView))
         }
 
         self.sidebar_buttons = []
@@ -340,8 +343,8 @@ class InvitadoDashboard(ctk.CTk):
 
         create_image_button("recetas2.jpg", "", 0, 0, 2, 2, 480, 520, lambda: self.load_view(RecetasInvView), section_name="Recetas")
         create_image_button("proyecciones.jpg", "", 0, 2, 2, 1, 650, 240, lambda: self.load_view(ProyeccionesAdminView), section_name="Proyecciones")
-        create_image_button("costos2.jpg", "", 1, 2, 1, 1, 300, 240, lambda: self.load_view(CostosAdminView), section_name="Costos")
-        create_image_button("historial2.jpg", "", 1, 3, 1, 1, 300, 240, lambda: self.load_view(HistorialAdminView), section_name="Historial")
+        create_image_button("costos2.jpg", "", 1, 2, 1, 1, 300, 240, lambda: self.load_view(CostosInvView), section_name="Costos")
+        create_image_button("historial2.jpg", "", 1, 3, 1, 1, 300, 240, lambda: self.load_view(HistorialInvView), section_name="Historial")
 
 
     ## @brief Highlights sidebar on dashboard button click.

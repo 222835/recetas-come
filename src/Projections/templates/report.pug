@@ -38,7 +38,7 @@ html(lang="es")
                 td #{ingrediente.nombre}
                 td #{ingrediente.cantidad}
                 td #{ingrediente.unidad}
-      else if item.total_ingredientes
+      elif item.total_ingredientes
         h2 Total de Ingredientes Necesarios:
         table
           thead
@@ -47,14 +47,14 @@ html(lang="es")
               th Cantidad Total
               th Unidad
           tbody
-            each ingrediente, nombre in item.total_ingredientes
+            each nombre in item.total_ingredientes
               tr
                 td #{nombre}
-                td #{ingrediente.cantidad}
-                td #{ingrediente.unidad}
+                td #{item.total_ingredientes[nombre].cantidad}
+                td #{item.total_ingredientes[nombre].unidad}
 
     // Mostrar una grafica de pastel con los porcentajes de cada receta
-    if report_data.length > 0
+    if len(report_data) > 0
       h2 Porcentaje de Ingredientes por Receta
       img(src="pie_chart.png", alt="")
      
