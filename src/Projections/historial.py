@@ -280,28 +280,8 @@ class HistorialAdminView(ctk.CTkFrame):
         )
         report_btn.pack(side="right", padx=10)
 
-
-    def editar_proyeccion(self, id_proyeccion):
-<<<<<<< HEAD
-        """Abrir ventana de edición de proyección"""
-        try:
-            self.editar_proyeccion_view = EditarProyeccionView(self, id_proyeccion)
-            self.editar_proyeccion_view.grab_set()
-        except Exception as e:
-            self.mostrar_mensaje_personalizado(
-                "Error", 
-                f"No se pudo abrir la ventana de edición.\n\n{str(e)}", 
-                "#d9534f"
-            )
-        
     def imprimir_proyeccion(self, id_proyeccion):
         """Generar e imprimir reporte de proyección"""
-=======
-        """Abrir la vista de edición de proyección"""
-        print(f"Editar proyección {id_proyeccion}")
-    
-    def generar_reporte(self, id_proyeccion):
->>>>>>> 459c2def50fdfe0e3fc1e31f0d3e531111e912a8
         try:
             report_path = ProyeccionController.generate_projection_report(self.session, id_proyeccion)
             self.mostrar_mensaje_personalizado(
