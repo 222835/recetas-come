@@ -230,7 +230,9 @@ class AdminDashboard(ctk.CTk):
             AyudaView(
                 self.main_content,
                 self.custom_font,  
-                self.custom_font   
+                self.custom_font,
+                usuario=self.usuario,
+                dashboard=self 
             ).pack(fill="both", expand=True)
         elif option == "Basurero":
             for w in self.main_content.winfo_children():

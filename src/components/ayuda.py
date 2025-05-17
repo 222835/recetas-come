@@ -18,7 +18,7 @@ class AyudaView(ctk.CTkFrame):
     ## @param parent The parent container.
     ## @param fuente_titulo Title font.
     ## @param fuente_card Content font.
-    def __init__(self, parent, fuente_titulo, fuente_card):
+    def __init__(self, parent, fuente_titulo, fuente_card, usuario, dashboard):
         super().__init__(parent)
         self.configure(fg_color="transparent")
 
@@ -27,7 +27,12 @@ class AyudaView(ctk.CTkFrame):
         self.fuente_button = ctk.CTkFont(family="Port Lligat Slab", size=18, weight="bold")
         self.fuente_card = ctk.CTkFont(family="Port Lligat Slab", size=15)
         self.fuente_titulo = ctk.CTkFont(family="Port Lligat Slab", size=40, weight="bold")
-        self.pdf_path = BASE_DIR / "res" / "images" / "pdf" / "manual.pdf"
+        if usuario.rol.lower() == "admin" or usuario.rol.lower() == "administrador":
+            manual_filename = "manual_admin.pdf"
+        else:
+            manual_filename = "manual_invitado.pdf"
+
+        self.pdf_path = BASE_DIR / "res" / "images" / "pdf" / manual_filename
 
         container = ctk.CTkFrame(self, fg_color="#dcd1cd", corner_radius=25, width=880, height=500)
         container.pack(padx=40, pady=40, fill="both", expand=True)
