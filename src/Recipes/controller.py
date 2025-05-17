@@ -7,7 +7,7 @@ from sqlalchemy import or_, func
 from sqlalchemy.orm import Session
 from src.Recipes.model import Receta, Receta_Ingredientes
 from src.Ingredients.model import Ingrediente
-from src.Users.model import Usuario
+from src.Projections.model import ProyeccionReceta
 from src.database.connector import Base
 from datetime import date
 
@@ -104,7 +104,12 @@ class RecetasController:
             session.commit()
             return True
         return False
-
+    
+    ##@brief Check if recipe is in a projection
+    @staticmethod
+    def recipe_in_projection(session, id_receta: int) -> bool:
+        return session.query(ProyeccionReceta).filter_by(id_receta=id_receta).first() is not None
+    
     ## @brief Deactivate a recipe (send it to the trash can).
     @staticmethod
     def deactivate_recipe(session: Session, numero_receta: int) -> bool:
