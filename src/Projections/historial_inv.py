@@ -15,17 +15,16 @@ from src.Projections.controller import ProyeccionController
 from src.database.connector import Connector
 
 class HistorialInvView(ctk.CTkFrame):
-    """
-    @brief History administration view class for projections
+    ##brief History administration view class for projections
     
-    This class provides a GUI for viewing and managing projection history,
-    including searching, filtering, editing, printing, and deleting projections.
-    """
+    ##This class provides a GUI for viewing and managing projection history,
+    ##including searching, filtering, editing, printing, and deleting projections.
+
     def __init__(self, parent):
-        """
-        @brief Initialize the HistorialAdminView
-        @param parent The parent widget
-        """
+        
+        ##@brief Initialize the HistorialAdminView
+        ##@param parent The parent widget
+
         super().__init__(parent)
         self.configure(fg_color="#1a1a22")
 
@@ -69,6 +68,7 @@ class HistorialInvView(ctk.CTkFrame):
         
         self.cargar_proyecciones()
     
+    ##Create the UI elements
     def _create_ui(self):
         self.contenedor = ctk.CTkFrame(self, fg_color="#dcd1cd", corner_radius=20)
         self.contenedor.pack(padx=60, pady=40, fill="both", expand=True)
@@ -123,11 +123,11 @@ class HistorialInvView(ctk.CTkFrame):
    
     
     def buscar_proyecciones(self, event=None):
-        """Buscar proyecciones según texto y fecha"""
+        ##@brief Search for projections based on the search entry and date entry
         self.cargar_proyecciones()
     
     def cargar_proyecciones(self):
-        """Cargar proyecciones desde el controlador"""
+        ##@brief Load projections from the database and display them in the UI
         for widget in self.scroll_container.winfo_children():
             widget.destroy()
 
@@ -188,7 +188,7 @@ class HistorialInvView(ctk.CTkFrame):
             error_label.pack(pady=50)
 
     def crear_card_proyeccion(self, proyeccion):
-        """Crear una tarjeta para una proyección"""
+       ##@brief Create a card for each projection
         print(f"Creating card for projection: {proyeccion}")
         
         card = ctk.CTkFrame(self.scroll_container, fg_color="white", corner_radius=12)
@@ -281,7 +281,7 @@ class HistorialInvView(ctk.CTkFrame):
         report_btn.pack(side="right", padx=10)
 
     def imprimir_proyeccion(self, id_proyeccion):
-        """Generar e imprimir reporte de proyección"""
+        ##@brief Print the projection report
         try:
             report_path = ProyeccionController.generate_projection_report(self.session, id_proyeccion)
             self.mostrar_mensaje_personalizado(
@@ -297,7 +297,7 @@ class HistorialInvView(ctk.CTkFrame):
             )
     
     def generar_reporte(self, id_proyeccion):
-        """Generar reporte de proyección"""
+        ##@brief Generate a report for the projection
         print(f"Generar reporte para proyección {id_proyeccion}")
         self.mostrar_mensaje_personalizado(
             "Función en desarrollo", 
@@ -306,7 +306,7 @@ class HistorialInvView(ctk.CTkFrame):
         )
     
     def confirmar_eliminacion(self, id_proyeccion, nombre_proyeccion, card_widget):
-        """Mostrar diálogo de confirmación para eliminar una proyección"""
+        ##@brief Confirm the deletion of a projection
         ventana = ctk.CTkToplevel(self)
         ventana.title("Confirmar eliminación")
         ventana.geometry("400x200")
@@ -337,7 +337,7 @@ class HistorialInvView(ctk.CTkFrame):
                      )).pack(side="left", padx=10)
     
     def eliminar_proyeccion_confirmado(self, id_proyeccion, nombre_proyeccion, card_widget, ventana):
-        """Eliminar una proyección después de confirmar"""
+        ##@brief Confirm the deletion of a projection
         ventana.destroy()
         try:
             ProyeccionController.deactivate_projection(self.session, id_proyeccion)
@@ -355,7 +355,7 @@ class HistorialInvView(ctk.CTkFrame):
             )
     
     def mostrar_mensaje_personalizado(self, titulo, mensaje, color):
-        """Mostrar ventana de mensaje personalizado"""
+        ##@brief Show a custom message box
         ventana_mensaje = ctk.CTkToplevel(self)
         ventana_mensaje.title(titulo)
         ventana_mensaje.geometry("420x200")
@@ -377,7 +377,7 @@ class HistorialInvView(ctk.CTkFrame):
                      command=ventana_mensaje.destroy).pack(pady=20)
     
     def on_close(self):
-        """Cerrar conexiones al salir"""
+        ##@brief Handle the window close event
         if hasattr(self, 'session') and self.session:
             self.session.close()
         if hasattr(self, 'db_connector') and self.db_connector:

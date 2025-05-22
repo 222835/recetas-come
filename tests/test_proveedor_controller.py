@@ -3,11 +3,13 @@ from unittest.mock import MagicMock
 from src.Providers.controller import ProveedorController
 from src.Providers.model import Proveedor
 
+## Class TestProveedorController
+## This class contains unit tests for the ProveedorController class.
 class TestProveedorController(unittest.TestCase):
-
+    ## This method sets up the test environment before each test case.
     def setUp(self):
         self.session = MagicMock()
-
+    ## This method tears down the test environment after each test case.
     def test_create_proveedor(self):
         # Arrange
         name = "Test Provider"
@@ -22,7 +24,7 @@ class TestProveedorController(unittest.TestCase):
         self.assertEqual(new_provider.categoria, category)
         self.session.add.assert_called_once_with(new_provider)
         self.session.commit.assert_called_once()
-
+    ## Test for get_provider_by_name
     def test_get_provider_by_name(self):
         # Arrange
         name = "Test Provider"
@@ -37,7 +39,7 @@ class TestProveedorController(unittest.TestCase):
         self.session.query.assert_called_once()
         self.session.query.return_value.filter.assert_called_once()
         self.session.query.return_value.filter.return_value.first.assert_called_once()
-
+    ## Test for get_provider_by_id
     def test_get_provider_by_id(self):
         # Arrange
         provider_id = 1
@@ -52,7 +54,7 @@ class TestProveedorController(unittest.TestCase):
         self.session.query.assert_called_once()
         self.session.query.return_value.filter.assert_called_once()
         self.session.query.return_value.filter.return_value.first.assert_called_once()
-
+    ## Test for update_proveedor
     def test_update_proveedor(self):
         # Arrange
         provider_id = 1
@@ -70,7 +72,7 @@ class TestProveedorController(unittest.TestCase):
         # Assert
         self.assertEqual(updated_provider.nombre, new_name)
         self.assertEqual(updated_provider.categoria, new_category)
-
+    ## Test for delete_proveedor
     def test_delete_proveedor(self):
         # Arrange
         provider_id = 1
@@ -82,7 +84,7 @@ class TestProveedorController(unittest.TestCase):
 
         # Assert
         self.assertTrue(result)
-
+    ## Test for get_all_providers
     def test_get_all_providers(self):
         # Arrange
         mock_providers = [
@@ -98,7 +100,7 @@ class TestProveedorController(unittest.TestCase):
         self.assertEqual(len(providers), len(mock_providers))
         self.session.query.assert_called_once()
         self.session.query.return_value.all.assert_called_once()
-
+    ## Test for get_providers_by_name
     def test_get_providers_by_name(self):
         # Arrange
         name = "Test"
@@ -116,7 +118,7 @@ class TestProveedorController(unittest.TestCase):
         self.session.query.assert_called_once()
         self.session.query.return_value.filter.assert_called_once()
         self.session.query.return_value.filter.return_value.all.assert_called_once()
-
+    ## Test for get_providers_by_name_empty
     def test_get_providers_by_name_empty(self):
         # Arrange
         name = "Nonexistent Provider"
@@ -131,8 +133,7 @@ class TestProveedorController(unittest.TestCase):
         self.session.query.return_value.filter.assert_called_once()
         self.session.query.return_value.filter.return_value.all.assert_called_once()
 
-    
-
+    ## Test for get_providers_by_category
     def test_get_providers_by_category(self):
         # Arrange
         category = "Category"
@@ -150,7 +151,7 @@ class TestProveedorController(unittest.TestCase):
         self.session.query.assert_called_once()
         self.session.query.return_value.filter.assert_called_once()
         self.session.query.return_value.filter.return_value.all.assert_called_once()
-
+    ## Test for get_providers_by_category_empty
     def test_get_providers_by_category_empty(self):
         # Arrange
         category = "Nonexistent Category"
@@ -164,7 +165,7 @@ class TestProveedorController(unittest.TestCase):
         self.session.query.assert_called_once()
         self.session.query.return_value.filter.assert_called_once()
         self.session.query.return_value.filter.return_value.all.assert_called_once()
-
+    ## Test for create_proveedor_invalid
     def test_create_proveedor_invalid(self):
         # Arrange
         name = None

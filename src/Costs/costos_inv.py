@@ -10,6 +10,8 @@ from .agregar_proveedor import AgregarProveedorView
 from src.Costs.controller import CostController
 from src.database.connector import Connector
 
+## Class CostosInvView
+## This class creates a view for managing costs and ingredients.
 class CostosInvView(ctk.CTkFrame):
     def __init__(self, parent):
         super().__init__(parent)
@@ -78,9 +80,11 @@ class CostosInvView(ctk.CTkFrame):
 
         self.cargar_costos()
 
+    ## Method to go back to the previous view
     def actualizar_cards(self, *args):
         self.cargar_costos()
 
+    ## Method to go charge the costs
     def cargar_costos(self):
         for widget in self.costos_scroll_frame.winfo_children():
             widget.destroy()
@@ -107,7 +111,7 @@ class CostosInvView(ctk.CTkFrame):
             unidad = unidad_result[0] if unidad_result else "PZA"
 
             self.crear_card_costo(nombre_proveedor, costo.nombre_ingrediente, unidad, costo.precio)
-
+    ## Function to create a card for the cost
     def crear_card_costo(self, proveedor, ingrediente, unidad, precio):
         card = ctk.CTkFrame(self.costos_scroll_frame, fg_color="white", corner_radius=12)
         card.pack(fill="x", pady=8, padx=25)
@@ -124,10 +128,11 @@ class CostosInvView(ctk.CTkFrame):
 
         card.grid_columnconfigure((1, 2, 3, 4, 5), weight=1)
 
-
+    ## Function to edited the provider
     def editar_proveedor(self, proveedor_id, nombre_proveedor):
         print(f"Editar proveedor: {nombre_proveedor} (ID: {proveedor_id})")
 
+    ## Function confirm the deletion of the provider
     def confirmar_eliminacion(self, proveedor_id, proveedor_nombre, card_widget):
         ventana = ctk.CTkToplevel(self)
         ventana.title("Confirmar eliminación")
@@ -151,6 +156,7 @@ class CostosInvView(ctk.CTkFrame):
         ctk.CTkButton(botones, text="Cancelar", font=self.fuente_button, fg_color="#a0a0a0", hover_color="#8c8c8c", width=100, command=ventana.destroy).pack(side="left", padx=10)
         ctk.CTkButton(botones, text="Eliminar", font=self.fuente_button, fg_color="#d9534f", hover_color="#b52a25", width=100, command=lambda: self.eliminar_proveedor_confirmado(proveedor_id, proveedor_nombre, card_widget, ventana)).pack(side="left", padx=10)
 
+    ## Function to delete the provider
     def eliminar_proveedor_confirmado(self, proveedor_id, proveedor_nombre, card_widget, ventana):
         ventana.destroy()
         try:
@@ -162,6 +168,7 @@ class CostosInvView(ctk.CTkFrame):
         except Exception as e:
             self.mostrar_mensaje_personalizado("Error", f"No se pudo eliminar el proveedor.\n\n{e}", "#d9534f")
 
+    ## Function to show a custom message
     def mostrar_mensaje_personalizado(self, titulo, mensaje, color):
         ventana_mensaje = ctk.CTkToplevel(self)
         ventana_mensaje.title(titulo)
@@ -180,6 +187,7 @@ class CostosInvView(ctk.CTkFrame):
         ctk.CTkLabel(ventana_mensaje, text=mensaje, font=self.fuente_card, text_color="black", wraplength=380, justify="center").pack(pady=5)
         ctk.CTkButton(ventana_mensaje, text="Aceptar", font=self.fuente_button, width=120, fg_color=color, hover_color="#991416" if color == "#b8191a" else "#a12a28", command=ventana_mensaje.destroy).pack(pady=20)
 
+    ##Function to show the add provider view
     def mostrar_agregar_proveedor(self):
         for widget in self.winfo_children():
             widget.destroy()
@@ -191,7 +199,7 @@ class CostosInvView(ctk.CTkFrame):
             fuente_button=self.fuente_button
         )
         nueva_vista.pack(fill="both", expand=True)
-
+    
     def on_close(self):
         if hasattr(self, 'session') and self.session:
             self.session.close()

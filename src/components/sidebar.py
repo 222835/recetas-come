@@ -1,5 +1,8 @@
 import customtkinter as ctk
 
+##Class Sidebar
+##This class creates a sidebar for the application.
+##It contains a menu icon and options for navigation.
 class Sidebar(ctk.CTkFrame):
     def __init__(self, master, **kwargs):
         super().__init__(master, **kwargs)

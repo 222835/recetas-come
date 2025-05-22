@@ -14,14 +14,14 @@ from src.Projections.proyecciones_resultados import ProyeccionesResultadosView
 ## @class PorcentajesProyeccionesView
 #  @brief A view class for managing recipe percentages for projections
 #
-#  This class creates a GUI interface that allows users to set percentage distributions
-#  for different recipes and generate ingredient projections based on those percentages.
-#  It displays recipe cards with their ingredients and allows adjusting percentage values.
+##This class creates a GUI interface that allows users to set percentage distributions
+##for different recipes and generate ingredient projections based on those percentages.
+##It displays recipe cards with their ingredients and allows adjusting percentage values.
 class PorcentajesProyeccionesView(ctk.CTkFrame):
     ## @brief Constructor for the PorcentajesProyeccionesView class
-    #  @param parent The parent widget for this frame
-    #  @param recetas_ids List of recipe IDs to display (defaults to [1, 2, 3] if None)
-    #  @param tipo_comida Type of meal ("Desayuno" by default)
+    ##@param parent The parent widget for this frame
+    ##@param recetas_ids List of recipe IDs to display (defaults to [1, 2, 3] if None)
+    ##@param tipo_comida Type of meal ("Desayuno" by default)
     def __init__(self, parent, recetas_ids=None, tipo_comida="Desayuno"):
         super().__init__(parent)
         self.configure(fg_color="#1a1a22")
@@ -51,9 +51,9 @@ class PorcentajesProyeccionesView(ctk.CTkFrame):
 
     ## @brief Creates dummy recipe data when no recipes are found in the database
     #
-    #  This method creates placeholder recipe objects with default values
-    #  to ensure the interface can still display properly when database data
-    #  is unavailable.
+    ##This method creates placeholder recipe objects with default values
+    ##to ensure the interface can still display properly when database data
+    ##is unavailable.
     def usar_datos_dummy(self):
         dummy_recetas = [
             {"id": 1, "nombre": "ARROZ BLANCO", "comensales": 100, "clasificacion": "Comida", "periodo": self.tipo_comida},
@@ -74,8 +74,8 @@ class PorcentajesProyeccionesView(ctk.CTkFrame):
 
     ## @brief Creates the main interface elements
     #
-    #  This private method builds the UI layout including the scrollable container,
-    #  title elements, recipe cards, and control elements for generating projections.
+    ##This private method builds the UI layout including the scrollable container,
+    ##title elements, recipe cards, and control elements for generating projections.
     def _crear_interfaz(self):
         contenedor = ctk.CTkScrollableFrame(self, fg_color="#dcd1cd", corner_radius=20)
         contenedor.pack(padx=60, pady=40, fill="both", expand=True)
@@ -136,13 +136,13 @@ class PorcentajesProyeccionesView(ctk.CTkFrame):
         ).pack(side="right", padx=10)
 
     ## @brief Creates a recipe card with ingredient information
-    #  @param parent The parent widget for this card
-    #  @param receta Recipe object containing recipe information
-    #  @param index Index of the recipe in the list (used for display numbering)
-    #  @param column Grid column position for layout
+    ##@param parent The parent widget for this card
+    ##@param receta Recipe object containing recipe information
+    ##@param index Index of the recipe in the list (used for display numbering)
+    ##@param column Grid column position for layout
     #
-    #  This method creates a card displaying recipe information, including
-    #  its ingredients table and percentage input field.
+    ##This method creates a card displaying recipe information, including
+    ##its ingredients table and percentage input field.
     def _crear_tarjeta_receta(self, parent, receta, index, column):
         wrapper = ctk.CTkFrame(parent, fg_color="transparent")
         wrapper.grid(row=0, column=column, padx=20, pady=10, sticky="n")
@@ -201,11 +201,11 @@ class PorcentajesProyeccionesView(ctk.CTkFrame):
 
         ctk.CTkLabel(card, text="%", font=self.fuente_card, text_color="black").pack()
 
-    ## @brief Updates ingredient quantities based on percentages and diners count
+    ##@brief Updates ingredient quantities based on percentages and diners count
     #
-    #  This method is called when the "Generate" button is clicked.
-    #  It calculates updated ingredient quantities based on the 
-    #  percentage distribution and number of diners entered.
+    ##This method is called when the "Generate" button is clicked.
+    ##It calculates updated ingredient quantities based on the 
+    ##percentage distribution and number of diners entered.
     #
     #  @note This method is currently a placeholder and needs implementation
     def actualizar_ingredientes(self):
@@ -254,9 +254,9 @@ class PorcentajesProyeccionesView(ctk.CTkFrame):
 
     ## @brief Saves the current projection to the database
     #
-    #  This method should save the current projection configuration
-    #  including percentages and diners count to the database.
+    ##This method should save the current projection configuration
+    ##including percentages and diners count to the database.
     #
-    #  @note This method is currently a placeholder and needs implementation
+    ##@note This method is currently a placeholder and needs implementation
     def guardar_proyeccion(self):
         pass

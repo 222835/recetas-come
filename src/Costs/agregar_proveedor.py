@@ -10,7 +10,10 @@ from src.Costs.controller import CostController
 from src.Providers.controller import ProveedorController
 from src.database.connector import Connector
 
+## Class AgregarProveedorView
+## This class creates a view for adding a new provider.
 class AgregarProveedorView(ctk.CTkFrame):
+    ## Constructor
     def __init__(self, parent, fuente_titulo, fuente_card, fuente_button):
         super().__init__(parent)
         self.configure(fg_color="transparent")
@@ -26,7 +29,8 @@ class AgregarProveedorView(ctk.CTkFrame):
         self.productos = []
 
         self.build_interface()
-
+    ## End of constructor
+    ## Method to build the interface
     def build_interface(self):
         contenedor = ctk.CTkFrame(self, fg_color="#E8E3E3", corner_radius=25, width=880, height=580)
         contenedor.pack(padx=40, pady=40, fill="both", expand=True)
@@ -113,6 +117,9 @@ class AgregarProveedorView(ctk.CTkFrame):
         btn_guardar = ctk.CTkButton(scroll, text="Guardar proveedor", font=self.fuente_button, width=500, corner_radius=50, fg_color="#b8191a", hover_color="#991416", command=self.guardar_proveedor)
         btn_guardar.pack(pady=(10, 20))
 
+    ## End of build_interface method
+    ## Method to handle pasting from Excel
+    ## This method processes the data from the clipboard and populates the treeview.
     def pegar_desde_excel(self, event=None):
         import tkinter as tk
         import re
@@ -160,7 +167,8 @@ class AgregarProveedorView(ctk.CTkFrame):
                 messagebox.showinfo("Pegado exitoso", f"Se pegaron {count} productos.")
         except Exception as e:
             messagebox.showerror("Error", f"No se pudo pegar: {str(e)}")
-    
+    ## End of pegar_desde_excel method
+    ## Method to handle saving the provider
     def guardar_proveedor(self):
         nombre = self.entry_nombre.get().strip()
         contacto = self.entry_contacto.get().strip()
@@ -198,9 +206,12 @@ class AgregarProveedorView(ctk.CTkFrame):
             self.session.rollback()
             self.mostrar_mensaje_personalizado("Error", f"No se pudo agregar el proveedor.\n\n{str(e)}", "#d9534f")
 
+    ## End of guardar_proveedor method
+    ## Method to show a custom message
     def mostrar_mensaje_personalizado(self, titulo, mensaje, color):
         messagebox.showinfo(titulo, mensaje)
-
+    ## End of mostrar_mensaje_personalizado method
+    ## Method to go back to the Costos view
     def volver_a_costos(self):
         self.session.close()
         self.connector.close_connection()
