@@ -6,11 +6,12 @@ from sqlalchemy.orm import sessionmaker
 from src.Providers.controller import ProveedorController
 from src.Providers.model import Proveedor, Base  # Importa el modelo y Base
 
+## Class ProveedorScreen
 class ProveedorScreen(ctk.CTkFrame):
     def __init__(self, master=None, **kwargs):
         super().__init__(master, **kwargs)
 
-        # Configuración de la base de datos (reemplaza con tu configuración)
+        ## Configurate the frame
         self.engine = create_engine('sqlite:///:memory:')  # Para pruebas en memoria
         Base.metadata.create_all(self.engine)  # Crea las tablas
         Session = sessionmaker(bind=self.engine)
@@ -41,7 +42,7 @@ class ProveedorScreen(ctk.CTkFrame):
         self.treeview.grid(row=1, column=0, columnspan=5, padx=10, pady=10, sticky="nsew")
 
         self.actualizar_tabla()
-
+    ## method crear_proveedor
     def crear_proveedor(self):
         nombre = self.nombre_entry.get()
         categoria = self.categoria_entry.get()
@@ -50,7 +51,7 @@ class ProveedorScreen(ctk.CTkFrame):
         # Limpiar los campos de entrada
         self.nombre_entry.delete(0, ctk.END)
         self.categoria_entry.delete(0, ctk.END)
-
+    ## method actualizar_tabla
     def actualizar_tabla(self):
         # Limpiar la tabla
         for item in self.treeview.get_children():
@@ -63,6 +64,7 @@ class ProveedorScreen(ctk.CTkFrame):
         for proveedor in proveedores:
             self.treeview.insert("", ctk.END, values=(proveedor.nombre, proveedor.categoria))
 
+## Main function to run the application
 if __name__ == "__main__":
     app = ctk.CTk()
     app.geometry("800x600")

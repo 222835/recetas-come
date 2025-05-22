@@ -4,11 +4,13 @@ from src.Costs.controller import CostController
 from src.Costs.model import Costos
 from sqlalchemy.orm import Session
 
+## Class TestCostController
+## This class contains unit tests for the CostController class.
 class TestCostController(unittest.TestCase):
-
+    ## This method sets up the test environment before each test case.
     def setUp(self):
         self.session = MagicMock(spec=Session)
-
+    ## This method tears down the test environment after each test case.
     def test_create_cost(self):
         # Arrange
         name = "Test Cost"
@@ -27,6 +29,7 @@ class TestCostController(unittest.TestCase):
         self.session.add.assert_called_once_with(new_cost)
         self.session.commit.assert_called_once()
 
+    ## Test for get_cost_by_name
     def test_get_cost_by_name(self):
         # Arrange
         name = "Test Cost"
@@ -42,6 +45,7 @@ class TestCostController(unittest.TestCase):
         self.session.query.return_value.filter.assert_called_once()
         self.session.query.return_value.filter.return_value.first.assert_called_once()
 
+    ## Test for get_cost_by_id
     def test_get_cost_by_id(self):
         # Arrange
         cost_id = 1
@@ -57,6 +61,7 @@ class TestCostController(unittest.TestCase):
         self.session.query.return_value.filter.assert_called_once()
         self.session.query.return_value.filter.return_value.first.assert_called_once()
 
+    ## Test for update_cost
     def test_update_cost(self):
         # Arrange
         cost_id = 1
@@ -75,6 +80,7 @@ class TestCostController(unittest.TestCase):
         self.assertEqual(updated_cost.nombre, new_name)
         self.assertEqual(updated_cost.precio, new_price)
 
+    ## Test for delete_cost
     def test_delete_cost(self):
         # Arrange
         cost_id = 1
@@ -87,7 +93,7 @@ class TestCostController(unittest.TestCase):
         # Assert
         self.assertTrue(result)
         
-
+    ## Test for create_costs
     def test_create_costs(self):
         # Arrange
         costs = [
@@ -101,7 +107,7 @@ class TestCostController(unittest.TestCase):
         # Assert
         self.session.add_all.assert_called_once_with(costs)
         self.session.commit.assert_called_once()
-
+    ## Test for get_all_costs
     def test_get_all_costs(self):
         # Arrange
         mock_costs = [
@@ -117,7 +123,7 @@ class TestCostController(unittest.TestCase):
         self.assertEqual(len(costs), len(mock_costs))
         self.session.query.assert_called_once()
         self.session.query.return_value.all.assert_called_once()
-
+    ## Test for fetch_costs_by_provider
     def test_fetch_costs_by_provider(self):
         # Arrange
         provider_id = 1
@@ -135,7 +141,7 @@ class TestCostController(unittest.TestCase):
         self.session.query.assert_called_once()
         self.session.query.return_value.filter.assert_called_once()
         self.session.query.return_value.filter.return_value.all.assert_called_once()
-
+    ## Test for fetch_costs_by_provider_empty
     def test_fetch_costs_by_provider_empty(self):
         # Arrange
         provider_id = 1
@@ -149,7 +155,7 @@ class TestCostController(unittest.TestCase):
         self.session.query.assert_called_once()
         self.session.query.return_value.filter.assert_called_once()
         self.session.query.return_value.filter.return_value.all.assert_called_once()
-
+    ## Test for fetch_costs_by_name
     def test_fetch_costs_by_name(self):
         # Arrange
         name = "Test Cost"
@@ -167,7 +173,7 @@ class TestCostController(unittest.TestCase):
         self.session.query.assert_called_once()
         self.session.query.return_value.filter.assert_called_once()
         self.session.query.return_value.filter.return_value.all.assert_called_once()
-
+    ## Test for search_costs
     def test_search_costs(self):
         # Arrange
         name = "Test"

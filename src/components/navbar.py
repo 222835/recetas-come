@@ -1,8 +1,10 @@
 import customtkinter as ctk
 from PIL import Image, ImageTk
 import os
-
+##Class Navbar
+# This class creates a navigation bar for the application.
 class Navbar(ctk.CTkFrame):
+    ## Constructor
     def __init__(self, master, **kwargs):
         super().__init__(master, **kwargs)
         self.configure(fg_color="#2E3440", height=50)
